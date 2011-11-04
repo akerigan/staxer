@@ -14,13 +14,13 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.resource.loader.StringResourceLoader;
 import org.apache.velocity.runtime.resource.util.StringResourceRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -40,7 +40,7 @@ import static comtech.util.xml.XmlUtils.deserialize;
  */
 public class StubGenerator {
 
-    private static Log log = LogFactory.getLog(StubGenerator.class);
+    private static Logger log = LoggerFactory.getLogger(StubGenerator.class);
 
     private static final String WSDL_PREFIX = "wsdl";
     private static final String WSDL_NAMESPACE = "http://schemas.xmlsoap.org/wsdl/";
@@ -1053,7 +1053,7 @@ public class StubGenerator {
             result.append(" implements StaxerXmlHandler {\n");
         }
         result.append("\n");
-        result.append("    private static final Log LOG = LogFactory.getLog(");
+        result.append("    private static final Logger log = LoggerFactory.getLogger(");
         result.append(typeJavaTypeName);
         result.append(".class);\n");
         result.append("\n");

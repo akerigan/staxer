@@ -1,7 +1,7 @@
 package comtech.util.file;
 
 import comtech.util.ResourceUtils;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 
 import java.io.*;
 
@@ -67,7 +67,7 @@ public class FileUtils {
         }
     }
 
-    public static void createOrCleanupDir(File dir, Log log) {
+    public static void createOrCleanupDir(File dir, Logger log) {
         if (!dir.exists()) {
             mkdirs(dir, log);
         } else {
@@ -81,7 +81,7 @@ public class FileUtils {
         }
     }
 
-    public static void mkdirs(File dir, Log log) {
+    public static void mkdirs(File dir, Logger log) {
         if (dir.mkdirs()) {
             String message = "Directory created: " + dir.toString();
             if (log != null) {

@@ -1,7 +1,7 @@
 package comtech.util.cache;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
@@ -12,7 +12,7 @@ import java.util.Collection;
 public class ValidatingThread extends Thread {
     // 35 secs
     public static final int DEFAULT_VALIDATE_INTERVAL = 35 * 1000;
-    private static final Log log = LogFactory.getLog(ValidatingThread.class);
+    private static final Logger log = LoggerFactory.getLogger(ValidatingThread.class);
     private long validateInterval = DEFAULT_VALIDATE_INTERVAL;
     private boolean continueWork = true;
     private SingleCache cache;

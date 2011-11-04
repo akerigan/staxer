@@ -58,7 +58,6 @@ public class HttpHelper extends HttpRequestHelper {
         return result;
     }
 
-    @SuppressWarnings({"unchecked"})
     public <T> T getApplicationAttribute(String name) {
         if (servletContext != null) {
             return (T) servletContext.getAttribute(name);

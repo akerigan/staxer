@@ -55,8 +55,8 @@ public class DocumentXmlStreamReader {
             while (reader.hasNext()) {
                 int event = reader.next();
                 if (event == XMLStreamConstants.START_ELEMENT &&
-                    name.equals(reader.getLocalName()) &&
-                    nmspUri.equals(reader.getNamespaceURI())) {
+                        name.equals(reader.getLocalName()) &&
+                        nmspUri.equals(reader.getNamespaceURI())) {
 
                     StartElement result = new StartElement();
                     fillStartElement(result);
@@ -75,8 +75,8 @@ public class DocumentXmlStreamReader {
             while (reader.hasNext()) {
                 int event = reader.next();
                 if (event == XMLStreamConstants.START_ELEMENT &&
-                    name.equals(reader.getLocalName()) &&
-                    nmspUri.equals(reader.getNamespaceURI())) {
+                        name.equals(reader.getLocalName()) &&
+                        nmspUri.equals(reader.getNamespaceURI())) {
                     int nsCount = reader.getNamespaceCount();
                     for (int i = 0; i < nsCount; i++) {
                         result.put(reader.getNamespacePrefix(i), reader.getNamespaceURI(i));
@@ -219,7 +219,6 @@ public class DocumentXmlStreamReader {
         return null;
     }
 
-    @SuppressWarnings({"unchecked"})
     public <T> T readObject(Class<T> objectClass, boolean checkStartElement) throws JAXBException, XMLStreamException {
         if (checkStartElement) {
             int event = reader.next();

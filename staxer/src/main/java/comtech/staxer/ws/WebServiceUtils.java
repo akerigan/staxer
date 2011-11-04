@@ -6,8 +6,8 @@ import comtech.util.props.StringMapProperties;
 import comtech.util.xml.XmlConstants;
 import comtech.util.xml.XmlName;
 import comtech.util.xml.read.DocumentXmlStreamReader2;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
@@ -23,7 +23,7 @@ import static comtech.util.xml.XmlConstants.*;
  */
 public class WebServiceUtils {
 
-    private static Log log = LogFactory.getLog(WebServiceUtils.class);
+    private static Logger log = LoggerFactory.getLogger(WebServiceUtils.class);
 
     public static Map<XmlName, XsdWebServiceType> XSD_JAVA_TYPE_MAP;
 

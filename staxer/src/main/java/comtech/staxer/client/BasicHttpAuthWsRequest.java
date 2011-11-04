@@ -3,8 +3,8 @@ package comtech.staxer.client;
 import comtech.staxer.soap.SoapHeader;
 import comtech.util.SecurityUtils;
 import comtech.util.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class BasicHttpAuthWsRequest implements WsRequest {
 
-    private static Log log = LogFactory.getLog(BasicHttpAuthWsRequest.class);
+    private static Logger log = LoggerFactory.getLogger(BasicHttpAuthWsRequest.class);
 
     private String endpoint;
     private String login;

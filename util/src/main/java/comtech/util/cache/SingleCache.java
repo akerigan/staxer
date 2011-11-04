@@ -1,7 +1,7 @@
 package comtech.util.cache;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,7 +20,7 @@ public class SingleCache {
     public static final long STORE_TIME_10_MINUTES = 10 * 60 * 1000;
     public static final long STORE_TIME_1_HOUR = 60 * 60 * 1000;
 
-    private static final Log LOG = LogFactory.getLog(SingleCache.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SingleCache.class);
 
     private HashMap<Object, CacheItem> cacheItemsMap = new HashMap<Object, CacheItem>();
     private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
@@ -41,7 +41,6 @@ public class SingleCache {
         validatingThread.setValidateInterval(validateInterval);
     }
 
-    @SuppressWarnings({"unchecked"})
     public <T> T get(Object key) {
         CacheItem cacheItem = null;
         lock.readLock().lock();

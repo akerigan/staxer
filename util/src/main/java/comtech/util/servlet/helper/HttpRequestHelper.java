@@ -7,8 +7,8 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -30,7 +30,7 @@ public class HttpRequestHelper {
 
     private static final String STORED_REQUEST_PARAMETERS = "storedRequestParameters";
 
-    private static Log log = LogFactory.getLog(HttpHelper.class);
+    private static Logger log = LoggerFactory.getLogger(HttpHelper.class);
     private static Set<String> deniedParametersNames;
 
     static {
@@ -315,7 +315,6 @@ public class HttpRequestHelper {
         stringParams.put(name, value);
     }
 
-    @SuppressWarnings({"unchecked"})
     public <T> T getRequestAttribute(String name) {
         return (T) request.getAttribute(name);
     }
@@ -370,7 +369,6 @@ public class HttpRequestHelper {
         this.sessionCreated = sessionCreated;
     }
 
-    @SuppressWarnings({"unchecked"})
     public <T> T getSessionAttribute(String name) {
         return (T) session.getAttribute(name);
     }

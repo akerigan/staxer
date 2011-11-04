@@ -1,8 +1,8 @@
 package comtech.staxer.generator;
 
 import comtech.util.file.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
@@ -13,7 +13,7 @@ import java.io.File;
  */
 public class ServerStubGenerator {
 
-    private static Log log = LogFactory.getLog(ServerStubGenerator.class);
+    private static Logger log = LoggerFactory.getLogger(ServerStubGenerator.class);
 
     public static void main(String[] args) throws Exception {
         File baseDir = new File("/home/akerigan/work/projects/comtech/trunk/ws-common");

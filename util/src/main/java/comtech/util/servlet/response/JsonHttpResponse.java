@@ -5,8 +5,8 @@ import comtech.util.json.JsonObject;
 import comtech.util.json.JsonObjectNull;
 import comtech.util.json.JsonUtils;
 import comtech.util.servlet.helper.HttpHelper;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -18,7 +18,7 @@ import java.io.IOException;
  */
 public class JsonHttpResponse extends AbstractHttpResponse {
 
-    private static Log LOG = LogFactory.getLog(JsonHttpResponse.class);
+    private static Logger LOG = LoggerFactory.getLogger(JsonHttpResponse.class);
 
     private JsonObject jsonObject;
     private Object object;

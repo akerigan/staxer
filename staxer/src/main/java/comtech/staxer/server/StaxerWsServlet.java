@@ -4,8 +4,8 @@ import comtech.staxer.StaxerException;
 import comtech.staxer.soap.SoapFault;
 import comtech.staxer.soap.SoapUtils;
 import comtech.util.servlet.helper.HttpHelper;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -30,7 +30,7 @@ public class StaxerWsServlet extends HttpServlet {
     protected WebApplicationContext applicationContext;
     protected Map<String, WsMessageProcessor> processors;
 
-    private static Log log = LogFactory.getLog(StaxerWsServlet.class);
+    private static Logger log = LoggerFactory.getLogger(StaxerWsServlet.class);
 
     @Override
     public void init() throws ServletException {

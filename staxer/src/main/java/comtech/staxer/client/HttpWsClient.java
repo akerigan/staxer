@@ -9,13 +9,13 @@ import comtech.util.xml.XmlUtils;
 import comtech.util.xml.read.DocumentXmlStreamReader2;
 import comtech.util.xml.write.DocumentXmlStreamWriter2;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.eclipse.jetty.client.Address;
 import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
@@ -47,7 +47,7 @@ public class HttpWsClient {
 
     private AtomicInteger requestIdHolder = new AtomicInteger(0);
 
-    private static Log log = LogFactory.getLog(HttpWsClient.class);
+    private static Logger log = LoggerFactory.getLogger(HttpWsClient.class);
 
     private String name;
 
