@@ -1,0 +1,12 @@
+#* @implicitly included *#
+#* @vtlvariable name="typesElements" type="java.util.Map<java.lang.String,java.lang.String>" *#
+#* @vtlvariable name="className" type="java.lang.String" *#
+#* @vtlvariable name="inXmlElement" type="java.lang.String" *#
+#* @vtlvariable name="inJavaType" type="java.lang.String" *#
+#* @vtlvariable name="method" type="java.lang.String" *#
+#* @vtlvariable name="beanPackageName" type="java.lang.String" *#
+#* @vtlvariable name="methods" type="java.util.List<comtech.staxer.domain.type.WsMethod>" *#
+#* @vtlvariable name="serviceName" type="java.lang.String" *#
+#* @vtlvariable name="type" type="comtech.staxer.domain.type.WsType" *#
+#* @vtlvariable name="namespace" type="java.lang.String" *#
+#* @vtlvariable name="packageName" type="java.lang.String" *#
