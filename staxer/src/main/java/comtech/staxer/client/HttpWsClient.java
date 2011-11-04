@@ -3,23 +3,24 @@ package comtech.staxer.client;
 import comtech.staxer.soap.SoapFault;
 import comtech.staxer.soap.SoapHeader;
 import comtech.util.xml.ReadXml;
+import comtech.util.xml.WriteXml;
 import comtech.util.xml.XmlName;
-import comtech.util.xml.read.DocumentXmlStreamReader;
+import comtech.util.xml.XmlUtils;
 import comtech.util.xml.read.DocumentXmlStreamReader2;
-import comtech.util.xml.read.StartElement;
-import comtech.util.xml.write.DocumentXmlStreamWriter;
-import org.apache.commons.httpclient.*;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
+import comtech.util.xml.write.DocumentXmlStreamWriter2;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.jetty.client.Address;
+import org.eclipse.jetty.client.ContentExchange;
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.http.HttpFields;
+import org.eclipse.jetty.http.HttpStatus;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class HttpWsClient {
 
     private static final String DEFAULT_NAME = "UNKNOWN";
     private static final int DEFAULT_CONNECTION_TIMEOUT = 15000;
-    private static final int DEFAULT_PROCESS_TIMEOUT = 60000;
+    private static final int DEFAULT_IDLE_TIMEOUT = 60000;
 
     private HttpClient httpClient;
 
@@ -52,13 +53,10 @@ public class HttpWsClient {
 
     public HttpWsClient() {
         httpClient = new HttpClient();
-        httpClient.getParams().setContentCharset("UTF-8");
-
-        MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
-        HttpConnectionManagerParams connectionParams = connectionManager.getParams();
-        connectionParams.setConnectionTimeout(DEFAULT_CONNECTION_TIMEOUT);
-        connectionParams.setSoTimeout(DEFAULT_PROCESS_TIMEOUT);
-        httpClient.setHttpConnectionManager(connectionManager);
+        httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
+//        httpClient.setConnectorType(HttpClient.CONNECTOR_SOCKET);
+        httpClient.setConnectTimeout(DEFAULT_CONNECTION_TIMEOUT);
+        httpClient.setIdleTimeout(DEFAULT_IDLE_TIMEOUT);
     }
 
     public String getName() {
@@ -76,221 +74,218 @@ public class HttpWsClient {
     public void setProxyHost(String proxyHostString) {
         if (proxyHostString != null && proxyHostString.trim().length() > 0) {
             String[] splitted = proxyHostString.trim().split(":");
-            ProxyHost proxyHost = null;
+            Address proxyAddress = null;
             switch (splitted.length) {
                 case 1:
-                    proxyHost = new ProxyHost(splitted[0]);
+                    proxyAddress = new Address(splitted[0], 80);
                     break;
                 case 2:
-                    proxyHost = new ProxyHost(splitted[0], Integer.valueOf(splitted[1]));
+                    proxyAddress = new Address(splitted[0], Integer.valueOf(splitted[1]));
                     break;
             }
-            setProxyHost2(proxyHost);
+            setProxyHost2(proxyAddress);
         }
     }
 
-    public void setProxyHost2(ProxyHost proxyHost) {
+    public void setProxyHost2(Address proxyHost) {
         if (proxyHost != null) {
-            httpClient.getHostConfiguration().setProxyHost(proxyHost);
+            httpClient.setProxy(proxyHost);
         }
     }
 
     public void setConnectionTimeout(int timeout) {
-        HttpConnectionManager connectionManager = httpClient.getHttpConnectionManager();
-        HttpConnectionManagerParams connectionParams = connectionManager.getParams();
-        connectionParams.setConnectionTimeout(timeout * 1000);
+        httpClient.setConnectTimeout(timeout * 1000);
     }
 
     public void setProcessTimeout(int timeout) {
-        HttpConnectionManager connectionManager = httpClient.getHttpConnectionManager();
-        HttpConnectionManagerParams connectionParams = connectionManager.getParams();
-        connectionParams.setSoTimeout(timeout * 1000);
+        httpClient.setIdleTimeout(timeout * 1000);
     }
 
-    public <T> T processSoapQuery(
-            WsRequest wsRequest, Object requestObject, Class<T> responseClass
+    public <Q extends WriteXml, A extends ReadXml> A processSoapQuery(
+            WsRequest wsRequest, Q requestObject,
+            XmlName requestXmlName, Class<A> responseClass
+    ) throws WsClientException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            DocumentXmlStreamWriter2 document1 = new DocumentXmlStreamWriter2(baos, "UTF-8", 2);
+            document1.declareNamespace(NAMESPACE_URI_SOAP_ENVELOPE);
+//            document1.declareNamespace(NAMESPACE_URI_XSI);
+            document1.startDocument();
+            document1.startElement(XML_NAME_SOAP_ENVELOPE);
+
+            SoapHeader soapHeader = wsRequest.getSoapHeader();
+            if (soapHeader != null) {
+                soapHeader.write(document1);
+            }
+            document1.startElement(XML_NAME_SOAP_ENVELOPE_BODY);
+
+            if (requestObject != null && requestXmlName != null) {
+                requestObject.writeXml(document1, requestXmlName);
+            }
+
+            document1.endElement();
+            document1.endElement();
+            document1.endDocument();
+        } catch (NoSuchAlgorithmException e) {
+            throw new WsClientException("Error while creating SHA-1 hash", e);
+        } catch (UnsupportedEncodingException e) {
+            throw new WsClientException("Error while serializing soap request", e);
+        } catch (IOException e) {
+            throw new WsClientException("Error while serializing soap request", e);
+        }
+        try {
+            return processSoapQuery(wsRequest, new String(baos.toByteArray(), "UTF-8"), responseClass);
+        } catch (UnsupportedEncodingException e) {
+            throw new WsClientException("Error while serializing soap request", e);
+        }
+    }
+
+    public <A extends ReadXml> A processSoapQuery(
+            WsRequest wsRequest, String soapRequestXml, Class<A> responseClass
     ) throws WsClientException {
         int requestId = requestIdHolder.addAndGet(1);
-
-        log.info(name + ", rid=" + requestId + ", wsRequest: " + wsRequest);
-
-        if (wsRequest == null) {
-            throw new IllegalStateException("Endpoint parameters is null");
-        }
-
-        StringWriter soapRequest = new StringWriter();
-        if (requestObject instanceof String) {
-            soapRequest.write(
-                    "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
-                    "<env:Envelope xmlns:env=\"http://schemas.xmlsoap.org/soap/envelope/\"><env:Body>"
-            );
-            soapRequest.write(requestObject.toString());
-            soapRequest.write(
-                    "</env:Body></env:Envelope>"
-            );
-        } else {
-            try {
-                DocumentXmlStreamWriter document1 = new DocumentXmlStreamWriter(soapRequest);
-                document1.startDocument("utf-8", "1.0");
-                document1.startElement(NAMESPACE_PREFIX_SOAP, SOAP_ENVELOPE, NAMESPACE_URI_SOAP_ENVELOPE);
-                document1.namespace(NAMESPACE_PREFIX_SOAP, NAMESPACE_URI_SOAP_ENVELOPE);
-                document1.namespace(NAMESPACE_PREFIX_XSI, NAMESPACE_URI_XSI);
-                document1.namespace(NAMESPACE_PREFIX_XSD, NAMESPACE_URI_XSD);
-
-                SoapHeader soapHeader = wsRequest.getSoapHeader();
-                if (soapHeader != null) {
-                    soapHeader.write(document1);
-                }
-
-                document1.startElement(NAMESPACE_PREFIX_SOAP, SOAP_BODY, NAMESPACE_URI_SOAP_ENVELOPE);
-/*
-                if (requestObject instanceof StaxerXmlHandler) {
-                    ((StaxerXmlHandler) requestObject).callWriteXmlAsSoapBody((StaxerXmlHandler) requestObject, document1);
-                } else {
-*/
-                document1.object(requestObject);
-/*
-                }
-*/
-                document1.endElement();
-                document1.endElement();
-                document1.endDocument();
-            } catch (XMLStreamException e) {
-                throw new WsClientException("Error while serializing soap request", e);
-            } catch (NoSuchAlgorithmException e) {
-                throw new WsClientException("Error while creating SHA-1 hash", e);
-            }
-        }
-
-        log.info(name + ", rid=" + requestId + ", soap request: " + soapRequest.toString());
-
+        String soapResponseXml = sendSoapQuery(wsRequest, soapRequestXml, requestId);
         try {
-            String soapResponse = postQuery(
-                    wsRequest, soapRequest.toString().getBytes("UTF-8"), requestId
-            );
-
-            log.info(name + ", rid=" + requestId + ", soap response: " + soapResponse);
-
-            if (!responseClass.equals(String.class)) {
-                if (Arrays.asList(responseClass.getInterfaces()).contains(ReadXml.class)) {
-                    DocumentXmlStreamReader2 document2 = new DocumentXmlStreamReader2(new StringReader(soapResponse));
-                    boolean envelopBodyRead = document2.readStartElement(XML_NAME_SOAP_ENVELOPE_BODY);
-                    if (envelopBodyRead) {
-                        XmlName bodyChildElement = document2.readStartElement();
-                        if (bodyChildElement == null) {
-                            throw new WsClientException(
-                                    name + ", rid=" + requestId +
+            DocumentXmlStreamReader2 document2 = new DocumentXmlStreamReader2(new StringReader(soapResponseXml));
+            boolean envelopBodyRead = document2.readStartElement(XML_NAME_SOAP_ENVELOPE_BODY);
+            if (envelopBodyRead) {
+                XmlName bodyChildElement = document2.readStartElement();
+                if (bodyChildElement == null) {
+                    throw new WsClientException(
+                            name + ", rid=" + requestId +
                                     ", invalid XML: cant locate payload element"
-                            );
-                        } else if (XML_NAME_SOAP_ENVELOPE_FAULT.equals(bodyChildElement)) {
-                            SoapFault soapFault = new SoapFault();
-                            soapFault.readXml(document2, XML_NAME_SOAP_ENVELOPE_FAULT);
-                            throw new WsClientException(soapFault);
-                        }
-                        try {
-                            T t = responseClass.newInstance();
-                            ((ReadXml) t).readXml(document2, bodyChildElement);
-                            return t;
-                        } catch (InstantiationException e) {
-                            throw new WsClientException(e);
-                        } catch (IllegalAccessException e) {
-                            throw new WsClientException(e);
-                        }
-                    } else {
-                        throw new WsClientException(
-                                name + ", rid=" + requestId +
-                                ", invalid XML: cant locate '" +
-                                XML_NAME_SOAP_ENVELOPE_BODY + "' element"
-                        );
-                    }
-                } else {
-                    DocumentXmlStreamReader document2 = new DocumentXmlStreamReader(new StringReader(soapResponse));
-                    StartElement startElement = document2.readStartElement(QNAME_SOAP_ENVELOP_BODY);
-                    if (startElement == null || !QNAME_SOAP_ENVELOP_BODY.equals(startElement.getName())) {
-                        throw new WsClientException(name + ", rid=" + requestId + ", invalid XML: cant locate '" + QNAME_SOAP_ENVELOP_BODY + "' element");
-                    }
-                    startElement = document2.readStartElement();
-                    if (startElement == null) {
-                        throw new WsClientException(name + ", rid=" + requestId + ", invalid XML: cant locate payload element");
-                    } else if (QNAME_SOAP_ENVELOP_FAULT.equals(startElement.getName())) {
-                        throw new WsClientException(document2.readObject(SoapFault.class, false));
-                    }
-                    return document2.readObject(responseClass, false);
+                    );
+                } else if (XML_NAME_SOAP_ENVELOPE_FAULT.equals(bodyChildElement)) {
+                    SoapFault soapFault = XmlUtils.readXml(document2, SoapFault.class, XML_NAME_SOAP_ENVELOPE_FAULT);
+                    throw new WsClientException(soapFault);
                 }
+                return XmlUtils.readXml(document2, responseClass, bodyChildElement);
             } else {
-                return (T) soapResponse;
+                throw new WsClientException(
+                        name + ", rid=" + requestId + ", invalid XML: cant locate '" +
+                                XML_NAME_SOAP_ENVELOPE_BODY + "' element"
+                );
             }
         } catch (XMLStreamException e) {
             throw new WsClientException(name + ", rid=" + requestId + ", error while deserializing soap response", e);
-        } catch (JAXBException e) {
+        } catch (InstantiationException e) {
             throw new WsClientException(name + ", rid=" + requestId + ", error while deserializing soap response", e);
+        } catch (IllegalAccessException e) {
+            throw new WsClientException(name + ", rid=" + requestId + ", error while deserializing soap response", e);
+        }
+    }
+
+    public String sendSoapQuery(
+            WsRequest wsRequest, String soapRequestXml, int requestId
+    ) throws WsClientException {
+        log.info(name + ", rid=" + requestId + ", wsRequest: " + wsRequest);
+        if (wsRequest == null) {
+            throw new IllegalStateException("Ws request header is null");
+        }
+        log.info(name + ", rid=" + requestId + ", soap request: " + soapRequestXml);
+        try {
+            String soapResponseXml = postQuery(
+                    wsRequest, soapRequestXml.getBytes("UTF-8"), requestId
+            );
+            log.info(name + ", rid=" + requestId + ", soap response: " + soapResponseXml);
+            return soapResponseXml;
         } catch (UnsupportedEncodingException e) {
             throw new WsClientException(name + ", rid=" + requestId + ", error while serializing soap response", e);
         }
-
     }
 
     private String postQuery(
             WsRequest wsRequest, byte[] data, int requestId
     ) throws WsClientException {
-        PostMethod postMethod = new PostMethod(wsRequest.getEndpoint());
-        postMethod.setRequestEntity(new ByteArrayRequestEntity(data, XML_CONTENT_TYPE));
-        postMethod.setRequestHeader("Accept", ACCEPT_MIME);
-        postMethod.setRequestHeader("User-Agent", "Staxer/1.0");
-        postMethod.setRequestHeader("Cache-Control", "no-cache");
-        postMethod.setRequestHeader("Pragma", "no-cache");
-        postMethod.addRequestHeader("Content-Type", XML_CONTENT_TYPE);
-        postMethod.addRequestHeader("Accept-Encoding", "deflate,gzip");
+        ContentExchange contentExchange = new ContentExchange(true);
+/*
+        try {
+            URI uri = new URI(wsRequest.getEndpoint());
+            log.info("uri=" + uri);
+            log.info("host=" + uri.getHost());
+            log.info("port=" + uri.getPort());
+            log.info("path=" + uri.getPath());
+            contentExchange.setURI(uri);
+        } catch (URISyntaxException e) {
+            throw new WsClientException("Error while serializing soap request", e);
+        }
+*/
+        contentExchange.setURL(wsRequest.getEndpoint());
+        contentExchange.setMethod("POST");
+        contentExchange.setRequestContentSource(new ByteArrayInputStream(data));
 
-        List<HttpRequestHeader> requestHeaders = wsRequest.getRequestHeaders();
-        if (requestHeaders != null && requestHeaders.size() > 0) {
-            for (HttpRequestHeader requestHeader : requestHeaders) {
-                postMethod.setRequestHeader(requestHeader.getName(), requestHeader.getValue());
-            }
+        List<HttpRequestHeader> requestHeaders = new ArrayList<HttpRequestHeader>();
+        requestHeaders.add(new HttpRequestHeader("Content-Type", XML_CONTENT_TYPE));
+        requestHeaders.add(new HttpRequestHeader("Accept", ACCEPT_MIME));
+        requestHeaders.add(new HttpRequestHeader("User-Agent", "Staxer/1.1"));
+        requestHeaders.add(new HttpRequestHeader("Cache-Control", "no-cache"));
+        requestHeaders.add(new HttpRequestHeader("Pragma", "no-cache"));
+        requestHeaders.add(new HttpRequestHeader("Accept-Encoding", "deflate,gzip"));
+        requestHeaders.add(new HttpRequestHeader("Content-Length", Integer.toString(data.length)));
+
+        List<HttpRequestHeader> wsRequestHeaders = wsRequest.getRequestHeaders();
+        if (wsRequestHeaders != null && !wsRequestHeaders.isEmpty()) {
+            requestHeaders.addAll(wsRequestHeaders);
         }
         try {
             Map<String, String> headers = new LinkedHashMap<String, String>();
-            for (Header header : postMethod.getRequestHeaders()) {
+            for (HttpRequestHeader header : requestHeaders) {
                 headers.put(header.getName(), header.getValue());
+                contentExchange.setRequestHeader(header.getName(), header.getValue());
             }
             log.info(name + ", rid=" + requestId + ", request headers: " + headers);
-            int statusCode = httpClient.executeMethod(postMethod);
+            if (!httpClient.isStarted()) {
+                httpClient.start();
+            }
+            httpClient.send(contentExchange);
+            contentExchange.waitForDone();
+            int statusCode = contentExchange.getResponseStatus();
 
-            if (statusCode != HttpStatus.SC_OK) {
-                log.warn(name + ", rid=" + requestId + ", method failed: " + postMethod.getStatusLine());
+            String responseContent = null;
+            if (statusCode != HttpStatus.OK_200) {
+                responseContent = contentExchange.getResponseContent();
+                log.warn(name + ", rid=" + requestId + ", method failed: " + responseContent);
+                throw new WsClientException(
+                        name + ", rid=" + requestId + ", http status code: " +
+                                statusCode + ", response: " + responseContent);
             }
 
             headers.clear();
-            for (Header header : postMethod.getResponseHeaders()) {
-                headers.put(header.getName(), header.getValue());
-            }
-            log.info(name + ", rid=" + requestId + ", response headers: " + headers);
-
-            Header encodingHeader = postMethod.getResponseHeader("Content-Encoding");
-            if (encodingHeader != null) {
-                InputStream inputStream;
-                StringWriter writer = new StringWriter();
-                if ("deflate".equalsIgnoreCase(encodingHeader.getValue())) {
-                    inputStream = new DeflaterInputStream(postMethod.getResponseBodyAsStream());
-                } else if ("gzip".equalsIgnoreCase(encodingHeader.getValue())) {
-                    inputStream = new GZIPInputStream(postMethod.getResponseBodyAsStream());
-                } else {
-                    throw new WsClientException("Invalid encoding in response: " + encodingHeader.getValue());
+            HttpFields responseFields = contentExchange.getResponseFields();
+            if (responseFields != null) {
+                for (String fieldName : responseFields.getFieldNamesCollection()) {
+                    headers.put(fieldName, responseFields.getStringField(fieldName));
                 }
-                InputStreamReader reader = new InputStreamReader(inputStream, "UTF-8");
-                IOUtils.copy(reader, writer);
-                reader.close();
-                return writer.toString();
-            } else {
-                return postMethod.getResponseBodyAsString();
-            }
+                log.info(name + ", rid=" + requestId + ", response headers: " + headers);
 
-        } catch (HttpException e) {
-            throw new WsClientException(name + ", rid=" + requestId + ", fatal protocol violation: ", e);
+                String encodingHeader = responseFields.getStringField("Content-Encoding");
+                if (encodingHeader != null) {
+                    InputStream inputStream;
+                    StringWriter writer = new StringWriter();
+                    if ("deflate".equalsIgnoreCase(encodingHeader)) {
+                        inputStream = new DeflaterInputStream(
+                                new ByteArrayInputStream(contentExchange.getResponseContentBytes())
+                        );
+                    } else if ("gzip".equalsIgnoreCase(encodingHeader)) {
+                        inputStream = new GZIPInputStream(
+                                new ByteArrayInputStream(contentExchange.getResponseContentBytes())
+                        );
+                    } else {
+                        throw new WsClientException("Invalid encoding in response: " + encodingHeader);
+                    }
+                    InputStreamReader reader = new InputStreamReader(inputStream, "UTF-8");
+                    IOUtils.copy(reader, writer);
+                    reader.close();
+                    return writer.toString();
+                }
+            }
+            return responseContent;
         } catch (IOException e) {
-            throw new WsClientException(name + ", rid=" + requestId + "fatal transport error: ", e);
-        } finally {
-            postMethod.releaseConnection();
+            throw new WsClientException(name + ", rid=" + requestId + " fatal transport error: ", e);
+        } catch (InterruptedException e) {
+            throw new WsClientException(name + ", rid=" + requestId + " thread interrupted: ", e);
+        } catch (Exception e) {
+            throw new WsClientException(name + ", rid=" + requestId + " fatal transport error: ", e);
         }
     }
 

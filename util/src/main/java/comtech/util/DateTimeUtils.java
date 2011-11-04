@@ -1,11 +1,5 @@
-package comtech.util.date;
+package comtech.util;
 
-import comtech.util.StringUtils;
-
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
-import java.sql.Timestamp;
 import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -369,39 +363,6 @@ public class DateTimeUtils {
         return dateCalendar.getTime();
     }
 
-    public static XMLGregorianCalendar toXmlDate(Date date) {
-        return toXmlDate(date, null);
-    }
-
-    public static XMLGregorianCalendar toXmlDate(Date date, TimeZone toTimezone) {
-        if (date != null) {
-            DatatypeFactory dataTypeFactory;
-            try {
-                dataTypeFactory = DatatypeFactory.newInstance();
-            } catch (DatatypeConfigurationException e) {
-                throw new RuntimeException(e);
-            }
-            GregorianCalendar gc;
-            if (toTimezone != null) {
-                gc = new GregorianCalendar(toTimezone);
-            } else {
-                gc = new GregorianCalendar();
-            }
-            gc.setTimeInMillis(date.getTime());
-            return dataTypeFactory.newXMLGregorianCalendar(gc);
-        } else {
-            return null;
-        }
-    }
-
-    public static Date fromXmlDate(XMLGregorianCalendar xmlDate) {
-        if (xmlDate != null) {
-            return xmlDate.toGregorianCalendar().getTime();
-        } else {
-            return null;
-        }
-    }
-
     public static Date addYears(Date date, int years) {
         return addToDate(date, Calendar.YEAR, years);
     }
@@ -433,27 +394,6 @@ public class DateTimeUtils {
         }
     }
 
-
-    public static DayShiftedTime getTotalFlightTime(List<? extends DatedFlight> flights) {
-        int flightTime = 0;
-        int previousFlightEndTime = 0;
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(0);
-        for (DatedFlight flight : flights) {
-            flightTime += flight.getFlightTimeInMinutes();
-            if (previousFlightEndTime != 0) {
-                flightTime += flight.getDepartureShiftedTime().getTimeInMinutes() - previousFlightEndTime;
-            }
-            previousFlightEndTime = flight.getArrivalShiftedTime().getTimeInMinutes();
-        }
-        SimpleDayShiftedTime result = new SimpleDayShiftedTime();
-        int days = flightTime / (24 * 60);
-        result.setDayShift(days);
-        result.setHours(flightTime / 60 - days * 24);
-        result.setMinutes(flightTime % 60);
-        return result;
-    }
-
     public static int getDeltaInMinutes(Date dateTime1, Date dateTime2) {
         if (dateTime1 == null || dateTime2 == null) {
             return 0;
@@ -479,115 +419,6 @@ public class DateTimeUtils {
         }
     }
 
-    public static DatePeriod validateDatePeriod(Date from, Date to, Integer lastDays) {
-        Date now = addMinutes(addDays(eraseTime(new Date()), 1), -1);
-        if (from != null && to != null) {
-            if (from.after(to)) {
-                Date tmp = from;
-                from = to;
-                to = tmp;
-            }
-            if (to.after(now)) {
-                to = now;
-            }
-            return new DatePeriod(from, to);
-        }
-        if (lastDays == null) {
-            lastDays = 7;
-        }
-        Date defaultFrom = addDays(eraseTime(now), -lastDays);
-        if (from != null) {
-            if (from.after(now)) {
-                return new DatePeriod(defaultFrom, now);
-            }
-            return new DatePeriod(from, now);
-        } else if (to != null) {
-            if (to.after(now)) {
-                return new DatePeriod(defaultFrom, now);
-            }
-            return new DatePeriod(addDays(eraseTime(to), -lastDays), to);
-        } else {
-            return new DatePeriod(defaultFrom, now);
-        }
-    }
-
-    public static DatePeriod validateDatePeriod2(Date from, Date to) {
-        from = eraseTime(from);
-        if (to == null) {
-            to = new Date();
-        }
-        to = addMinutes(addDays(eraseTime(to), 1), -1);
-        if (from != null && to != null && from.after(to)) {
-            return new DatePeriod(eraseTime(to), addMinutes(addDays(eraseTime(from), 1), -1));
-        } else {
-            return new DatePeriod(eraseTime(from), addMinutes(addDays(eraseTime(to), 1), -1));
-        }
-    }
-
-    public static String convertReceiptDate(String date) {
-        if (!StringUtils.isEmpty(date)) {
-            String dateTrimmed = date.trim();
-            if (dateTrimmed.length() > 7) {
-                return dateTrimmed.substring(6, 8) + "." + dateTrimmed.substring(4, 6)
-                       + "." + dateTrimmed.substring(0, 4);
-            } else {
-                return dateTrimmed;
-            }
-        } else {
-            return "";
-        }
-    }
-
-    public static String convertReceiptTime(String dateTime) {
-        if (!StringUtils.isEmpty(dateTime)) {
-            String dateTimeTrimmed = dateTime.trim();
-            if (dateTimeTrimmed.length() > 11) {
-                return dateTimeTrimmed.substring(8, 10) + ":" + dateTimeTrimmed.substring(10, 12);
-            } else {
-                return dateTimeTrimmed;
-            }
-        } else {
-            return "";
-        }
-    }
-
-    public static java.sql.Date toSqlDate(Date date) {
-        if (date != null) {
-            return new java.sql.Date(date.getTime());
-        } else {
-            return null;
-        }
-    }
-
-    public static Timestamp toSqlTimestamp(Date date) {
-        if (date != null) {
-            return new Timestamp(date.getTime());
-        } else {
-            return null;
-        }
-    }
-
-    public static XMLGregorianCalendar parseXMLGregorianCalendar(String date) throws DatatypeConfigurationException {
-        if (date != null) {
-            return DatatypeFactory.newInstance().newXMLGregorianCalendar(date);
-        } else {
-            return null;
-        }
-    }
-
-
-    public static XMLGregorianCalendar[] parseXMLGregorianCalendars(String[] values) throws DatatypeConfigurationException {
-        if (values != null) {
-            XMLGregorianCalendar[] result = new XMLGregorianCalendar[values.length];
-            for (int i = 0; i < values.length; ++i) {
-                result[i] = parseXMLGregorianCalendar(values[i]);
-            }
-            return result;
-        } else {
-            return null;
-        }
-    }
-
     public static Date parseXmlDate(String s) {
         return null;
     }
@@ -596,7 +427,7 @@ public class DateTimeUtils {
         return formatXmlDate(date, null);
     }
 
-    public static Date formatXmlDate(Date date, TimeZone utc) {
+    public static Date formatXmlDate(Date date, TimeZone timezone) {
         return null;
     }
 

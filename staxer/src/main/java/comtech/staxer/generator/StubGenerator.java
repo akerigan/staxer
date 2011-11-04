@@ -526,7 +526,7 @@ public class StubGenerator {
             }
             for (SimpleType simpleType : schema.getSimpleTypes()) {
                 if ((simpleType.getRestriction() != null && simpleType.getRestriction().getEnumerations().size() > 0)
-                    || simpleType.getUnion() != null) {
+                        || simpleType.getUnion() != null) {
                     WsType wsType = createEnum2(simpleType, schema.getPrefixXmlnsMap(), xmlnsTypesMap);
                     if (wsType == null) {
                         wsType = new WsType();
@@ -563,7 +563,7 @@ public class StubGenerator {
                 }
                 if (element.getSimpleType() != null) {
                     if ((element.getSimpleType().getRestriction() != null & element.getSimpleType().getRestriction().getEnumerations().size() > 0)
-                        || element.getSimpleType().getUnion() != null) {
+                            || element.getSimpleType().getUnion() != null) {
                         WsType enumType = createEnum2(element.getSimpleType(), schema.getPrefixXmlnsMap(), xmlnsTypesMap);
                         enumType.setXmlElementName(elementName);
                         typesMap.put(enumType.getName(), enumType);
@@ -608,8 +608,8 @@ public class StubGenerator {
                     field.setJavaName(decapitalize(capitalize3(fieldName)));
                     field.setEnum(
                             !XMLConstants.W3C_XML_SCHEMA_NS_URI.equals(field.getNsURI()) &&
-                            xmlnsTypesMap.get(field.getNsURI()).get(field.getTypeName()) != null &&
-                            xmlnsTypesMap.get(field.getNsURI()).get(field.getTypeName()).isEnumType()
+                                    xmlnsTypesMap.get(field.getNsURI()).get(field.getTypeName()) != null &&
+                                    xmlnsTypesMap.get(field.getNsURI()).get(field.getTypeName()).isEnumType()
                     );
                     field.setJavaTypeName(getJavaTypeName(field.getTypeName()));
                 }
@@ -700,7 +700,7 @@ public class StubGenerator {
             boolean generateClientService, boolean generateServerService
     ) throws Exception {
         log.info("generateStub(" + wsDefinition + ", " + sourceDir + ", " + packageName + ", "
-                 + generateClientService + ", " + generateServerService + ")");
+                + generateClientService + ", " + generateServerService + ")");
         if (wsDefinition == null) {
             throw new IllegalStateException("definition is empty");
         }
@@ -841,7 +841,7 @@ public class StubGenerator {
             boolean generateClientService, boolean generateServerService
     ) throws Exception {
         log.info("generateStub(" + wsDefinition + ", " + sourceDir + ", " + packageName + ", "
-                 + generateClientService + ", " + generateServerService + ")");
+                + generateClientService + ", " + generateServerService + ")");
         if (wsDefinition == null) {
             throw new IllegalStateException("definition is empty");
         }
@@ -953,7 +953,7 @@ public class StubGenerator {
         result.append(packageName);
         result.append(";\n");
         result.append("\n");
-        result.append("import comtech.util.date.DateTimeUtils;\n");
+        result.append("import comtech.util.DateTimeUtils;\n");
         result.append("import comtech.staxer.server.HttpParametersParser;\n");
         result.append("import comtech.util.servlet.helper.HttpHelper;\n");
         result.append("import comtech.staxer.soap.StaxerXmlHandler;\n");
@@ -1004,15 +1004,15 @@ public class StubGenerator {
             for (WsField field : type.getContainedFields()) {
                 String fieldJavaTypeName = field.getJavaTypeName();
                 if (!"Integer".equals(fieldJavaTypeName)
-                    && !"String".equals(fieldJavaTypeName)
-                    && !"Boolean".equals(fieldJavaTypeName)
-                    && !"Float".equals(fieldJavaTypeName)
-                    && !"Double".equals(fieldJavaTypeName)
-                    && !"BigDecimal".equals(fieldJavaTypeName)
-                    && !"Character".equals(fieldJavaTypeName)
-                    && !field.isDateTime()
-                    && !field.isDate()
-                    && !field.isEnum()) {
+                        && !"String".equals(fieldJavaTypeName)
+                        && !"Boolean".equals(fieldJavaTypeName)
+                        && !"Float".equals(fieldJavaTypeName)
+                        && !"Double".equals(fieldJavaTypeName)
+                        && !"BigDecimal".equals(fieldJavaTypeName)
+                        && !"Character".equals(fieldJavaTypeName)
+                        && !field.isDateTime()
+                        && !field.isDate()
+                        && !field.isEnum()) {
 
                     isComplexRequest = true;
                     break;
@@ -1907,15 +1907,15 @@ public class StubGenerator {
                 String fieldJavaNameCap = field.getJavaNameCap();
                 if (field.isList()) {
                     if ("Integer".equals(fieldJavaTypeName)
-                        || "String".equals(fieldJavaTypeName)
-                        || "Boolean".equals(fieldJavaTypeName)
-                        || "Float".equals(fieldJavaTypeName)
-                        || "Double".equals(fieldJavaTypeName)
-                        || "BigDecimal".equals(fieldJavaTypeName)
-                        || "Character".equals(fieldJavaTypeName)
-                        || field.isDateTime()
-                        || field.isDate()
-                        || field.isEnum()) {
+                            || "String".equals(fieldJavaTypeName)
+                            || "Boolean".equals(fieldJavaTypeName)
+                            || "Float".equals(fieldJavaTypeName)
+                            || "Double".equals(fieldJavaTypeName)
+                            || "BigDecimal".equals(fieldJavaTypeName)
+                            || "Character".equals(fieldJavaTypeName)
+                            || field.isDateTime()
+                            || field.isDate()
+                            || field.isEnum()) {
 
                         result.append("            for (");
                         result.append(fieldJavaTypeName);
@@ -1945,16 +1945,16 @@ public class StubGenerator {
                     }
                 } else {
                     if ("Integer".equals(fieldJavaTypeName)
-                        || "String".equals(fieldJavaTypeName)
-                        || "Boolean".equals(fieldJavaTypeName)
-                        || "Float".equals(fieldJavaTypeName)
-                        || "Double".equals(fieldJavaTypeName)
-                        || "BigDecimal".equals(fieldJavaTypeName)
-                        || "Character".equals(fieldJavaTypeName)
-                        || "byte[]".equals(fieldJavaTypeName)
-                        || field.isDateTime()
-                        || field.isDate()
-                        || field.isEnum()) {
+                            || "String".equals(fieldJavaTypeName)
+                            || "Boolean".equals(fieldJavaTypeName)
+                            || "Float".equals(fieldJavaTypeName)
+                            || "Double".equals(fieldJavaTypeName)
+                            || "BigDecimal".equals(fieldJavaTypeName)
+                            || "Character".equals(fieldJavaTypeName)
+                            || "byte[]".equals(fieldJavaTypeName)
+                            || field.isDateTime()
+                            || field.isDate()
+                            || field.isEnum()) {
                         result.append("            if (contentObject.get");
                         result.append(fieldJavaNameCap);
                         result.append("() != null) {\n");
@@ -2735,7 +2735,7 @@ public class StubGenerator {
                 }
                 if (element.getSimpleType() != null) {
                     if ((element.getSimpleType().getRestriction() != null && element.getSimpleType().getRestriction().getEnumerations().size() > 0
-                         || element.getSimpleType().getUnion() != null)
+                            || element.getSimpleType().getUnion() != null)
                             ) {
                         WsType enumType = createEnum2(element.getSimpleType(), schema.getPrefixXmlnsMap(), xmlnsTypesMap);
                         enumType.setXmlElementName(element.getName() != null ? element.getName() : cleanPrefix(element.getRef()));

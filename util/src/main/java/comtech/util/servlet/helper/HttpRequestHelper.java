@@ -1,7 +1,7 @@
 package comtech.util.servlet.helper;
 
+import comtech.util.DateTimeUtils;
 import comtech.util.StringUtils;
-import comtech.util.date.DateTimeUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -15,8 +15,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -233,13 +231,8 @@ public class HttpRequestHelper {
         }
     }
 
-    public XMLGregorianCalendar getXMLGregorianCalendarRequestParameter(String name) {
-        try {
-            return DateTimeUtils.parseXMLGregorianCalendar(getRequestParameter(name));
-        } catch (DatatypeConfigurationException e) {
-            log.error("", e);
-            return null;
-        }
+    public Date getXmlDate(String name) {
+        return DateTimeUtils.parseXmlDate(getRequestParameter(name));
     }
 
     public String[] getRequestParameters(String name) {
@@ -471,16 +464,6 @@ public class HttpRequestHelper {
             stringParams.putAll(storedRequestParameters);
         }
     }
-
-    public XMLGregorianCalendar[] getXMLGregorianCalendarRequestParameters(String name) {
-        try {
-            return DateTimeUtils.parseXMLGregorianCalendars(getRequestParameters(name));
-        } catch (DatatypeConfigurationException e) {
-            log.error("", e);
-            return null;
-        }
-    }
-
 
     public Integer[] getIntInstanceRequestParameters(String name) {
         return StringUtils.parseIntInstances(getRequestParameters(name), null);

@@ -68,7 +68,7 @@ public class WebServiceUtils {
         javaType = new XsdWebServiceType();
         javaType.setJavaName("Date");
         javaType.getImports().add("java.util.Date");
-        javaType.getImports().add("comtech.util.date.DateTimeUtils");
+        javaType.getImports().add("comtech.util.DateTimeUtils");
         javaType.setJaxbXmlSchema("dateTime");
         javaType.setJavaConverter("DateTimeUtils.parseXmlDate");
         javaType.setXmlConverter("DateTimeUtils.formatXmlDate");
@@ -397,10 +397,10 @@ public class WebServiceUtils {
         result.setXmlType(unpackXmlName(attributes.get("type"), namespacesMap));
         result.setNillable(attributes.getBoolean("nillable"));
         result.setRequired(attributes.getInteger("minOccurs") > 0
-                           || "required".equals(attributes.get("use")));
+                || "required".equals(attributes.get("use")));
         result.setArray(
                 "unbounded".equals(attributes.get("maxOccurs"))
-                || attributes.getInteger("maxOccurs") > 1
+                        || attributes.getInteger("maxOccurs") > 1
         );
         result.setElementField(elementField);
         return result;
@@ -479,10 +479,10 @@ public class WebServiceUtils {
             writer.write("\n\n");
             writer.write(
                     "import javax.xml.bind.annotation.XmlEnum;\n" +
-                    "import javax.xml.bind.annotation.XmlEnumValue;\n" +
-                    "import java.util.HashMap;\n" +
-                    "import java.util.Map;\n" +
-                    "\n"
+                            "import javax.xml.bind.annotation.XmlEnumValue;\n" +
+                            "import java.util.HashMap;\n" +
+                            "import java.util.Map;\n" +
+                            "\n"
             );
             if (writeJaxbAnnotations) {
                 writer.write(
@@ -517,43 +517,43 @@ public class WebServiceUtils {
                     "    private static Map<String, ");
             writer.write(enumTypeJavaName);
             writer.write("> map;\n" +
-                         "    private String code;\n" +
-                         "\n" +
-                         "    static {\n" +
-                         "        map = new HashMap<String, ");
+                    "    private String code;\n" +
+                    "\n" +
+                    "    static {\n" +
+                    "        map = new HashMap<String, ");
             writer.write(enumTypeJavaName);
             writer.write(
                     ">();\n" +
-                    "        for ("
+                            "        for ("
             );
             writer.write(enumTypeJavaName);
             writer.write(" value : ");
             writer.write(enumTypeJavaName);
             writer.write(
                     ".values()) {\n" +
-                    "            map.put(value.code, value);\n" +
-                    "        }\n" +
-                    "    }\n" +
-                    "\n" +
-                    "    "
+                            "            map.put(value.code, value);\n" +
+                            "        }\n" +
+                            "    }\n" +
+                            "\n" +
+                            "    "
             );
             writer.write(enumTypeJavaName);
             writer.write(
                     "(String code) {\n" +
-                    "        this.code = code;\n" +
-                    "    }\n" +
-                    "\n" +
-                    "    public String getCode() {\n" +
-                    "        return code;\n" +
-                    "    }\n" +
-                    "\n" +
-                    "    public static "
+                            "        this.code = code;\n" +
+                            "    }\n" +
+                            "\n" +
+                            "    public String getCode() {\n" +
+                            "        return code;\n" +
+                            "    }\n" +
+                            "\n" +
+                            "    public static "
             );
             writer.write(enumTypeJavaName);
             writer.write(
                     " getByCode(String code) {\n" +
-                    "        return map.get(code);\n" +
-                    "    }\n\n"
+                            "        return map.get(code);\n" +
+                            "    }\n\n"
             );
             writer.write("}\n");
 
@@ -785,8 +785,8 @@ public class WebServiceUtils {
                         if (readXmlElements.length() == 0) {
                             readXmlElements.append(
                                     "        while (reader.readNext()) {\n" +
-                                    "            if (reader.elementEnded(elementName)) {\n" +
-                                    "                break;\n"
+                                            "            if (reader.elementEnded(elementName)) {\n" +
+                                            "                break;\n"
                             );
                         }
                         if (fieldXsdType != null) {
@@ -1122,15 +1122,15 @@ public class WebServiceUtils {
 
             writer.write(
                     "    public void readXml(\n" +
-                    "            DocumentXmlStreamReader2 reader, XmlName elementName\n" +
-                    "    ) throws XMLStreamException {\n"
+                            "            DocumentXmlStreamReader2 reader, XmlName elementName\n" +
+                            "    ) throws XMLStreamException {\n"
             );
             writer.write(readXmlAttributes.toString());
             if (readXmlElements.length() != 0) {
                 writer.write(readXmlElements.toString());
                 writer.write(
                         "            }\n" +
-                        "        }\n"
+                                "        }\n"
                 );
             }
             writer.write(readXmlValue.toString());
@@ -1140,8 +1140,8 @@ public class WebServiceUtils {
 
             writer.write(
                     "    public void writeXml(\n" +
-                    "            DocumentXmlStreamWriter2 writer, XmlName elementName\n" +
-                    "    ) throws IOException {\n");
+                            "            DocumentXmlStreamWriter2 writer, XmlName elementName\n" +
+                            "    ) throws IOException {\n");
             for (String namespace : writeXmlNamespaces) {
                 writer.write("        writer.declareNamespace(\"");
                 writer.write(namespace);
@@ -1157,7 +1157,7 @@ public class WebServiceUtils {
 
             writer.write(
                     "        writer.endElement();\n" +
-                    "    }\n\n"
+                            "    }\n\n"
             );
 
             writer.write(toStringMethod.toString());

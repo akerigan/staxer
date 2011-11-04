@@ -53,16 +53,10 @@ public class SecurityUtils {
         }
     }
 
-    public static String getSwcPasswordHash(String plainTextPassword) throws NoSuchAlgorithmException {
-        return getMD5_EncodedBase64(
-                "IS09STKN" + getMD5_EncodedBase64(plainTextPassword) + "VSKIKNMISTKA"
-        );
-    }
-
     public static byte[] encryptSymmetrically(
             byte[] bytes, SecretKey key
     ) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-             IllegalBlockSizeException, BadPaddingException {
+            IllegalBlockSizeException, BadPaddingException {
         Cipher cipher = Cipher.getInstance(SYMMETRICAL_ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, key);
         return cipher.doFinal(bytes);
@@ -71,7 +65,7 @@ public class SecurityUtils {
     public static byte[] encryptAsymmetrically(
             byte[] bytes, PrivateKey key
     ) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-             IllegalBlockSizeException, BadPaddingException {
+            IllegalBlockSizeException, BadPaddingException {
         Cipher cipher = Cipher.getInstance(ASYMMETRICAL_ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, key);
         return cipher.doFinal(bytes);
@@ -80,7 +74,7 @@ public class SecurityUtils {
     public static byte[] encryptAsymmetrically(
             byte[] bytes, PublicKey key
     ) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-             IllegalBlockSizeException, BadPaddingException {
+            IllegalBlockSizeException, BadPaddingException {
         Cipher cipher = Cipher.getInstance(ASYMMETRICAL_ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, key);
         return cipher.doFinal(bytes);
@@ -89,7 +83,7 @@ public class SecurityUtils {
     public static byte[] decryptSymmetrically(
             byte[] bytes, SecretKey key
     ) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-             IllegalBlockSizeException, BadPaddingException {
+            IllegalBlockSizeException, BadPaddingException {
         Cipher cipher = Cipher.getInstance(SYMMETRICAL_ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, key);
         return cipher.doFinal(bytes);
@@ -98,7 +92,7 @@ public class SecurityUtils {
     public static byte[] decryptAsymmetrically(
             byte[] bytes, PrivateKey key
     ) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-             IllegalBlockSizeException, BadPaddingException {
+            IllegalBlockSizeException, BadPaddingException {
         Cipher cipher = Cipher.getInstance(ASYMMETRICAL_ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, key);
         return cipher.doFinal(bytes);
@@ -107,7 +101,7 @@ public class SecurityUtils {
     public static byte[] decryptAsymmetrically(
             byte[] bytes, PublicKey key
     ) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-             IllegalBlockSizeException, BadPaddingException {
+            IllegalBlockSizeException, BadPaddingException {
         Cipher cipher = Cipher.getInstance(ASYMMETRICAL_ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, key);
         return cipher.doFinal(bytes);

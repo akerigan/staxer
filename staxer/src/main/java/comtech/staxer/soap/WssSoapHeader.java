@@ -4,7 +4,7 @@ import comtech.staxer.domain.wss.WssNonce;
 import comtech.staxer.domain.wss.WssPassword;
 import comtech.staxer.domain.wss.WssSecurity;
 import comtech.staxer.domain.wss.WssUsernameToken;
-import comtech.util.date.DateTimeUtils;
+import comtech.util.DateTimeUtils;
 import comtech.util.xml.XmlConstants;
 import comtech.util.xml.write.DocumentXmlStreamWriter;
 import comtech.util.xml.write.DocumentXmlStreamWriter2;
