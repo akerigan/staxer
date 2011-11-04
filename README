@@ -1,0 +1,3 @@
+Staxer is a java library aimed to create java webservice clients and servers.
+Staxer uses java xml streaming api's and static xml serializers/deserializers to effieciently process webservice's needs.
+Project uses a maven build system to package binary builds.
