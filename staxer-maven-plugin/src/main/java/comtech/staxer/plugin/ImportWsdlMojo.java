@@ -1,16 +1,14 @@
 package comtech.staxer.plugin;
 
 import comtech.staxer.domain.WebService;
+import comtech.util.ResourceUtils;
 import comtech.util.file.FileUtils;
 import comtech.util.xml.XmlConstants;
 import comtech.util.xml.XmlUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.net.URI;
+import java.io.*;
 
 /**
  * Ws-client stub generator goal
@@ -38,6 +36,13 @@ public class ImportWsdlMojo extends AbstractMojo {
     private String wsdlUrl;
 
     /**
+     * Charset of wsdl file
+     *
+     * @parameter default-value="UTF-8"
+     */
+    private String wsdlCharset;
+
+    /**
      * Http basic auth login
      *
      * @parameter
@@ -61,13 +66,33 @@ public class ImportWsdlMojo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException {
         try {
-            InputStream inputStream = URI.create(wsdlUrl).toURL().openStream();
-            WebService webService = XmlUtils.readXml(inputStream, "UTF-8", WebService.class, XmlConstants.XML_NAME_WSDL_DEFINITIONS);
-            inputStream.close();
+            WebService webService;
+            if (wsdlUrl.startsWith("http")) {
+                String xml = ResourceUtils.getUrlContentAsString(wsdlUrl, httpUser, httpPassword);
+                if (xml != null) {
+                    webService = XmlUtils.readXml(
+                            new StringReader(xml), WebService.class,
+                            XmlConstants.XML_NAME_WSDL_DEFINITIONS
+                    );
+                } else {
+                    throw new MojoExecutionException("Url content is empty");
+                }
+            } else {
+                File wsdlFile = new File(baseDir, wsdlUrl);
+                InputStream inputStream = new FileInputStream(wsdlFile);
+                webService = XmlUtils.readXml(
+                        inputStream, wsdlCharset, WebService.class,
+                        XmlConstants.XML_NAME_WSDL_DEFINITIONS
+                );
+                inputStream.close();
+            }
             if (webService != null) {
                 File wsdlFile = new File(baseDir, "/src/main/resources/" + generatedWsdl);
                 FileUtils.mkdirs(wsdlFile.getParentFile(), null);
-                XmlUtils.writeXml(new FileOutputStream(wsdlFile), "UTF-8", 2, webService, XmlConstants.XML_NAME_WSDL_DEFINITIONS);
+                FileOutputStream outputStream = new FileOutputStream(wsdlFile);
+                XmlUtils.writeXml(outputStream, "UTF-8", 4, webService, XmlConstants.XML_NAME_WSDL_DEFINITIONS);
+                outputStream.flush();
+                outputStream.close();
             } else {
                 throw new MojoExecutionException("Web service is empty");
             }

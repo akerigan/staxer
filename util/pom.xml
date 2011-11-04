@@ -34,50 +34,15 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.xmlgraphics</groupId>
-            <artifactId>fop</artifactId>
-            <version>1.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.sf.barcode4j</groupId>
-            <artifactId>barcode4j-fop-ext</artifactId>
-            <version>2.0</version>
-        </dependency>
-
-
-        <!--Velocity-->
-
-        <dependency>
-            <groupId>org.apache.velocity</groupId>
-            <artifactId>velocity</artifactId>
-            <version>1.7-beta1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.velocity</groupId>
-            <artifactId>velocity-tools</artifactId>
-            <version>2.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.struts</groupId>
-                    <artifactId>struts-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.struts</groupId>
-                    <artifactId>struts-taglib</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.struts</groupId>
-                    <artifactId>struts-tiles</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
             <version>3.0.5.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-client</artifactId>
+            <version>8.0.4.v20111024</version>
         </dependency>
 
     </dependencies>

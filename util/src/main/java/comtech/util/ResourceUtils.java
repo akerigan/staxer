@@ -2,6 +2,9 @@ package comtech.util;
 
 import comtech.util.servlet.helper.HttpHelper;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jetty.client.ContentExchange;
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.http.HttpStatus;
 
 import javax.servlet.ServletContext;
 import java.io.*;
@@ -153,6 +156,55 @@ public class ResourceUtils {
 
     public static boolean isDeflated(byte[] bytes) {
         return bytes != null && bytes.length > 2 && bytes[0] == 120 && bytes[1] == -38;
+    }
+
+    public static String getUrlContentAsString(
+            String url, String httpUser, String httpPassword
+    ) throws Exception {
+        ContentExchange contentExchange = getUrlContentExchange(url, httpUser, httpPassword);
+        if (contentExchange != null) {
+            return contentExchange.getResponseContent();
+        } else {
+            return null;
+        }
+    }
+
+    public static byte[] getUrlContentAsBytes(
+            String url, String httpUser, String httpPassword
+    ) throws Exception {
+        ContentExchange contentExchange = getUrlContentExchange(url, httpUser, httpPassword);
+        if (contentExchange != null) {
+            return contentExchange.getResponseContentBytes();
+        } else {
+            return null;
+        }
+    }
+
+    private static ContentExchange getUrlContentExchange(
+            String url, String httpUser, String httpPassword
+    ) throws Exception {
+        HttpClient httpClient = new HttpClient();
+        httpClient.setConnectorType(HttpClient.CONNECTOR_SOCKET);
+        httpClient.setConnectTimeout(10000);
+        httpClient.setIdleTimeout(30000);
+        ContentExchange contentExchange = new ContentExchange(true);
+        contentExchange.setURL(url);
+        contentExchange.setMethod("GET");
+        if (!StringUtils.isEmpty(httpUser) && !StringUtils.isEmpty(httpPassword)) {
+            contentExchange.addRequestHeader("Authorization", SecurityUtils.getBasicHttpAuth(
+                    httpUser, httpPassword
+            ));
+        }
+        httpClient.start();
+        httpClient.send(contentExchange);
+        contentExchange.waitForDone();
+        httpClient.stop();
+        int statusCode = contentExchange.getResponseStatus();
+        if (statusCode != HttpStatus.OK_200) {
+            return contentExchange;
+        } else {
+            return null;
+        }
     }
 
 }
