@@ -12,7 +12,7 @@
     <modules>
         <module>util</module>
         <module>staxer</module>
-        <module>maven-staxer-plugin</module>
+        <module>staxer-maven-plugin</module>
     </modules>
 
     <build>
