@@ -1,9 +1,10 @@
 package comtech.staxer.server;
 
 import comtech.staxer.StaxerException;
-import comtech.staxer.soap.SoapFault;
-import comtech.staxer.soap.SoapUtils;
+import comtech.staxer.domain.SoapFault;
 import comtech.util.servlet.helper.HttpHelper;
+import comtech.util.xml.XmlConstants;
+import comtech.util.xml.XmlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.WebApplicationContext;
@@ -15,7 +16,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,9 +67,12 @@ public class StaxerWsServlet extends HttpServlet {
                     soapFault = new SoapFault("env:Server", "Internal server error");
                 }
                 try {
-                    SoapUtils.serialize(soapFault, responseOutputStream);
-                } catch (XMLStreamException xse) {
-                    log.error("", xse);
+                    XmlUtils.serializeSoapEnvelop(
+                            responseOutputStream, "UTF-8", 2, soapFault,
+                            XmlConstants.XML_NAME_SOAP_ENVELOPE_FAULT
+                    );
+                } catch (Exception se) {
+                    log.error("", se);
                     throw new ServletException("Internal server error");
                 }
             }
@@ -77,9 +80,12 @@ public class StaxerWsServlet extends HttpServlet {
             String message = "Ws processor not found for path: " + servletPath;
             log.error(message);
             try {
-                SoapUtils.serialize(new SoapFault("env:Server", message), responseOutputStream);
-            } catch (XMLStreamException xse) {
-                log.error("", xse);
+                XmlUtils.serializeSoapEnvelop(
+                        responseOutputStream, "UTF-8", 2, new SoapFault("env:Server", message),
+                        XmlConstants.XML_NAME_SOAP_ENVELOPE_FAULT
+                );
+            } catch (Exception e) {
+                log.error("", e);
                 throw new ServletException("Internal server error");
             }
         }

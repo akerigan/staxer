@@ -1,13 +1,7 @@
 package comtech.staxer.client;
 
-import comtech.staxer.soap.SoapFault;
-import comtech.staxer.soap.SoapHeader;
-import comtech.util.xml.ReadXml;
-import comtech.util.xml.WriteXml;
-import comtech.util.xml.XmlName;
-import comtech.util.xml.XmlUtils;
-import comtech.util.xml.read.DocumentXmlStreamReader2;
-import comtech.util.xml.write.DocumentXmlStreamWriter2;
+import comtech.staxer.domain.SoapFault;
+import comtech.util.xml.*;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.client.Address;
 import org.eclipse.jetty.client.ContentExchange;
@@ -19,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -107,30 +100,24 @@ public class HttpWsClient {
     ) throws WsClientException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            DocumentXmlStreamWriter2 document1 = new DocumentXmlStreamWriter2(baos, "UTF-8", 2);
-            document1.declareNamespace(NAMESPACE_URI_SOAP_ENVELOPE);
-//            document1.declareNamespace(NAMESPACE_URI_XSI);
-            document1.startDocument();
-            document1.startElement(XML_NAME_SOAP_ENVELOPE);
+            XmlStreamWriter writer = new XmlStreamWriter(baos, "UTF-8", 2);
+            writer.declareNamespace(NAMESPACE_URI_SOAP_ENVELOPE);
+//            writer.declareNamespace(NAMESPACE_URI_XSI);
+            writer.startDocument();
+            writer.startElement(XML_NAME_SOAP_ENVELOPE);
 
-            SoapHeader soapHeader = wsRequest.getSoapHeader();
-            if (soapHeader != null) {
-                soapHeader.write(document1);
-            }
-            document1.startElement(XML_NAME_SOAP_ENVELOPE_BODY);
+            wsRequest.writeSoapHeader(writer);
+
+            writer.startElement(XML_NAME_SOAP_ENVELOPE_BODY);
 
             if (requestObject != null && requestXmlName != null) {
-                requestObject.writeXml(document1, requestXmlName);
+                requestObject.writeXml(writer, requestXmlName);
             }
 
-            document1.endElement();
-            document1.endElement();
-            document1.endDocument();
-        } catch (NoSuchAlgorithmException e) {
-            throw new WsClientException("Error while creating SHA-1 hash", e);
-        } catch (UnsupportedEncodingException e) {
-            throw new WsClientException("Error while serializing soap request", e);
-        } catch (IOException e) {
+            writer.endElement();
+            writer.endElement();
+            writer.endDocument();
+        } catch (Exception e) {
             throw new WsClientException("Error while serializing soap request", e);
         }
         try {
@@ -146,20 +133,20 @@ public class HttpWsClient {
         int requestId = requestIdHolder.addAndGet(1);
         String soapResponseXml = sendSoapQuery(wsRequest, soapRequestXml, requestId);
         try {
-            DocumentXmlStreamReader2 document2 = new DocumentXmlStreamReader2(new StringReader(soapResponseXml));
-            boolean envelopBodyRead = document2.readStartElement(XML_NAME_SOAP_ENVELOPE_BODY);
+            XmlStreamReader document = new XmlStreamReader(new StringReader(soapResponseXml));
+            boolean envelopBodyRead = document.readStartElement(XML_NAME_SOAP_ENVELOPE_BODY);
             if (envelopBodyRead) {
-                XmlName bodyChildElement = document2.readStartElement();
+                XmlName bodyChildElement = document.readStartElement();
                 if (bodyChildElement == null) {
                     throw new WsClientException(
                             name + ", rid=" + requestId +
                                     ", invalid XML: cant locate payload element"
                     );
                 } else if (XML_NAME_SOAP_ENVELOPE_FAULT.equals(bodyChildElement)) {
-                    SoapFault soapFault = XmlUtils.readXml(document2, SoapFault.class, XML_NAME_SOAP_ENVELOPE_FAULT);
+                    SoapFault soapFault = XmlUtils.readXml(document, SoapFault.class, XML_NAME_SOAP_ENVELOPE_FAULT);
                     throw new WsClientException(soapFault);
                 }
-                return XmlUtils.readXml(document2, responseClass, bodyChildElement);
+                return XmlUtils.readXml(document, responseClass, bodyChildElement);
             } else {
                 throw new WsClientException(
                         name + ", rid=" + requestId + ", invalid XML: cant locate '" +

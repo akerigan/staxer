@@ -1,6 +1,6 @@
 package comtech.staxer.client;
 
-import comtech.staxer.soap.SoapFault;
+import comtech.staxer.domain.SoapFault;
 
 /**
  * User: Vlad Vinichenko (akerigan@gmail.com)

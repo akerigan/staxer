@@ -1,11 +1,16 @@
 package comtech.staxer.plugin;
 
-import comtech.staxer.generator.StubGenerator;
+import comtech.staxer.domain.WebService;
 import comtech.util.file.FileUtils;
+import comtech.util.xml.XmlConstants;
+import comtech.util.xml.XmlUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.URI;
 
 /**
  * Ws-client stub generator goal
@@ -56,20 +61,18 @@ public class ImportWsdlMojo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException {
         try {
-            File definitionFile = FileUtils.createTempFile(null, "definition", "xml");
-            StubGenerator.importWsdl(wsdlUrl, httpUser, httpPassword, definitionFile);
-            File wsdlFile = new File(baseDir, "/src/main/resources/" + generatedWsdl);
-            FileUtils.mkdirs(wsdlFile.getParentFile(), null);
-            Writer wsdlWriter = new FileWriter(wsdlFile);
-            Reader definitionReader = new FileReader(definitionFile);
-            StubGenerator.serializeAsWsdl(
-                    definitionReader, wsdlWriter,
-                    "http://localhost:8080/webapp/servlet"
-            );
-            definitionReader.close();
-            wsdlWriter.close();
+            InputStream inputStream = URI.create(wsdlUrl).toURL().openStream();
+            WebService webService = XmlUtils.readXml(inputStream, "UTF-8", WebService.class, XmlConstants.XML_NAME_WSDL_DEFINITIONS);
+            inputStream.close();
+            if (webService != null) {
+                File wsdlFile = new File(baseDir, "/src/main/resources/" + generatedWsdl);
+                FileUtils.mkdirs(wsdlFile.getParentFile(), null);
+                XmlUtils.writeXml(new FileOutputStream(wsdlFile), "UTF-8", 2, webService, XmlConstants.XML_NAME_WSDL_DEFINITIONS);
+            } else {
+                throw new MojoExecutionException("Web service is empty");
+            }
         } catch (Exception e) {
-            throw new MojoExecutionException("Cant generate stub", e);
+            throw new MojoExecutionException("Cant import wsdl", e);
         }
     }
 }

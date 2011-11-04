@@ -1,7 +1,5 @@
 package comtech.util.xml;
 
-import comtech.util.xml.read.DocumentXmlStreamReader2;
-
 import javax.xml.stream.XMLStreamException;
 
 /**
@@ -11,7 +9,7 @@ import javax.xml.stream.XMLStreamException;
 public interface ReadXml {
 
     public void readXml(
-            DocumentXmlStreamReader2 reader, XmlName elementName
+            XmlStreamReader reader, XmlName elementName
     ) throws XMLStreamException;
 
 }

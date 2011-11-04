@@ -1,13 +1,13 @@
 package comtech.util.json;
 
 import comtech.util.StringUtils;
-import comtech.util.xml.write.DocumentXmlStreamWriter;
+import comtech.util.xml.XmlName;
+import comtech.util.xml.XmlStreamWriter;
 
-import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -327,15 +327,14 @@ public class JsonUtils {
     }
 
     public static void jsonToXml(
-            Reader reader, Writer writer, String rootName
+            Reader reader, OutputStream outputStream, String charset, String rootName
     ) throws JsonException {
         try {
             JsonStreamReader jsonReader = new JsonStreamReader(reader);
-            DocumentXmlStreamWriter xmlWriter = new DocumentXmlStreamWriter(writer);
-
+            XmlStreamWriter xmlWriter = new XmlStreamWriter(outputStream, charset);
             xmlWriter.startDocument();
-            xmlWriter.startElement(rootName);
-
+            xmlWriter.startElement(new XmlName(rootName));
+            XmlName itemXmlName = new XmlName("item");
             int event;
             while ((event = jsonReader.next()) != JsonStreamReader.EVENT_END) {
                 switch (event) {
@@ -343,7 +342,7 @@ public class JsonUtils {
                         break;
                     case JsonStreamReader.EVENT_OBJECT_FIELD_NAME:
                         String name = jsonReader.getStringValue();
-                        xmlWriter.startElement(name);
+                        xmlWriter.startElement(new XmlName(name));
                         break;
                     case JsonStreamReader.EVENT_OBJECT_FIELD_VALUE:
                         break;
@@ -354,11 +353,11 @@ public class JsonUtils {
                         xmlWriter.endElement();
                         break;
                     case JsonStreamReader.EVENT_LIST_START:
-                        xmlWriter.startElement("item");
+                        xmlWriter.startElement(itemXmlName);
                         break;
                     case JsonStreamReader.EVENT_LIST_ITEM_NEXT:
                         xmlWriter.endElement();
-                        xmlWriter.startElement("item");
+                        xmlWriter.startElement(itemXmlName);
                         break;
                     case JsonStreamReader.EVENT_LIST_END:
                         xmlWriter.endElement();
@@ -372,8 +371,6 @@ public class JsonUtils {
             // rootName
             xmlWriter.endElement();
             xmlWriter.endDocument();
-        } catch (XMLStreamException e) {
-            throw new JsonException(e);
         } catch (IOException e) {
             throw new JsonException(e);
         }

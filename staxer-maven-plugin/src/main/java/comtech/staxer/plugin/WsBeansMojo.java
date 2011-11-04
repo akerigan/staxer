@@ -1,12 +1,15 @@
 package comtech.staxer.plugin;
 
-import comtech.staxer.generator.StubGenerator;
-import comtech.util.file.FileUtils;
+import comtech.staxer.StaxerUtils;
+import comtech.staxer.domain.WebService;
+import comtech.util.xml.XmlConstants;
+import comtech.util.xml.XmlUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.InputStream;
+import java.net.URI;
 
 /**
  * Ws-client stub generator goal
@@ -75,43 +78,29 @@ public class WsBeansMojo extends AbstractMojo {
      *
      * @parameter
      */
-    private boolean clientService;
+    private boolean createClientService;
 
     /**
      * Generate server operations
      *
      * @parameter
      */
-    private boolean serverService;
+    private boolean createServerService;
 
     public void execute() throws MojoExecutionException {
         try {
-            File definitionFile;
-            if (definitionPath != null) {
-                definitionFile = new File(baseDir, definitionPath);
-                File parentFile = definitionFile.getParentFile();
-                if (!parentFile.exists()) {
-                    if (!parentFile.mkdirs()) {
-                        throw new MojoExecutionException("Cant create dir: " + parentFile.toString());
-                    }
-                }
+            InputStream inputStream = URI.create(wsdlUrl).toURL().openStream();
+            WebService webService = XmlUtils.readXml(inputStream, "UTF-8", WebService.class, XmlConstants.XML_NAME_WSDL_DEFINITIONS);
+            inputStream.close();
+            if (webService != null) {
+                StaxerUtils.createJavaWebService(
+                        webService, new File(sourceDir), packageName, true, createServerService, createClientService
+                );
             } else {
-                definitionFile = FileUtils.createTempFile(baseDir, "description", "xml");
+                throw new MojoExecutionException("Web service is empty");
             }
-            if (wsdlUrl.startsWith("http")) {
-                StubGenerator.importWsdl(wsdlUrl, httpUser, httpPassword, definitionFile);
-            } else {
-                File wsdlFile = new File(baseDir, wsdlUrl);
-                FileReader wsdlReader = new FileReader(wsdlFile);
-                StubGenerator.importWsdl(wsdlReader, definitionFile);
-                wsdlReader.close();
-            }
-            StubGenerator.generateStub(
-                    definitionFile, new File(baseDir, sourceDir),
-                    packageName, clientService, serverService
-            );
         } catch (Exception e) {
-            throw new MojoExecutionException("Cant generate stub", e);
+            throw new MojoExecutionException("Cant generate java ws beans", e);
         }
     }
 }

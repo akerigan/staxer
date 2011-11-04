@@ -1,6 +1,6 @@
 package comtech.staxer.client;
 
-import comtech.staxer.soap.SoapHeader;
+import comtech.util.xml.XmlStreamWriter;
 
 import java.util.List;
 
@@ -20,8 +20,8 @@ public class SimpleWsRequest implements WsRequest {
         this.endpoint = endpoint;
     }
 
-    public SoapHeader getSoapHeader() {
-        return null;
+    public void writeSoapHeader(XmlStreamWriter writer) {
+        // do nothing
     }
 
     public List<HttpRequestHeader> getRequestHeaders() {
