@@ -11,7 +11,7 @@
 
     <modules>
         <module>util</module>
-        <module>staxer</module>
+        <module>staxer-core</module>
         <module>staxer-maven-plugin</module>
     </modules>
 
@@ -52,6 +52,12 @@
         </dependency>
 
         <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
             <version>1.6.4</version>
@@ -75,6 +81,14 @@
                 <exclusion>
                     <groupId>com.sun.jdmk</groupId>
                     <artifactId>jmxtools</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.mail</groupId>
+                    <artifactId>mail</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.jms</groupId>
+                    <artifactId>jms</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
