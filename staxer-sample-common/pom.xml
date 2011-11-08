@@ -1,0 +1,75 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>staxer</artifactId>
+        <groupId>staxer</groupId>
+        <version>1.1</version>
+    </parent>
+    <artifactId>staxer-sample-common</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0</version>
+    <name>Staxer sample common</name>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>staxer</groupId>
+            <artifactId>staxer-core</artifactId>
+            <version>1.1</version>
+        </dependency>
+
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>staxerTestWsBeans</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>comtech.staxer</groupId>
+                        <artifactId>maven-staxer-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <id>staxerTestWsBeans</id>
+                                <goals>
+                                    <goal>ws-beans</goal>
+                                </goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <wsdlUrl>/src/main/resources/staxerSample.wsdl</wsdlUrl>
+                                    <packageName>comtech.ws.staxer.test</packageName>
+                                    <sourceDir>/src/main/java</sourceDir>
+                                    <clientService>true</clientService>
+                                    <serverService>true</serverService>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

@@ -13,6 +13,7 @@
         <module>util</module>
         <module>staxer-core</module>
         <module>staxer-maven-plugin</module>
+        <module>staxer-sample-common</module>
     </modules>
 
     <build>

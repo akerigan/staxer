@@ -9,7 +9,7 @@
     <artifactId>staxer-core</artifactId>
     <packaging>jar</packaging>
     <version>1.1</version>
-    <name>Staxer</name>
+    <name>Staxer core</name>
     <description>Staxer is a module thats provide interaction with ws servers</description>
     <url>http://sirena2000.ru</url>
 
