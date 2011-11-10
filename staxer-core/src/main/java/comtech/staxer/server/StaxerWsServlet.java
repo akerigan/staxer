@@ -1,10 +1,10 @@
 package comtech.staxer.server;
 
 import comtech.staxer.StaxerException;
-import comtech.staxer.domain.SoapFault;
 import comtech.util.servlet.helper.HttpHelper;
 import comtech.util.xml.XmlConstants;
 import comtech.util.xml.XmlUtils;
+import comtech.util.xml.soap.SoapFault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.WebApplicationContext;
@@ -67,7 +67,7 @@ public class StaxerWsServlet extends HttpServlet {
                     soapFault = new SoapFault("env:Server", "Internal server error");
                 }
                 try {
-                    XmlUtils.serializeSoapEnvelop(
+                    XmlUtils.writeSoapEnvelopedElement(
                             responseOutputStream, "UTF-8", 2, soapFault,
                             XmlConstants.XML_NAME_SOAP_ENVELOPE_FAULT
                     );
@@ -80,7 +80,7 @@ public class StaxerWsServlet extends HttpServlet {
             String message = "Ws processor not found for path: " + servletPath;
             log.error(message);
             try {
-                XmlUtils.serializeSoapEnvelop(
+                XmlUtils.writeSoapEnvelopedElement(
                         responseOutputStream, "UTF-8", 2, new SoapFault("env:Server", message),
                         XmlConstants.XML_NAME_SOAP_ENVELOPE_FAULT
                 );

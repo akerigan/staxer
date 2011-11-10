@@ -1,8 +1,9 @@
 package comtech.util.json;
 
 import comtech.util.StringUtils;
+import comtech.util.xml.StaxerXmlStreamException;
+import comtech.util.xml.StaxerXmlStreamWriter;
 import comtech.util.xml.XmlName;
-import comtech.util.xml.XmlStreamWriter;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -270,8 +271,8 @@ public class JsonUtils {
                             for (Method method : objClass.getMethods()) {
                                 String methodName = method.getName();
                                 if (((methodName.startsWith("get") && methodName.length() > 3)
-                                        || (methodName.startsWith("is") && methodName.length() > 2))
-                                        && !DENIED_METHODS.contains(methodName)) {
+                                     || (methodName.startsWith("is") && methodName.length() > 2))
+                                    && !DENIED_METHODS.contains(methodName)) {
                                     Class<?>[] parameters = method.getParameterTypes();
                                     if (parameters == null || parameters.length == 0) {
                                         methods.add(methodName);
@@ -331,7 +332,7 @@ public class JsonUtils {
     ) throws JsonException {
         try {
             JsonStreamReader jsonReader = new JsonStreamReader(reader);
-            XmlStreamWriter xmlWriter = new XmlStreamWriter(outputStream, charset);
+            StaxerXmlStreamWriter xmlWriter = new StaxerXmlStreamWriter(outputStream, charset);
             xmlWriter.startDocument();
             xmlWriter.startElement(new XmlName(rootName));
             XmlName itemXmlName = new XmlName("item");
@@ -372,6 +373,8 @@ public class JsonUtils {
             xmlWriter.endElement();
             xmlWriter.endDocument();
         } catch (IOException e) {
+            throw new JsonException(e);
+        } catch (StaxerXmlStreamException e) {
             throw new JsonException(e);
         }
     }

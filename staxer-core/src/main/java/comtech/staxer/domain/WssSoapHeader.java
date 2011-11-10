@@ -1,13 +1,11 @@
 package comtech.staxer.domain;
 
 import comtech.util.DateTimeUtils;
-import comtech.util.xml.WriteXml;
-import comtech.util.xml.XmlConstants;
-import comtech.util.xml.XmlName;
-import comtech.util.xml.XmlStreamWriter;
+import comtech.util.xml.*;
 import org.apache.commons.codec.binary.Base64;
 
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Random;
 
@@ -17,9 +15,9 @@ import java.util.Random;
  * Date: 15.02.2010
  * Time: 17:32:22
  */
-public class WssSoapHeader implements WriteXml {
+public class WssSoapHeader implements StaxerXmlWriter {
 
-    public static final XmlName SECURITY = new XmlName("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "Security");
+    public static final XmlName XML_NAME_SECURITY = new XmlName("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "Security");
 
     private static final String PASSWORD_DIGEST = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest";
     private static final String ENCODING_BASE64 = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary";
@@ -45,7 +43,10 @@ public class WssSoapHeader implements WriteXml {
         this.clientPassword = clientPassword;
     }
 
-    public void writeXml(XmlStreamWriter writer, XmlName elementName) throws Exception {
+    public void writeXmlAttributes(StaxerXmlStreamWriter xmlWriter) throws StaxerXmlStreamException {
+    }
+
+    public void writeXmlContent(StaxerXmlStreamWriter xmlWriter) throws StaxerXmlStreamException {
         WssSecurity wssSecurity = new WssSecurity();
 
         WssUsernameToken wssUsernameToken = new WssUsernameToken();
@@ -70,13 +71,20 @@ public class WssSoapHeader implements WriteXml {
 
         wssPassword.setType(PASSWORD_DIGEST);
 
-        MessageDigest sha = MessageDigest.getInstance("SHA-1");
+        MessageDigest sha = null;
+        try {
+            sha = MessageDigest.getInstance("SHA-1");
+        } catch (NoSuchAlgorithmException e) {
+            throw new StaxerXmlStreamException(e);
+        }
         sha.update(nonceValue);
         sha.update(wssUsernameToken.getCreated().getBytes());
         sha.update(clientPassword.getBytes());
         wssPassword.setValue(Base64.encodeBase64String(sha.digest()).trim());
 
-        wssSecurity.writeXml(writer, XmlConstants.XML_NAME_SOAP_ENVELOPE_HEADER);
+        xmlWriter.startElement(XmlConstants.XML_NAME_SOAP_ENVELOPE_HEADER);
+        XmlUtils.writeXmlElement(xmlWriter, wssSecurity, XmlConstants.XML_NAME_WSS_SECURITY);
+        xmlWriter.endElement();
     }
 
 }

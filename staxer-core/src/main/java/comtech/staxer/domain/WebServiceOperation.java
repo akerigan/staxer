@@ -9,6 +9,7 @@ import comtech.util.xml.XmlName;
 public class WebServiceOperation {
 
     private XmlName name;
+    private String javaName;
     private XmlName inputName;
     private XmlName inputMessage;
     private XmlName outputName;
@@ -23,6 +24,14 @@ public class WebServiceOperation {
 
     public void setName(XmlName name) {
         this.name = name;
+    }
+
+    public String getJavaName() {
+        return javaName;
+    }
+
+    public void setJavaName(String javaName) {
+        this.javaName = javaName;
     }
 
     public XmlName getInputName() {

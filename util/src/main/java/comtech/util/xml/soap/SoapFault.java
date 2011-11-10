@@ -1,13 +1,12 @@
-package comtech.staxer.domain;
+package comtech.util.xml.soap;
 
+import comtech.util.props.StringMapProperties;
 import comtech.util.xml.*;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
 
 /**
  * User: Vlad Vinichenko (akerigan@gmail.com)
@@ -16,12 +15,12 @@ import java.io.IOException;
  */
 @XmlRootElement(name = "Fault", namespace = "http://schemas.xmlsoap.org/soap/envelope/")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class SoapFault implements ReadXml, WriteXml {
+public class SoapFault implements StaxerXmlReader, StaxerXmlWriter {
 
-    public static final XmlName QNAME_FAULTCODE = new XmlName("faultcode");
-    public static final XmlName QNAME_FAULTSTRING = new XmlName("faultstring");
-    public static final XmlName QNAME_FAULTACTOR = new XmlName("faultactor");
-    public static final XmlName QNAME_DETAIL = new XmlName("detail");
+    public static final XmlName XML_NAME_FAULTCODE = new XmlName("faultcode");
+    public static final XmlName XML_NAME_FAULTSTRING = new XmlName("faultstring");
+    public static final XmlName XML_NAME_FAULTACTOR = new XmlName("faultactor");
+    public static final XmlName XML_NAME_DETAIL = new XmlName("detail");
 
     @XmlElement(name = "faultcode")
     private String code;
@@ -75,25 +74,34 @@ public class SoapFault implements ReadXml, WriteXml {
         this.detail = detail;
     }
 
-    public void readXml(XmlStreamReader reader, XmlName elementName) throws XMLStreamException {
-        while (reader.readNext()) {
-            if (reader.elementEnded(elementName)) {
+    public void readXmlAttributes(StringMapProperties attributes) throws StaxerXmlStreamException {
+    }
+
+    public void readXmlContent(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
+        XmlName rootElementName = xmlReader.getLastStartedElement();
+        while (xmlReader.readNext()) {
+            if (xmlReader.elementEnded(rootElementName)) {
                 break;
-            } else if (reader.elementStarted(QNAME_FAULTCODE)) {
-                code = reader.readCharacters(QNAME_FAULTCODE);
-            } else if (reader.elementStarted(QNAME_FAULTSTRING)) {
-                string = reader.readCharacters(QNAME_FAULTSTRING);
-            } else if (reader.elementStarted(QNAME_FAULTACTOR)) {
-                actor = reader.readCharacters(QNAME_FAULTACTOR);
-            } else if (reader.elementStarted(QNAME_DETAIL)) {
-                detail = new SoapFaultDetail();
-                detail.readXml(reader, QNAME_DETAIL);
+            } else if (xmlReader.elementStarted(XML_NAME_FAULTCODE)) {
+                code = xmlReader.readCharacters(XML_NAME_FAULTCODE);
+            } else if (xmlReader.elementStarted(XML_NAME_FAULTSTRING)) {
+                string = xmlReader.readCharacters(XML_NAME_FAULTSTRING);
+            } else if (xmlReader.elementStarted(XML_NAME_FAULTACTOR)) {
+                actor = xmlReader.readCharacters(XML_NAME_FAULTACTOR);
+            } else if (xmlReader.elementStarted(XML_NAME_DETAIL)) {
+                detail = XmlUtils.readXml(xmlReader, SoapFaultDetail.class, XML_NAME_DETAIL);
             }
         }
     }
 
-    public void writeXml(XmlStreamWriter writer, XmlName elementName) throws IOException {
+    public void writeXmlAttributes(StaxerXmlStreamWriter xmlWriter) throws StaxerXmlStreamException {
+    }
 
+    public void writeXmlContent(StaxerXmlStreamWriter xmlWriter) throws StaxerXmlStreamException {
+        xmlWriter.element(XML_NAME_FAULTCODE, code);
+        xmlWriter.element(XML_NAME_FAULTSTRING, string);
+        xmlWriter.element(XML_NAME_FAULTACTOR, actor);
+        XmlUtils.writeXmlElement(xmlWriter, detail, XML_NAME_DETAIL);
     }
 
     @Override

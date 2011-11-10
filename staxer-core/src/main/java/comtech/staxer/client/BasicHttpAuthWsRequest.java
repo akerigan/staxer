@@ -2,7 +2,7 @@ package comtech.staxer.client;
 
 import comtech.util.SecurityUtils;
 import comtech.util.StringUtils;
-import comtech.util.xml.XmlStreamWriter;
+import comtech.util.xml.StaxerXmlStreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ public class BasicHttpAuthWsRequest implements WsRequest {
         this.password = password;
     }
 
-    public void writeSoapHeader(XmlStreamWriter writer) {
+    public void writeSoapHeader(StaxerXmlStreamWriter xmlWriter) {
         // do nothing
     }
 

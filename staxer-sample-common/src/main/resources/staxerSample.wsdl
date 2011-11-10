@@ -1,0 +1,125 @@
+<?xml version="1.0" ?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://staxer.sample/"
+                  name="staxerSampleService" targetNamespace="http://staxer.sample/">
+    <wsdl:types>
+        <xsd:schema targetNamespace="http://staxer.sample/" elementFormDefault="unqualified">
+
+            <xsd:complexType name="EchoXsdTypes">
+                <xsd:complexContent>
+                    <xsd:extension base="tns:XsdTypes"/>
+                </xsd:complexContent>
+            </xsd:complexType>
+            <xsd:element name="echoXsdTypes" type="tns:EchoXsdTypes"/>
+            <xsd:complexType name="EchoXsdTypesResponse">
+                <xsd:complexContent>
+                    <xsd:extension base="tns:XsdTypes"/>
+                </xsd:complexContent>
+            </xsd:complexType>
+            <xsd:element name="echoXsdTypesResponse" type="tns:EchoXsdTypesResponse"/>
+
+            <xsd:complexType name="XsdTypes">
+                <xsd:sequence>
+                    <xsd:element minOccurs="0" name="elemString" type="xsd:string"/>
+                    <xsd:element minOccurs="0" name="elemInteger" type="xsd:integer"/>
+                    <xsd:element minOccurs="0" name="elemCharacter" type="xsd:unsignedShort"/>
+                    <xsd:element minOccurs="0" name="elemFloat" type="xsd:float"/>
+                    <xsd:element minOccurs="0" name="elemDouble" type="xsd:double"/>
+                    <xsd:element minOccurs="0" name="elemDecimal" type="xsd:decimal"/>
+                    <xsd:element minOccurs="0" name="elemDateTime" type="xsd:dateTime"/>
+                    <xsd:element minOccurs="0" name="elemBoolean" type="xsd:boolean"/>
+                    <xsd:element minOccurs="0" name="elemBase64Binary" type="xsd:base64Binary"/>
+                    <xsd:element minOccurs="0" maxOccurs="unbounded" name="lstString" type="xsd:string"/>
+                    <xsd:element minOccurs="0" maxOccurs="unbounded" name="lstInteger" type="xsd:integer"/>
+                    <xsd:element minOccurs="0" maxOccurs="unbounded" name="lstCharacter" type="xsd:unsignedShort"/>
+                    <xsd:element minOccurs="0" maxOccurs="unbounded" name="lstFloat" type="xsd:float"/>
+                    <xsd:element minOccurs="0" maxOccurs="unbounded" name="lstDouble" type="xsd:double"/>
+                    <xsd:element minOccurs="0" maxOccurs="unbounded" name="lstDecimal" type="xsd:decimal"/>
+                    <xsd:element minOccurs="0" maxOccurs="unbounded" name="lstDateTime" type="xsd:dateTime"/>
+                    <xsd:element minOccurs="0" maxOccurs="unbounded" name="lstBoolean" type="xsd:boolean"/>
+                    <xsd:element minOccurs="0" maxOccurs="unbounded" name="lstBase64Binary" type="xsd:base64Binary"/>
+                </xsd:sequence>
+                <xsd:attribute name="attString" type="xsd:string"/>
+                <xsd:attribute name="attInteger" type="xsd:integer"/>
+                <xsd:attribute name="attCharacter" type="xsd:unsignedShort"/>
+                <xsd:attribute name="attFloat" type="xsd:float"/>
+                <xsd:attribute name="attDouble" type="xsd:double"/>
+                <xsd:attribute name="attDecimal" type="xsd:decimal"/>
+                <xsd:attribute name="attDateTime" type="xsd:dateTime"/>
+                <xsd:attribute name="attBoolean" type="xsd:boolean"/>
+                <xsd:attribute name="attBase64Binary" type="xsd:base64Binary"/>
+            </xsd:complexType>
+
+            <xsd:complexType name="EchoCustomTypes">
+                <xsd:sequence/>
+            </xsd:complexType>
+            <xsd:element name="echoCustomTypes" type="tns:EchoCustomTypes"/>
+            <xsd:complexType name="EchoCustomTypesResponse">
+                <xsd:sequence>
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:element name="echoCustomTypesResponse" type="tns:EchoCustomTypesResponse"/>
+
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="echoXsdTypes">
+        <wsdl:part element="tns:echoXsdTypes" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="echoXsdTypesResponse">
+        <wsdl:part element="tns:echoXsdTypesResponse" name="echoXsdTypesResponse"/>
+    </wsdl:message>
+
+    <wsdl:message name="echoCustomTypes">
+        <wsdl:part element="tns:echoCustomTypes" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="echoCustomTypesResponse">
+        <wsdl:part element="tns:echoCustomTypesResponse" name="echoCustomTypesResponse"/>
+    </wsdl:message>
+
+    <wsdl:portType name="staxerSampleService">
+
+        <wsdl:operation name="echoXsdTypes">
+            <wsdl:input message="tns:echoXsdTypes" name="echoXsdTypes"/>
+            <wsdl:output message="tns:echoXsdTypesResponse" name="echoXsdTypesResponse"/>
+        </wsdl:operation>
+
+        <wsdl:operation name="echoCustomTypes">
+            <wsdl:input message="tns:echoCustomTypes" name="echoCustomTypes"/>
+            <wsdl:output message="tns:echoCustomTypesResponse" name="echoCustomTypesResponse"/>
+        </wsdl:operation>
+
+    </wsdl:portType>
+
+    <wsdl:binding name="staxerSampleService" type="tns:staxerSampleService">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+        <wsdl:operation name="echoXsdTypes">
+            <soap:operation soapAction="echoXsdTypes" style="document"/>
+            <wsdl:input name="echoXsdTypes">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="echoXsdTypesResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+
+        <wsdl:operation name="echoCustomTypes">
+            <soap:operation soapAction="echoCustomTypes" style="document"/>
+            <wsdl:input name="echoCustomTypes">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="echoCustomTypesResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+
+    </wsdl:binding>
+
+    <wsdl:service name="staxerSampleService">
+        <wsdl:port binding="tns:staxerSampleService" name="staxerSampleService">
+            <soap:address location="http://localhost:8080/webapp/servlet"/>
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

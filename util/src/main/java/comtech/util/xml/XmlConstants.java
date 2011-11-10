@@ -1,6 +1,5 @@
 package comtech.util.xml;
 
-import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,12 +14,14 @@ public class XmlConstants {
     public static final String NAMESPACE_URI_XSI = "http://www.w3.org/2001/XMLSchema-instance";
     public static final String NAMESPACE_URI_SOAP = "http://schemas.xmlsoap.org/wsdl/soap/";
     public static final String NAMESPACE_URI_SOAP_ENVELOPE = "http://schemas.xmlsoap.org/soap/envelope/";
+    public static final String NAMESPACE_URI_WSS = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
 
     public static final String NAMESPACE_PREFIX_XSI = "xsi";
     public static final String NAMESPACE_PREFIX_XSD = "xsd";
     public static final String NAMESPACE_PREFIX_WSDL = "wsdl";
     public static final String NAMESPACE_PREFIX_SOAP = "soap";
     public static final String NAMESPACE_PREFIX_SOAP_ENVELOP = "env";
+    public static final String NAMESPACE_PREFIX_WSS = "wss";
 
     public static final XmlName XML_NAME_WSDL_DEFINITIONS = new XmlName(NAMESPACE_URI_WSDL, "definitions");
     public static final XmlName XML_NAME_WSDL_TYPES = new XmlName(NAMESPACE_URI_WSDL, "types");
@@ -68,8 +69,8 @@ public class XmlConstants {
     public static final XmlName XML_NAME_SOAP_ENVELOPE_FAULT_STRING = new XmlName(NAMESPACE_URI_SOAP_ENVELOPE, SOAP_FAULT_STRING);
     public static final XmlName XML_NAME_SOAP_ENVELOPE_FAULT_ACTOR = new XmlName(NAMESPACE_URI_SOAP_ENVELOPE, SOAP_FAULT_ACTOR);
 
-    public static final QName QNAME_SOAP_ENVELOP_BODY = new QName(NAMESPACE_URI_SOAP_ENVELOPE, SOAP_BODY);
-    public static final QName QNAME_SOAP_ENVELOP_FAULT = new QName(NAMESPACE_URI_SOAP_ENVELOPE, SOAP_FAULT);
+    public static final XmlName XML_NAME_WSS_SECURITY = new XmlName(NAMESPACE_URI_WSS, "Security");
+    public static final XmlName XML_NAME_WSS_USERNAME_TOKEN = new XmlName(NAMESPACE_URI_WSS, "UsernameToken");
 
     public static final Map<String, String> DEFAULT_NAMESPACES_PREFIXES;
 
@@ -80,5 +81,6 @@ public class XmlConstants {
         DEFAULT_NAMESPACES_PREFIXES.put(NAMESPACE_URI_XSI, NAMESPACE_PREFIX_XSI);
         DEFAULT_NAMESPACES_PREFIXES.put(NAMESPACE_URI_SOAP, NAMESPACE_PREFIX_SOAP);
         DEFAULT_NAMESPACES_PREFIXES.put(NAMESPACE_URI_SOAP_ENVELOPE, NAMESPACE_PREFIX_SOAP_ENVELOP);
+        DEFAULT_NAMESPACES_PREFIXES.put(NAMESPACE_URI_WSS, NAMESPACE_PREFIX_WSS);
     }
 }

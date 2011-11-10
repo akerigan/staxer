@@ -7,8 +7,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlValue;
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
 
 /**
  * User: Vlad Vinichenko (akerigan@gmail.com)
@@ -16,7 +14,9 @@ import java.io.IOException;
  * Time: 16:58:58
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public class WssNonce implements ReadXml, WriteXml {
+public class WssNonce implements StaxerXmlReader, StaxerXmlWriter {
+
+    private static final XmlName XML_NAME_ENCODING_TYPE = new XmlName("EncodingType");
 
     @XmlAttribute(name = "EncodingType")
     private String encodingType;
@@ -40,18 +40,20 @@ public class WssNonce implements ReadXml, WriteXml {
         this.value = value;
     }
 
-    public void readXml(XmlStreamReader reader, XmlName elementName) throws XMLStreamException {
-        StringMapProperties attributes = reader.getAttributes();
-        encodingType = attributes.get("EncodingType");
-        value = reader.readCharacters(elementName);
+    public void readXmlAttributes(StringMapProperties attributes) throws StaxerXmlStreamException {
+        encodingType = attributes.get(XML_NAME_ENCODING_TYPE.toString());
     }
 
-    public void writeXml(XmlStreamWriter writer, XmlName elementName) throws IOException {
-        writer.startElement(elementName);
-        writer.attribute(new XmlName("EncodingType"), encodingType);
-        writer.text(value);
-        writer.endElement();
+    public void readXmlContent(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
+        value = xmlReader.readCharacters();
     }
 
+    public void writeXmlAttributes(StaxerXmlStreamWriter xmlWriter) throws StaxerXmlStreamException {
+        xmlWriter.attribute(XML_NAME_ENCODING_TYPE, encodingType);
+    }
+
+    public void writeXmlContent(StaxerXmlStreamWriter xmlWriter) throws StaxerXmlStreamException {
+        xmlWriter.text(value);
+    }
 
 }

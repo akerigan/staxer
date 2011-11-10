@@ -1,7 +1,15 @@
 package comtech.util.xml;
 
-import javax.xml.stream.XMLStreamException;
-import java.io.*;
+import comtech.util.props.StringMapProperties;
+import comtech.util.xml.soap.SoapFault;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.Reader;
+
+import static comtech.util.xml.XmlConstants.XML_NAME_SOAP_ENVELOPE_FAULT;
+import static comtech.util.xml.XmlConstants.XML_NAME_XSI_NIL;
 
 /**
  * User: Vlad Vinichenko (akerigan@gmail.com)
@@ -10,64 +18,147 @@ import java.io.*;
  */
 public class XmlUtils {
 
-    public static <T extends ReadXml> T readXml(
+    public static <T extends StaxerXmlReader> T readXml(
             InputStream inputStream, String charset, Class<T> cls, XmlName elementName
-    ) throws UnsupportedEncodingException, XMLStreamException, InstantiationException, IllegalAccessException {
-        return readXml(new InputStreamReader(inputStream, charset), cls, elementName);
-    }
-
-    public static <T extends ReadXml> T readXml(
-            Reader reader, Class<T> cls, XmlName elementName
-    ) throws XMLStreamException, IllegalAccessException, InstantiationException {
-        return readXml(new XmlStreamReader(reader), cls, elementName);
-    }
-
-    public static <T extends ReadXml> T readXml(
-            XmlStreamReader reader, Class<T> cls, XmlName elementName
-    ) throws XMLStreamException, IllegalAccessException, InstantiationException {
-        if (!reader.elementStarted(elementName)) {
-            reader.readStartElement(elementName);
+    ) throws StaxerXmlStreamException {
+        try {
+            return readXml(new InputStreamReader(inputStream, charset), cls, elementName);
+        } catch (StaxerXmlStreamException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new StaxerXmlStreamException(e);
         }
-        if (reader.elementStarted(elementName)) {
-            T t = cls.newInstance();
-            t.readXml(reader, elementName);
-            return t;
-        } else {
-            return null;
+    }
+
+    public static <T extends StaxerXmlReader> T readXml(
+            Reader reader, Class<T> cls, XmlName elementName
+    ) throws StaxerXmlStreamException {
+        try {
+            return readXml(new StaxerXmlStreamReader(reader), cls, elementName);
+        } catch (StaxerXmlStreamException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new StaxerXmlStreamException(e);
+        }
+    }
+
+    public static <T extends StaxerXmlReader> T readXml(
+            StaxerXmlStreamReader xmlReader, Class<T> cls, XmlName elementName
+    ) throws StaxerXmlStreamException {
+        return readXml(xmlReader, cls, elementName, false);
+    }
+
+    public static <T extends StaxerXmlReader> T readXml(
+            StaxerXmlStreamReader xmlReader, Class<T> cls,
+            XmlName elementName, boolean nillable
+    ) throws StaxerXmlStreamException {
+        try {
+            if (!xmlReader.elementStarted(elementName)) {
+                xmlReader.readStartElement(elementName);
+            }
+            if (xmlReader.elementStarted(elementName)) {
+                StringMapProperties attributes = xmlReader.getAttributes();
+                if (nillable && attributes.getBoolean(XML_NAME_XSI_NIL.toString())) {
+                    return null;
+                }
+                T t = cls.newInstance();
+                t.readXmlAttributes(attributes);
+                t.readXmlContent(xmlReader);
+                return t;
+            } else {
+                return null;
+            }
+        } catch (StaxerXmlStreamException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new StaxerXmlStreamException(e);
         }
     }
 
     public static void writeXml(
             OutputStream outputStream, String charset, int indentSize,
-            WriteXml writeXml, XmlName rootElementName
-    ) throws Exception {
-        if (writeXml != null && rootElementName != null) {
-            XmlStreamWriter writer = new XmlStreamWriter(
-                    outputStream, charset, indentSize
-            );
-            writer.startDocument();
-            writeXml.writeXml(writer, rootElementName);
-            writer.endDocument();
+            StaxerXmlWriter staxerXmlWriter, XmlName rootElementName
+    ) throws StaxerXmlStreamException {
+        try {
+            if (staxerXmlWriter != null && rootElementName != null) {
+                StaxerXmlStreamWriter xmlWriter = new StaxerXmlStreamWriter(
+                        outputStream, charset, indentSize
+                );
+                xmlWriter.startDocument();
+                xmlWriter.startElement(rootElementName);
+                staxerXmlWriter.writeXmlAttributes(xmlWriter);
+                staxerXmlWriter.writeXmlContent(xmlWriter);
+                xmlWriter.endElement();
+                xmlWriter.endDocument();
+            }
+        } catch (StaxerXmlStreamException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new StaxerXmlStreamException(e);
         }
     }
 
-    public static void serializeSoapEnvelop(
+    public static void writeSoapEnvelopedElement(
             OutputStream outputStream, String charset, int indentSize,
-            WriteXml writeXml, XmlName rootElementName
-    ) throws Exception {
-        XmlStreamWriter writer = new XmlStreamWriter(
-                outputStream, charset, indentSize
-        );
-        writer.startDocument();
-        writer.startElement(XmlConstants.XML_NAME_SOAP_ENVELOPE);
-        writer.startElement(XmlConstants.XML_NAME_SOAP_ENVELOPE_BODY);
-        if (writeXml != null && rootElementName != null) {
-            writeXml.writeXml(writer, rootElementName);
-        }
+            StaxerXmlWriter staxerXmlWriter, XmlName payloadElementName
+    ) throws StaxerXmlStreamException {
+        try {
+            StaxerXmlStreamWriter xmlWriter = new StaxerXmlStreamWriter(
+                    outputStream, charset, indentSize
+            );
+            xmlWriter.startDocument();
+            xmlWriter.startElement(XmlConstants.XML_NAME_SOAP_ENVELOPE);
+            xmlWriter.startElement(XmlConstants.XML_NAME_SOAP_ENVELOPE_BODY);
+            if (staxerXmlWriter != null) {
+                if (staxerXmlWriter instanceof SoapFault) {
+                    payloadElementName = XML_NAME_SOAP_ENVELOPE_FAULT;
+                }
+                if (payloadElementName != null) {
+                    xmlWriter.startElement(payloadElementName);
+                    staxerXmlWriter.writeXmlAttributes(xmlWriter);
+                    staxerXmlWriter.writeXmlAttributes(xmlWriter);
+                    xmlWriter.endElement();
+                }
+            }
 
-        writer.endElement();
-        writer.endElement();
-        writer.endDocument();
+            xmlWriter.endElement();
+            xmlWriter.endElement();
+            xmlWriter.endDocument();
+        } catch (StaxerXmlStreamException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new StaxerXmlStreamException(e);
+        }
+    }
+
+    public static void writeXmlElement(
+            StaxerXmlStreamWriter xmlWriter, StaxerXmlWriter staxerXmlWriter, XmlName elementName
+    ) throws StaxerXmlStreamException {
+        writeXmlElement(xmlWriter, staxerXmlWriter, elementName, false);
+    }
+
+    public static void writeXmlElement(
+            StaxerXmlStreamWriter xmlWriter, StaxerXmlWriter staxerXmlWriter,
+            XmlName elementName, boolean nillable
+    ) throws StaxerXmlStreamException {
+        try {
+            if (staxerXmlWriter != null) {
+                xmlWriter.startElement(elementName);
+                staxerXmlWriter.writeXmlAttributes(xmlWriter);
+                staxerXmlWriter.writeXmlContent(xmlWriter);
+                xmlWriter.endElement();
+            } else if (nillable) {
+                xmlWriter.startElement(elementName);
+                xmlWriter.attribute(XML_NAME_XSI_NIL, "true");
+                xmlWriter.endElement();
+            }
+        } catch (StaxerXmlStreamException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new StaxerXmlStreamException(e);
+        }
     }
 
 }
+
+

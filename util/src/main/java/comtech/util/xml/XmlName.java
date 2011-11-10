@@ -12,6 +12,9 @@ public class XmlName {
     private String localPart;
     private String prefix;
 
+    private int hashCode;
+    private String toStringValue;
+
     public XmlName(String localPart) {
         this.localPart = localPart;
     }
@@ -33,6 +36,8 @@ public class XmlName {
 
     public void setNamespaceURI(String namespaceURI) {
         this.namespaceURI = StringUtils.notEmptyElseNull(namespaceURI);
+        this.hashCode = 0;
+        this.toStringValue = null;
     }
 
     public String getLocalPart() {
@@ -41,6 +46,8 @@ public class XmlName {
 
     public void setLocalPart(String localPart) {
         this.localPart = localPart;
+        this.hashCode = 0;
+        this.toStringValue = null;
     }
 
     public String getPrefix() {
@@ -68,19 +75,25 @@ public class XmlName {
     }
 
     public final int hashCode() {
-        if (namespaceURI != null) {
-            return namespaceURI.hashCode() ^ localPart.hashCode();
-        } else {
-            return localPart.hashCode();
+        if (hashCode == 0) {
+            if (namespaceURI != null) {
+                hashCode = namespaceURI.hashCode() ^ localPart.hashCode();
+            } else {
+                hashCode = localPart.hashCode();
+            }
         }
+        return hashCode;
     }
 
     public String toString() {
-        if (namespaceURI == null) {
-            return localPart;
-        } else {
-            return "{" + namespaceURI + "}" + localPart;
+        if (toStringValue == null) {
+            if (namespaceURI == null) {
+                toStringValue = localPart;
+            } else {
+                toStringValue = "{" + namespaceURI + "}" + localPart;
+            }
         }
+        return toStringValue;
     }
 
 }

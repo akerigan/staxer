@@ -49,9 +49,9 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>comtech.staxer</groupId>
-                        <artifactId>maven-staxer-plugin</artifactId>
-                        <version>1.0</version>
+                        <groupId>staxer</groupId>
+                        <artifactId>staxer-maven-plugin</artifactId>
+                        <version>1.1</version>
                         <executions>
                             <execution>
                                 <id>staxerTestWsBeans</id>
@@ -61,10 +61,10 @@
                                 <phase>generate-sources</phase>
                                 <configuration>
                                     <wsdlUrl>/src/main/resources/staxerSample.wsdl</wsdlUrl>
-                                    <packageName>comtech.ws.staxer.test</packageName>
+                                    <packageName>staxer.test</packageName>
                                     <sourceDir>/src/main/java</sourceDir>
-                                    <clientService>true</clientService>
-                                    <serverService>true</serverService>
+                                    <createClientService>true</createClientService>
+                                    <createServerService>true</createServerService>
                                 </configuration>
                             </execution>
                         </executions>

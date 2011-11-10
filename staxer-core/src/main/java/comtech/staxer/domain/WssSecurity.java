@@ -1,13 +1,12 @@
 package comtech.staxer.domain;
 
+import comtech.util.props.StringMapProperties;
 import comtech.util.xml.*;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
 
 /**
  * User: Vlad Vinichenko (akerigan@gmail.com)
@@ -15,34 +14,13 @@ import java.io.IOException;
  * Time: 16:51:04
  */
 @XmlRootElement(name = "Security",
-        namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
+                namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class WssSecurity implements ReadXml, WriteXml {
-
-    public static final XmlName XML_NAME_USERNAME_TOKEN = new XmlName("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "UsernameToken");
+public class WssSecurity implements StaxerXmlReader, StaxerXmlWriter {
 
     @XmlElement(name = "UsernameToken",
-            namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
+                namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
     private WssUsernameToken usernameToken;
-
-    public void readXml(XmlStreamReader reader, XmlName elementName) throws XMLStreamException {
-        while (reader.readNext()) {
-            if (reader.elementEnded(elementName)) {
-                break;
-            } else if (reader.elementStarted(XML_NAME_USERNAME_TOKEN)) {
-                usernameToken = new WssUsernameToken();
-                usernameToken.readXml(reader, XML_NAME_USERNAME_TOKEN);
-            }
-        }
-    }
-
-    public void writeXml(XmlStreamWriter writer, XmlName elementName) throws IOException {
-        writer.startElement(elementName);
-        if (usernameToken != null) {
-            usernameToken.writeXml(writer, XML_NAME_USERNAME_TOKEN);
-        }
-        writer.endElement();
-    }
 
     public WssUsernameToken getUsernameToken() {
         return usernameToken;
@@ -51,4 +29,26 @@ public class WssSecurity implements ReadXml, WriteXml {
     public void setUsernameToken(WssUsernameToken usernameToken) {
         this.usernameToken = usernameToken;
     }
+
+    public void readXmlAttributes(StringMapProperties attributes) throws StaxerXmlStreamException {
+    }
+
+    public void readXmlContent(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
+        XmlName rootElement = xmlReader.getLastStartedElement();
+        while (xmlReader.readNext()) {
+            if (xmlReader.elementEnded(rootElement)) {
+                break;
+            } else if (xmlReader.elementStarted(XmlConstants.XML_NAME_WSS_USERNAME_TOKEN)) {
+                usernameToken = XmlUtils.readXml(xmlReader, WssUsernameToken.class, XmlConstants.XML_NAME_WSS_USERNAME_TOKEN);
+            }
+        }
+    }
+
+    public void writeXmlAttributes(StaxerXmlStreamWriter xmlWriter) throws StaxerXmlStreamException {
+    }
+
+    public void writeXmlContent(StaxerXmlStreamWriter xmlWriter) throws StaxerXmlStreamException {
+        XmlUtils.writeXmlElement(xmlWriter, usernameToken, XmlConstants.XML_NAME_WSS_USERNAME_TOKEN);
+    }
+
 }

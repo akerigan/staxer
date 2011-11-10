@@ -1,12 +1,11 @@
 package comtech.staxer.domain;
 
+import comtech.util.props.StringMapProperties;
 import comtech.util.xml.*;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
 
 /**
  * User: Vlad Vinichenko (akerigan@gmail.com)
@@ -14,7 +13,7 @@ import java.io.IOException;
  * Time: 16:51:27
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public class WssUsernameToken implements ReadXml, WriteXml {
+public class WssUsernameToken implements StaxerXmlReader, StaxerXmlWriter {
 
     public static final XmlName XML_NAME_USERNAME = new XmlName("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "Username");
     public static final XmlName XML_NAME_PASSWORD = new XmlName("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "Password");
@@ -22,19 +21,19 @@ public class WssUsernameToken implements ReadXml, WriteXml {
     public static final XmlName XML_NAME_CREATED = new XmlName("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "Created");
 
     @XmlElement(name = "Username",
-            namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
+                namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
     private String userName;
 
     @XmlElement(name = "Password",
-            namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
+                namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
     private WssPassword password;
 
     @XmlElement(name = "Nonce",
-            namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
+                namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
     private WssNonce nonce;
 
     @XmlElement(name = "Created",
-            namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd")
+                namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd")
     private String created;
 
     public String getUserName() {
@@ -69,38 +68,33 @@ public class WssUsernameToken implements ReadXml, WriteXml {
         this.created = created;
     }
 
-    public void readXml(XmlStreamReader reader, XmlName elementName) throws XMLStreamException {
-        while (reader.readNext()) {
-            if (reader.elementEnded(elementName)) {
+    public void readXmlAttributes(StringMapProperties attributes) throws StaxerXmlStreamException {
+    }
+
+    public void readXmlContent(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
+        XmlName rootElementName = xmlReader.getLastStartedElement();
+        while (xmlReader.readNext()) {
+            if (xmlReader.elementEnded(rootElementName)) {
                 break;
-            } else if (reader.elementStarted(XML_NAME_USERNAME)) {
-                userName = reader.readCharacters(XML_NAME_USERNAME);
-            } else if (reader.elementStarted(XML_NAME_PASSWORD)) {
-                password = new WssPassword();
-                password.readXml(reader, XML_NAME_PASSWORD);
-            } else if (reader.elementStarted(XML_NAME_NONCE)) {
-                nonce = new WssNonce();
-                nonce.readXml(reader, XML_NAME_NONCE);
-            } else if (reader.elementStarted(XML_NAME_CREATED)) {
-                created = reader.readCharacters(XML_NAME_CREATED);
+            } else if (xmlReader.elementStarted(XML_NAME_USERNAME)) {
+                userName = xmlReader.readCharacters(XML_NAME_USERNAME);
+            } else if (xmlReader.elementStarted(XML_NAME_PASSWORD)) {
+                password = XmlUtils.readXml(xmlReader, WssPassword.class, XML_NAME_PASSWORD);
+            } else if (xmlReader.elementStarted(XML_NAME_NONCE)) {
+                nonce = XmlUtils.readXml(xmlReader, WssNonce.class, XML_NAME_NONCE);
+            } else if (xmlReader.elementStarted(XML_NAME_CREATED)) {
+                created = xmlReader.readCharacters(XML_NAME_CREATED);
             }
         }
     }
 
-    public void writeXml(XmlStreamWriter writer, XmlName elementName) throws IOException {
-        writer.startElement(elementName);
-        if (userName != null) {
-            writer.element(XML_NAME_USERNAME, userName);
-        }
-        if (password != null) {
-            password.writeXml(writer, XML_NAME_PASSWORD);
-        }
-        if (nonce != null) {
-            nonce.writeXml(writer, XML_NAME_NONCE);
-        }
-        if (created != null) {
-            writer.element(XML_NAME_CREATED, created);
-        }
-        writer.endElement();
+    public void writeXmlAttributes(StaxerXmlStreamWriter xmlWriter) throws StaxerXmlStreamException {
+    }
+
+    public void writeXmlContent(StaxerXmlStreamWriter xmlWriter) throws StaxerXmlStreamException {
+        xmlWriter.element(XML_NAME_USERNAME, userName);
+        XmlUtils.writeXmlElement(xmlWriter, password, XML_NAME_PASSWORD);
+        XmlUtils.writeXmlElement(xmlWriter, nonce, XML_NAME_NONCE);
+        xmlWriter.element(XML_NAME_CREATED, created);
     }
 }

@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
 
+import static comtech.util.StringUtils.capitalize2;
 import static comtech.util.xml.XmlConstants.NAMESPACE_URI_XSD;
 
 
@@ -78,7 +79,7 @@ public class StaxerUtils {
     public static void createJavaWebService(
             WebService webService, File sourceDir,
             String packageName, boolean writeJaxbAnnotations,
-            boolean writeClientService, boolean writeServerService
+            boolean createClientService, boolean createServerService
     ) throws IOException {
         File destDir = new File(sourceDir, packageName.replaceAll("\\.", "/"));
         File beansDir = new File(destDir, "bean");
@@ -86,6 +87,7 @@ public class StaxerUtils {
 
         Map<XmlName, XmlName> globalTypeElementMap = webService.getGlobalTypeElementMap();
         Map<XmlName, XmlName> globalElementTypeMap = webService.getGlobalElementTypeMap();
+        Map<XmlName, WebServiceMessage> webServiceMessagesMap = webService.getMessagesMap();
         Map<XmlName, WebServiceOperation> webServiceOperationsMap = webService.getOperationsMap();
         Map<XmlName, WebServiceMessage> messagesMap = webService.getMessagesMap();
         Map<XmlName, WebServiceEnum> webServiceEnumsMap = webService.getEnumsMap();
@@ -128,89 +130,89 @@ public class StaxerUtils {
             File file = new File(beansDir, enumTypeJavaName + ".java");
             Writer writer = new FileWriter(file);
 
-            writer.write("package ");
-            writer.write(packageName);
-            writer.write(".bean;");
-            writer.write("\n\n");
-            writer.write(
+            writer.append("package ");
+            writer.append(packageName);
+            writer.append(".bean;");
+            writer.append("\n\n");
+            writer.append(
                     "import javax.xml.bind.annotation.XmlEnum;\n" +
-                            "import javax.xml.bind.annotation.XmlEnumValue;\n" +
-                            "import java.util.HashMap;\n" +
-                            "import java.util.Map;\n" +
-                            "\n"
+                    "import javax.xml.bind.annotation.XmlEnumValue;\n" +
+                    "import java.util.HashMap;\n" +
+                    "import java.util.Map;\n" +
+                    "\n"
             );
             if (writeJaxbAnnotations) {
-                writer.write(
+                writer.append(
                         "@XmlEnum\n"
                 );
             }
-            writer.write(
+            writer.append(
                     "public enum "
             );
-            writer.write(enumTypeJavaName);
-            writer.write(" {\n\n");
+            writer.append(enumTypeJavaName);
+            writer.append(" {\n\n");
             int idx = 1;
             for (WebServiceEnumValue enumValue : enumType.getValues()) {
                 if (idx > 1) {
-                    writer.write(",\n");
+                    writer.append(",\n");
                 }
                 String value = enumValue.getValue();
                 if (writeJaxbAnnotations) {
-                    writer.write("    @XmlEnumValue(\"");
-                    writer.write(value);
-                    writer.write("\")\n");
+                    writer.append("    @XmlEnumValue(\"");
+                    writer.append(value);
+                    writer.append("\")\n");
                 }
-                writer.write("    ");
-                writer.write(enumValue.getJavaName());
-                writer.write("(\"");
-                writer.write(value);
-                writer.write("\")");
+                writer.append("    ");
+                writer.append(enumValue.getJavaName());
+                writer.append("(\"");
+                writer.append(value);
+                writer.append("\")");
                 ++idx;
             }
-            writer.write(";\n\n");
-            writer.write(
+            writer.append(";\n\n");
+            writer.append(
                     "    private static Map<String, ");
-            writer.write(enumTypeJavaName);
-            writer.write("> map;\n" +
-                    "    private String code;\n" +
-                    "\n" +
-                    "    static {\n" +
-                    "        map = new HashMap<String, ");
-            writer.write(enumTypeJavaName);
-            writer.write(
+            writer.append(enumTypeJavaName);
+            writer.append("> map;\n" +
+                          "    private String code;\n" +
+                          "\n" +
+                          "    static {\n" +
+                          "        map = new HashMap<String, ");
+            writer.append(enumTypeJavaName);
+            writer.append(
                     ">();\n" +
-                            "        for ("
+                    "        for ("
             );
-            writer.write(enumTypeJavaName);
-            writer.write(" value : ");
-            writer.write(enumTypeJavaName);
-            writer.write(
+            writer.append(enumTypeJavaName);
+            writer.append(" value : ");
+            writer.append(enumTypeJavaName);
+            writer.append(
                     ".values()) {\n" +
-                            "            map.put(value.code, value);\n" +
-                            "        }\n" +
-                            "    }\n" +
-                            "\n" +
-                            "    "
+                    "            map.put(value.code, value);\n" +
+                    "        }\n" +
+                    "    }\n" +
+                    "\n" +
+                    "    "
             );
-            writer.write(enumTypeJavaName);
-            writer.write(
+            writer.append(enumTypeJavaName);
+            writer.append(
                     "(String code) {\n" +
-                            "        this.code = code;\n" +
-                            "    }\n" +
-                            "\n" +
-                            "    public String getCode() {\n" +
-                            "        return code;\n" +
-                            "    }\n" +
-                            "\n" +
-                            "    public static "
+                    "        this.code = code;\n" +
+                    "    }\n" +
+                    "\n" +
+                    "    public String getCode() {\n" +
+                    "        return code;\n" +
+                    "    }\n" +
+                    "\n" +
+                    "    public static "
             );
-            writer.write(enumTypeJavaName);
-            writer.write(
+            writer.append(enumTypeJavaName);
+            writer.append(
                     " getByCode(String code) {\n" +
-                            "        return map.get(code);\n" +
-                            "    }\n\n"
+                    "        return map.get(code);\n" +
+                    "    }\n\n"
             );
-            writer.write("}\n");
+            writer.append("}\n");
 
             writer.flush();
             writer.close();
@@ -223,19 +225,18 @@ public class StaxerUtils {
             File file = new File(beansDir, typeJavaName + ".java");
             Writer writer = new FileWriter(file);
 
-            writer.write("package ");
-            writer.write(packageName);
-            writer.write(".bean;");
-            writer.write("\n\n");
+            writer.append("package ");
+            writer.append(packageName);
+            writer.append(".bean;");
+            writer.append("\n\n");
 
             TreeSet<String> imports = new TreeSet<String>();
-            imports.add("comtech.util.xml.ReadXml");
-            imports.add("comtech.util.xml.XmlStreamReader");
-            imports.add("comtech.util.xml.XmlName");
-            imports.add("javax.xml.stream.XMLStreamException");
-            imports.add("comtech.util.xml.WriteXml");
-            imports.add("comtech.util.xml.XmlStreamWriter");
-            imports.add("java.io.IOException");
+            imports.add("comtech.util.xml.StaxerXmlReader");
+            imports.add("comtech.util.xml.StaxerXmlWriter");
+            imports.add("comtech.util.xml.StaxerXmlStreamReader");
+            imports.add("comtech.util.xml.StaxerXmlStreamWriter");
+            imports.add("comtech.util.props.StringMapProperties");
+            imports.add("comtech.util.xml.StaxerXmlStreamException");
 
             Map<XmlName, String> constantsMap = new HashMap<XmlName, String>();
             Set<String> writeXmlNamespaces = new TreeSet<String>();
@@ -349,6 +350,7 @@ public class StaxerUtils {
                                 fields.append('"');
                             }
                             if (nillableField) {
+                                writeXmlNamespaces.add(XmlConstants.NAMESPACE_URI_XSI);
                                 fields.append(", nillable = true");
                             }
                             if (field.isRequired()) {
@@ -422,6 +424,7 @@ public class StaxerUtils {
 
                     String constantName = constantsMap.get(fieldXmlName);
                     if (StringUtils.isEmpty(constantName) && !valueField) {
+                        imports.add("comtech.util.xml.XmlName");
                         constantName = "XML_NAME_" + StringUtils.toEnumName(fieldJavaName);
                         constantsMap.put(fieldXmlName, constantName);
                         constants.append("    public static final XmlName ");
@@ -439,13 +442,14 @@ public class StaxerUtils {
                     if (elementField) {
                         if (readXmlElements.length() == 0) {
                             readXmlElements.append(
-                                    "        while (reader.readNext()) {\n" +
-                                            "            if (reader.elementEnded(elementName)) {\n" +
-                                            "                break;\n"
+                                    "        XmlName rootElementName = xmlReader.getLastStartedElement();\n" +
+                                    "        while (xmlReader.readNext()) {\n" +
+                                    "            if (xmlReader.elementEnded(rootElementName)) {\n" +
+                                    "                break;\n"
                             );
                         }
                         if (fieldXsdType != null) {
-                            readXmlElements.append("            } else if (reader.elementStarted(");
+                            readXmlElements.append("            } else if (xmlReader.elementStarted(");
                             readXmlElements.append(constantName);
                             readXmlElements.append(")) {\n                ");
                             if (arrayField) {
@@ -461,7 +465,7 @@ public class StaxerUtils {
                                 readXmlElements.append(fieldJavaConverter);
                                 readXmlElements.append("(");
                             }
-                            readXmlElements.append("reader.readCharacters(");
+                            readXmlElements.append("xmlReader.readCharacters(");
                             readXmlElements.append(constantName);
                             if (fieldJavaConverterNotEmpty) {
                                 readXmlElements.append(")");
@@ -479,42 +483,47 @@ public class StaxerUtils {
                                 readXmlElements.append("                }\n");
                             }
                         } else {
-                            readXmlElements.append("            } else if (reader.elementStarted(");
+                            readXmlElements.append("            } else if (xmlReader.elementStarted(");
                             readXmlElements.append(constantName);
                             readXmlElements.append(")) {\n                ");
                             if (arrayField) {
                                 readXmlElements.append(fieldTypeJavaName);
                                 readXmlElements.append(" ");
                                 readXmlElements.append(fieldJavaName);
-                                readXmlElements.append("Item = new ");
+                                readXmlElements.append("Item = ");
                             } else {
                                 readXmlElements.append(fieldJavaName);
-                                readXmlElements.append(" = new ");
-                            }
-                            readXmlElements.append(fieldTypeJavaName);
-                            readXmlElements.append("();\n                ");
-                            readXmlElements.append(fieldJavaName);
-                            if (arrayField) {
-                                readXmlElements.append("Item");
+                                readXmlElements.append(" = ");
                             }
                             if (fieldTypeEnum) {
-                                readXmlElements.append(" = ");
                                 readXmlElements.append(fieldTypeJavaName);
                                 readXmlElements.append(".getByCode(");
-                                readXmlValue.append("reader.readCharacters(elementName)");
+                                readXmlValue.append("xmlReader.readCharacters(elementName)");
                                 readXmlElements.append(");\n");
                             } else {
-                                readXmlElements.append(".readXml(reader, ");
+                                readXmlElements.append("XmlUtils.readXml(xmlReader, ");
+                                readXmlElements.append(fieldTypeJavaName);
+                                readXmlElements.append(".class, ");
                                 readXmlElements.append(constantName);
+                                if (nillableField) {
+                                    writeXmlNamespaces.add(XmlConstants.NAMESPACE_URI_XSI);
+                                    writeXmlElements.append(", true");
+                                } else {
+                                    writeXmlElements.append(", false");
+                                }
                                 readXmlElements.append(");\n");
                             }
                             if (arrayField) {
-                                readXmlElements.append("                ");
+                                readXmlElements.append("                if ");
+                                readXmlElements.append(fieldJavaName);
+                                readXmlElements.append("Item != null) {\n");
+                                readXmlElements.append("                    ");
                                 readXmlElements.append(fieldJavaName);
                                 readXmlElements.append(".add(");
                                 readXmlElements.append(fieldJavaName);
                                 readXmlElements.append("Item");
                                 readXmlElements.append(");\n");
+                                readXmlElements.append("                }\n");
                             }
                         }
                     } else if (valueField) {
@@ -526,16 +535,12 @@ public class StaxerUtils {
                             readXmlValue.append(fieldTypeJavaName);
                             readXmlValue.append(".getByCode(");
                         }
-                        readXmlValue.append("reader.readCharacters(elementName)");
+                        readXmlValue.append("xmlReader.readCharacters(elementName)");
                         if (fieldJavaConverterNotEmpty || fieldTypeEnum) {
                             readXmlValue.append(")");
                         }
                         readXmlValue.append(";\n");
                     } else {
-                        if (readXmlAttributes.length() == 0) {
-                            imports.add("comtech.util.props.StringMapProperties");
-                            readXmlAttributes.append("        StringMapProperties attributes = reader.getAttributes();\n");
-                        }
                         readXmlAttributes.append("        ");
                         readXmlAttributes.append(fieldJavaName);
                         readXmlAttributes.append(" = ");
@@ -570,7 +575,7 @@ public class StaxerUtils {
                             writeXmlElements.append(fieldJavaName);
                             writeXmlElements.append(") {\n");
                             if (fieldXsdType != null) {
-                                writeXmlElements.append("                writer.element(");
+                                writeXmlElements.append("                xmlWriter.element(");
                                 writeXmlElements.append(constantName);
                                 writeXmlElements.append(", ");
                                 if (fieldXmlConverterNotEmpty) {
@@ -582,36 +587,32 @@ public class StaxerUtils {
                                 if (fieldXmlConverterNotEmpty) {
                                     writeXmlElements.append(")");
                                 }
+                                if (nillableField) {
+                                    writeXmlNamespaces.add(XmlConstants.NAMESPACE_URI_XSI);
+                                    writeXmlElements.append(", true");
+                                } else {
+                                    writeXmlElements.append(", false");
+                                }
                                 writeXmlElements.append(");\n");
                             } else {
-                                writeXmlElements.append("                if (");
+                                imports.add("comtech.util.xml.XmlUtils");
+                                writeXmlElements.append("                XmlUtils.writeXmlElement(xmlWriter, ");
                                 writeXmlElements.append(fieldJavaName);
-                                writeXmlElements.append(" != null) {\n");
-                                writeXmlElements.append("                    ");
-                                writeXmlElements.append(fieldJavaName);
-                                writeXmlElements.append("Item.writeXml(writer, ");
+                                writeXmlElements.append(".class, ");
                                 writeXmlElements.append(constantName);
+                                if (nillableField) {
+                                    writeXmlNamespaces.add(XmlConstants.NAMESPACE_URI_XSI);
+                                    writeXmlElements.append(", true");
+                                } else {
+                                    writeXmlElements.append(", false");
+                                }
                                 writeXmlElements.append(");\n");
-                                writeXmlElements.append("                }\n");
                             }
                             writeXmlElements.append("            }\n");
-                            if (nillableField) {
-                                imports.add("comtech.util.xml.XmlConstants");
-                                writeXmlNamespaces.add(XmlConstants.NAMESPACE_URI_XSI);
-                                writeXmlElements.append("      } else {\n");
-                                writeXmlElements.append("          writer.startElement(");
-                                writeXmlElements.append(constantName);
-                                writeXmlElements.append(");\n");
-                                writeXmlElements.append("          writer.attribute(XmlConstants.XML_NAME_XSI_NIL, \"true\");\n");
-                                writeXmlElements.append("          writer.endElement();\n");
-                            }
                             writeXmlElements.append("        }\n");
                         } else {
-                            writeXmlElements.append("        if (");
-                            writeXmlElements.append(fieldJavaName);
-                            writeXmlElements.append(" != null) {\n");
                             if (fieldXsdType != null) {
-                                writeXmlElements.append("            writer.element(");
+                                writeXmlElements.append("        xmlWriter.element(");
                                 writeXmlElements.append(constantName);
                                 writeXmlElements.append(", ");
                                 if (fieldXmlConverterNotEmpty) {
@@ -622,37 +623,38 @@ public class StaxerUtils {
                                 if (fieldXmlConverterNotEmpty) {
                                     writeXmlElements.append(")");
                                 }
+                                if (nillableField) {
+                                    writeXmlNamespaces.add(XmlConstants.NAMESPACE_URI_XSI);
+                                    writeXmlElements.append(", true");
+                                } else {
+                                    writeXmlElements.append(", false");
+                                }
                                 writeXmlElements.append(");\n");
                             } else {
-                                writeXmlElements.append("            ");
+                                writeXmlElements.append("                XmlUtils.writeXmlElement(xmlWriter, ");
                                 writeXmlElements.append(fieldJavaName);
-                                writeXmlElements.append(".writeXml(writer, ");
+                                writeXmlElements.append(".class, ");
                                 writeXmlElements.append(constantName);
+                                if (nillableField) {
+                                    writeXmlNamespaces.add(XmlConstants.NAMESPACE_URI_XSI);
+                                    writeXmlElements.append(", true");
+                                } else {
+                                    writeXmlElements.append(", false");
+                                }
                                 writeXmlElements.append(");\n");
                             }
-                            if (nillableField) {
-                                imports.add("comtech.util.xml.XmlConstants");
-                                writeXmlNamespaces.add(XmlConstants.NAMESPACE_URI_XSI);
-                                writeXmlElements.append("        } else {\n");
-                                writeXmlElements.append("            writer.startElement(");
-                                writeXmlElements.append(constantName);
-                                writeXmlElements.append(");\n");
-                                writeXmlElements.append("            writer.attribute(XmlConstants.XML_NAME_XSI_NIL, \"true\");\n");
-                                writeXmlElements.append("            writer.endElement();\n");
-                            }
-                            writeXmlElements.append("        }\n");
                         }
                     } else if (valueField) {
                         if (fieldTypeEnum) {
                             writeXmlValue.append("        if(");
                             writeXmlValue.append(fieldJavaName);
                             writeXmlValue.append(" != null) {\n");
-                            writeXmlValue.append("            writer.text(");
+                            writeXmlValue.append("            xmlWriter.text(");
                             writeXmlValue.append(fieldJavaName);
                             writeXmlValue.append(".getCode());\n");
                             writeXmlValue.append("        }\n");
                         } else {
-                            writeXmlValue.append("        writer.text(");
+                            writeXmlValue.append("        xmlWriter.text(");
                             if (fieldXmlConverterNotEmpty) {
                                 writeXmlValue.append(fieldXmlConverter);
                                 writeXmlValue.append("(");
@@ -669,14 +671,14 @@ public class StaxerUtils {
                             writeXmlAttributes.append("        if(");
                             writeXmlAttributes.append(fieldJavaName);
                             writeXmlAttributes.append(" != null) {\n");
-                            writeXmlAttributes.append("            writer.attribute(");
+                            writeXmlAttributes.append("            xmlWriter.attribute(");
                             writeXmlAttributes.append(constantName);
                             writeXmlAttributes.append(", ");
                             writeXmlAttributes.append(fieldJavaName);
                             writeXmlAttributes.append(".getCode());\n");
                             writeXmlAttributes.append("        }\n");
                         } else {
-                            writeXmlAttributes.append("        writer.attribute(");
+                            writeXmlAttributes.append("        xmlWriter.attribute(");
                             writeXmlAttributes.append(constantName);
                             writeXmlAttributes.append(", ");
                             if (fieldXmlConverterNotEmpty) {
@@ -756,70 +758,273 @@ public class StaxerUtils {
             }
 
             for (String className : imports) {
-                writer.write("import ");
-                writer.write(className);
-                writer.write(";\n");
+                writer.append("import ");
+                writer.append(className);
+                writer.append(";\n");
             }
 
-            writer.write("\n");
+            writer.append("\n");
 
-            writer.write(classJaxbAnnotations.toString());
+            writer.append(classJaxbAnnotations.toString());
 
-            writer.write("public class ");
-            writer.write(typeJavaName);
-            writer.write(" implements ReadXml, WriteXml {\n\n");
+            writer.append("public class ");
+            writer.append(typeJavaName);
+            if (superTypeJavaName != null) {
+                writer.append(" extends ");
+                writer.append(superTypeJavaName);
+            }
+            writer.append(" implements StaxerXmlReader, StaxerXmlWriter {\n\n");
             if (constants.length() > 0) {
-                writer.write(constants.toString());
-                writer.write("\n");
+                writer.append(constants.toString());
+                writer.append("\n");
             }
-            writer.write(fields.toString());
-            writer.write(gettersSetters.toString());
+            writer.append(fields.toString());
+            writer.append(gettersSetters.toString());
 
-            writer.write(
-                    "    public void readXml(\n" +
-                            "            XmlStreamReader reader, XmlName elementName\n" +
-                            "    ) throws XMLStreamException {\n"
+            writer.append(
+                    "    public void readXmlAttributes(\n" +
+                    "            StringMapProperties attributes\n" +
+                    "    ) throws StaxerXmlStreamException {\n"
             );
-            writer.write(readXmlAttributes.toString());
-            if (readXmlElements.length() != 0) {
-                writer.write(readXmlElements.toString());
-                writer.write(
-                        "            }\n" +
-                                "        }\n"
-                );
+            if (superTypeJavaName != null) {
+                writer.append("        super.readXmlAttributes(attributes);\n");
             }
-            writer.write(readXmlValue.toString());
-            writer.write(
+            writer.append(readXmlAttributes.toString());
+            writer.append(
                     "    }\n\n"
             );
 
-            writer.write(
-                    "    public void writeXml(\n" +
-                            "            XmlStreamWriter writer, XmlName elementName\n" +
-                            "    ) throws IOException {\n");
-            for (String namespace : writeXmlNamespaces) {
-                writer.write("        writer.declareNamespace(\"");
-                writer.write(namespace);
-                writer.write("\");\n");
+            writer.append(
+                    "    public void readXmlContent(\n" +
+                    "            StaxerXmlStreamReader xmlReader\n" +
+                    "    ) throws StaxerXmlStreamException {\n"
+            );
+            if (superTypeJavaName != null) {
+                writer.append("        super.readXmlContent(xmlReader);\n");
             }
-            writer.write(
-                    "        writer.startElement(elementName);\n"
+            if (readXmlElements.length() != 0) {
+                writer.append(readXmlElements.toString());
+                writer.append(
+                        "            }\n" +
+                        "        }\n"
+                );
+            }
+            writer.append(readXmlValue.toString());
+            writer.append(
+                    "    }\n\n"
             );
 
-            writer.write(writeXmlAttributes.toString());
-            writer.write(writeXmlElements.toString());
-            writer.write(writeXmlValue.toString());
-
-            writer.write(
-                    "        writer.endElement();\n" +
-                            "    }\n\n"
+            writer.append(
+                    "    public void writeXmlAttributes(\n" +
+                    "            StaxerXmlStreamWriter xmlWriter\n" +
+                    "    ) throws StaxerXmlStreamException {\n");
+            if (superTypeJavaName != null) {
+                writer.append("        super.writeXmlAttributes(xmlWriter);\n");
+            }
+            writer.append(writeXmlAttributes.toString());
+            for (String namespace : writeXmlNamespaces) {
+                writer.append("        writer.declareNamespace(\"");
+                writer.append(namespace);
+                writer.append("\");\n");
+            }
+            writer.append(
+                    "    }\n\n"
             );
 
-            writer.write(toStringMethod.toString());
-            writer.write("}\n");
+            writer.append(
+                    "    public void writeXmlContent(\n" +
+                    "            StaxerXmlStreamWriter xmlWriter\n" +
+                    "    ) throws StaxerXmlStreamException {\n");
+            if (superTypeJavaName != null) {
+                writer.append("        super.writeXmlAttributes(xmlWriter);\n");
+            }
+            writer.append(writeXmlElements.toString());
+            writer.append(writeXmlValue.toString());
+            writer.append(
+                    "    }\n\n"
+            );
+
+            writer.append(toStringMethod.toString());
+            writer.append("}\n");
 
             writer.flush();
             writer.close();
+        }
+
+        if (createClientService || createServerService) {
+            String webServiceName = capitalize2(webService.getBindingName().getLocalPart(), false);
+            if (!webServiceName.toUpperCase().endsWith("WS")) {
+                webServiceName += "Ws";
+            }
+            String beanPackageName = packageName + ".bean";
+            StringBuilder serviceXmlNames = new StringBuilder();
+            StringBuilder clientServiceMethods = new StringBuilder();
+            StringBuilder serverServiceStaticConstrustor = new StringBuilder();
+            StringBuilder serverServiceMethods = new StringBuilder();
+
+            for (WebServiceOperation method : webServiceOperationsMap.values()) {
+                XmlName outputMessageName = method.getOutputMessage();
+                WebServiceMessage outputMessage = webServiceMessagesMap.get(outputMessageName);
+                List<WebServiceMessagePart> outputParts = outputMessage.getParts();
+                if (outputParts.isEmpty()) {
+                    continue;
+                }
+                WebServiceMessagePart firstOutputPart = outputParts.get(0);
+                XmlName outputElement = firstOutputPart.getElement();
+                XmlName outputTypeName = globalElementTypeMap.get(outputElement);
+                WebServiceType outputType = webServiceTypesMap.get(outputTypeName);
+                if (outputType == null) {
+                    continue;
+                }
+                XmlName inputMessageName = method.getInputMessage();
+                WebServiceMessage inputMessage = webServiceMessagesMap.get(inputMessageName);
+                List<WebServiceMessagePart> inputParts = inputMessage.getParts();
+                if (inputParts.isEmpty()) {
+                    continue;
+                }
+                WebServiceMessagePart firstInputPart = inputParts.get(0);
+                XmlName inputElement = firstInputPart.getElement();
+                XmlName inputTypeName = globalElementTypeMap.get(inputElement);
+                WebServiceType inputType = webServiceTypesMap.get(inputTypeName);
+                if (inputType == null) {
+                    continue;
+                }
+                String outputTypeJavaName = outputType.getJavaName();
+                String inputTypeJavaName = inputType.getJavaName();
+                String methodJavaName = method.getJavaName();
+
+                String inputElementLocalPart = inputElement.getLocalPart();
+                String inputTypeConstantName = "XML_NAME_" + StringUtils.toEnumName(inputElementLocalPart);
+                serviceXmlNames.append("    public static final XmlName ");
+                serviceXmlNames.append(inputTypeConstantName);
+                serviceXmlNames.append(" = new XmlName(\"");
+                serviceXmlNames.append(inputElement.getNamespaceURI());
+                serviceXmlNames.append("\", \"");
+                serviceXmlNames.append(inputElementLocalPart);
+                serviceXmlNames.append("\");\n");
+
+                if (createClientService) {
+                    clientServiceMethods.append("    public ");
+                    clientServiceMethods.append(outputTypeJavaName);
+                    clientServiceMethods.append(" ");
+                    clientServiceMethods.append(methodJavaName);
+                    clientServiceMethods.append("(\n");
+                    clientServiceMethods.append("            WsRequest wsRequest, ");
+                    clientServiceMethods.append(inputTypeJavaName);
+                    clientServiceMethods.append(" parameters\n");
+                    clientServiceMethods.append("    ) throws WsClientException {\n");
+                    clientServiceMethods.append("        return httpWsClient.processSoapQuery(\n");
+                    clientServiceMethods.append("                wsRequest, parameters, ");
+                    clientServiceMethods.append(inputTypeConstantName);
+                    clientServiceMethods.append(", ");
+                    clientServiceMethods.append(outputTypeJavaName);
+                    clientServiceMethods.append(".class\n");
+                    clientServiceMethods.append("        );\n");
+                    clientServiceMethods.append("    }\n\n");
+                }
+                if (createServerService) {
+                    serverServiceStaticConstrustor.append("\n        CLASSES.put(");
+                    serverServiceStaticConstrustor.append(inputTypeConstantName);
+                    serverServiceStaticConstrustor.append(", ");
+                    serverServiceStaticConstrustor.append(inputTypeJavaName);
+                    serverServiceStaticConstrustor.append(".class);\n");
+                    serverServiceStaticConstrustor.append("        METHOD_NAMES.put(");
+                    serverServiceStaticConstrustor.append(inputTypeConstantName);
+                    serverServiceStaticConstrustor.append(", \"");
+                    serverServiceStaticConstrustor.append(methodJavaName);
+                    serverServiceStaticConstrustor.append("\");\n");
+
+                    serverServiceMethods.append("    public abstract ");
+                    serverServiceMethods.append(outputTypeJavaName);
+                    serverServiceMethods.append(" ");
+                    serverServiceMethods.append(methodJavaName);
+                    serverServiceMethods.append("(\n");
+                    serverServiceMethods.append("            WsMessage<");
+                    serverServiceMethods.append(inputTypeJavaName);
+                    serverServiceMethods.append("> wsMessage\n");
+                    serverServiceMethods.append("    );\n");
+                    serverServiceMethods.append("\n");
+
+                }
+            }
+
+            if (createClientService) {
+                String serviceName = "Client" + webServiceName;
+                File file = new File(destDir, serviceName + ".java");
+                Writer writer = new FileWriter(file);
+                writer.append("package ");
+                writer.append(packageName);
+                writer.append(";\n\n");
+                writer.append("import comtech.staxer.client.HttpWsClient;\n");
+                writer.append("import comtech.staxer.client.WsClientException;\n");
+                writer.append("import comtech.staxer.client.WsRequest;\n");
+                writer.append("import comtech.util.xml.XmlName;\n");
+                writer.append("import ");
+                writer.append(packageName);
+                writer.append(".bean.*;\n\n");
+                writer.append("import javax.xml.stream.XMLStreamException;\n");
+                writer.append("\n");
+                writer.append("public class ");
+                writer.append(serviceName);
+                writer.append(" {\n\n");
+                writer.append(serviceXmlNames.toString());
+                writer.append("\n");
+                writer.append("    private HttpWsClient httpWsClient;\n");
+                writer.append("\n");
+                writer.append("    public HttpWsClient getHttpWsClient() {\n");
+                writer.append("        return httpWsClient;\n");
+                writer.append("    }\n");
+                writer.append("\n");
+                writer.append("    public void setHttpWsClient(HttpWsClient httpWsClient) {\n");
+                writer.append("        this.httpWsClient = httpWsClient;\n");
+                writer.append("    }\n");
+                writer.append("\n");
+                writer.append("    // service related methods\n");
+                writer.append("\n");
+                writer.append(clientServiceMethods.toString());
+                writer.append("}\n");
+                writer.close();
+            }
+            if (createServerService) {
+                String serviceName = "Server" + webServiceName;
+                File file = new File(destDir, serviceName + ".java");
+                Writer writer = new FileWriter(file);
+                writer.append("package ");
+                writer.append(packageName);
+                writer.append(";\n");
+                writer.append("\n");
+                writer.append("import comtech.staxer.server.ServerServiceWs;\n");
+                writer.append("import comtech.staxer.server.WsMessage;\n");
+                writer.append("import comtech.util.xml.XmlName;\n");
+                writer.append("import ");
+                writer.append(beanPackageName);
+                writer.append(".*;\n");
+                writer.append("\n");
+                writer.append("import java.util.HashMap;\n");
+                writer.append("import java.util.Map;\n");
+                writer.append("\n");
+                writer.append("public abstract class ");
+                writer.append(serviceName);
+                writer.append(" implements ServerServiceWs {\n\n");
+                writer.append(serviceXmlNames.toString());
+                writer.append("\n");
+                writer.append("    public static final Map<XmlName, Class> CLASSES;\n");
+                writer.append("    public static final Map<XmlName, String> METHOD_NAMES;\n\n");
+                writer.append("    static {\n");
+                writer.append("        CLASSES = new HashMap<XmlName, Class>();\n");
+                writer.append("        METHOD_NAMES = new HashMap<XmlName, String>();\n");
+                writer.append(serverServiceStaticConstrustor.toString());
+                writer.append("    }\n\n");
+                writer.append("    public Class getClass(XmlName xmlName) {\n");
+                writer.append("        return CLASSES.get(xmlName);\n");
+                writer.append("    }\n\n");
+                writer.append("    public String getMethodName(XmlName xmlName) {\n");
+                writer.append("        return METHOD_NAMES.get(xmlName);\n");
+                writer.append("    }\n\n");
+                writer.append(serverServiceMethods.toString());
+                writer.append("}\n");
+                writer.close();
+            }
         }
     }
 

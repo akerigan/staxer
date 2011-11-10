@@ -1,7 +1,7 @@
 package comtech.staxer.client;
 
-import comtech.staxer.domain.SoapFault;
 import comtech.util.xml.*;
+import comtech.util.xml.soap.SoapFault;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.client.Address;
 import org.eclipse.jetty.client.ContentExchange;
@@ -11,7 +11,6 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.stream.XMLStreamException;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -23,7 +22,8 @@ import java.util.zip.GZIPInputStream;
 
 import static comtech.staxer.StaxerConstants.ACCEPT_MIME;
 import static comtech.staxer.StaxerConstants.XML_CONTENT_TYPE;
-import static comtech.util.xml.XmlConstants.*;
+import static comtech.util.xml.XmlConstants.XML_NAME_SOAP_ENVELOPE_BODY;
+import static comtech.util.xml.XmlConstants.XML_NAME_SOAP_ENVELOPE_FAULT;
 
 /**
  * User: Vlad Vinichenko (akerigan@gmail.com)
@@ -94,30 +94,14 @@ public class HttpWsClientJetty implements HttpWsClient {
         httpClient.setIdleTimeout(timeout * 1000);
     }
 
-    public <Q extends WriteXml, A extends ReadXml> A processSoapQuery(
+    public <Q extends StaxerXmlWriter, A extends StaxerXmlReader> A processSoapQuery(
             WsRequest wsRequest, Q requestObject,
             XmlName requestXmlName, Class<A> responseClass
     ) throws WsClientException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            XmlStreamWriter writer = new XmlStreamWriter(baos, "UTF-8", 2);
-            writer.declareNamespace(NAMESPACE_URI_SOAP_ENVELOPE);
-//            writer.declareNamespace(NAMESPACE_URI_XSI);
-            writer.startDocument();
-            writer.startElement(XML_NAME_SOAP_ENVELOPE);
-
-            wsRequest.writeSoapHeader(writer);
-
-            writer.startElement(XML_NAME_SOAP_ENVELOPE_BODY);
-
-            if (requestObject != null && requestXmlName != null) {
-                requestObject.writeXml(writer, requestXmlName);
-            }
-
-            writer.endElement();
-            writer.endElement();
-            writer.endDocument();
-        } catch (Exception e) {
+            XmlUtils.writeSoapEnvelopedElement(baos, "UTF-8", 2, requestObject, requestXmlName);
+        } catch (StaxerXmlStreamException e) {
             throw new WsClientException("Error while serializing soap request", e);
         }
         try {
@@ -127,13 +111,13 @@ public class HttpWsClientJetty implements HttpWsClient {
         }
     }
 
-    public <A extends ReadXml> A processSoapQuery(
+    public <A extends StaxerXmlReader> A processSoapQuery(
             WsRequest wsRequest, String soapRequestXml, Class<A> responseClass
     ) throws WsClientException {
         int requestId = requestIdHolder.addAndGet(1);
         String soapResponseXml = sendSoapQuery(wsRequest, soapRequestXml, requestId);
         try {
-            XmlStreamReader document = new XmlStreamReader(new StringReader(soapResponseXml));
+            StaxerXmlStreamReader document = new StaxerXmlStreamReader(new StringReader(soapResponseXml));
             boolean envelopBodyRead = document.readStartElement(XML_NAME_SOAP_ENVELOPE_BODY);
             if (envelopBodyRead) {
                 XmlName bodyChildElement = document.readStartElement();
@@ -153,11 +137,7 @@ public class HttpWsClientJetty implements HttpWsClient {
                         XML_NAME_SOAP_ENVELOPE_BODY + "' element"
                 );
             }
-        } catch (XMLStreamException e) {
-            throw new WsClientException(name + ", rid=" + requestId + ", error while deserializing soap response", e);
-        } catch (InstantiationException e) {
-            throw new WsClientException(name + ", rid=" + requestId + ", error while deserializing soap response", e);
-        } catch (IllegalAccessException e) {
+        } catch (StaxerXmlStreamException e) {
             throw new WsClientException(name + ", rid=" + requestId + ", error while deserializing soap response", e);
         }
     }

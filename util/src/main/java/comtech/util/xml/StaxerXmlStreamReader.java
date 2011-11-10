@@ -18,7 +18,7 @@ import java.util.Stack;
  * Date: 04.09.2009
  * Time: 13:10:01
  */
-public class XmlStreamReader {
+public class StaxerXmlStreamReader {
 
     private static final XMLInputFactory factory = XMLInputFactory.newInstance();
     private XMLStreamReader reader;
@@ -27,15 +27,23 @@ public class XmlStreamReader {
     private XmlName endedElement;
     private int event;
 
-    public XmlStreamReader(InputStream stream) throws XMLStreamException {
-        this.reader = factory.createXMLStreamReader(stream, "utf-8");
+    public StaxerXmlStreamReader(InputStream stream) throws StaxerXmlStreamException {
+        try {
+            this.reader = factory.createXMLStreamReader(stream, "utf-8");
+        } catch (Exception e) {
+            throw new StaxerXmlStreamException(e);
+        }
     }
 
-    public XmlStreamReader(Reader reader) throws XMLStreamException {
-        this.reader = factory.createXMLStreamReader(reader);
+    public StaxerXmlStreamReader(Reader reader) throws StaxerXmlStreamException {
+        try {
+            this.reader = factory.createXMLStreamReader(reader);
+        } catch (Exception e) {
+            throw new StaxerXmlStreamException(e);
+        }
     }
 
-    public XmlStreamReader(XMLStreamReader xmlStreamReader) {
+    public StaxerXmlStreamReader(XMLStreamReader xmlStreamReader) {
         this.reader = xmlStreamReader;
     }
 
@@ -62,34 +70,42 @@ public class XmlStreamReader {
         }
     }
 
-    public XmlName readStartElement() throws XMLStreamException {
-        while (reader.hasNext()) {
-            updateState();
+    public XmlName readStartElement() throws StaxerXmlStreamException {
+        try {
+            while (reader.hasNext()) {
+                updateState();
+                if (event == XMLStreamConstants.START_ELEMENT) {
+                    return lastStartedElement;
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            throw new StaxerXmlStreamException(e);
+        }
+    }
+
+    private void updateState() throws StaxerXmlStreamException {
+        try {
+            event = reader.next();
             if (event == XMLStreamConstants.START_ELEMENT) {
-                return lastStartedElement;
+                if (lastStartedElement != null) {
+                    startedElements.push(lastStartedElement);
+                }
+                lastStartedElement = new XmlName(reader.getNamespaceURI(), reader.getLocalName());
+            } else if (event == XMLStreamConstants.END_ELEMENT) {
+                endedElement = lastStartedElement;
+                if (!startedElements.isEmpty()) {
+                    lastStartedElement = startedElements.pop();
+                } else {
+                    lastStartedElement = null;
+                }
             }
-        }
-        return null;
-    }
-
-    private void updateState() throws XMLStreamException {
-        event = reader.next();
-        if (event == XMLStreamConstants.START_ELEMENT) {
-            if (lastStartedElement != null) {
-                startedElements.push(lastStartedElement);
-            }
-            lastStartedElement = new XmlName(reader.getNamespaceURI(), reader.getLocalName());
-        } else if (event == XMLStreamConstants.END_ELEMENT) {
-            endedElement = lastStartedElement;
-            if (!startedElements.isEmpty()) {
-                lastStartedElement = startedElements.pop();
-            } else {
-                lastStartedElement = null;
-            }
+        } catch (XMLStreamException e) {
+            throw new StaxerXmlStreamException(e);
         }
     }
 
-    public boolean readStartElement(XmlName elementName) throws XMLStreamException {
+    public boolean readStartElement(XmlName elementName) throws StaxerXmlStreamException {
         XmlName qName;
         do {
             qName = readStartElement();
@@ -108,17 +124,21 @@ public class XmlStreamReader {
         return result;
     }
 
-    public XmlName readEndElement() throws XMLStreamException {
-        while (reader.hasNext()) {
-            updateState();
-            if (event == XMLStreamConstants.END_ELEMENT) {
-                return endedElement;
+    public XmlName readEndElement() throws StaxerXmlStreamException {
+        try {
+            while (reader.hasNext()) {
+                updateState();
+                if (event == XMLStreamConstants.END_ELEMENT) {
+                    return endedElement;
+                }
             }
+            return null;
+        } catch (XMLStreamException e) {
+            throw new StaxerXmlStreamException(e);
         }
-        return null;
     }
 
-    public boolean readEndElement(XmlName elementName) throws XMLStreamException {
+    public boolean readEndElement(XmlName elementName) throws StaxerXmlStreamException {
         XmlName qName;
         do {
             qName = readEndElement();
@@ -140,7 +160,7 @@ public class XmlStreamReader {
 
     public boolean elementStarted(XmlName name) {
         return event == XMLStreamConstants.START_ELEMENT
-                && name != null && name.equals(lastStartedElement);
+               && name != null && name.equals(lastStartedElement);
     }
 
     public boolean elementEnded() {
@@ -149,19 +169,27 @@ public class XmlStreamReader {
 
     public boolean elementEnded(XmlName name) {
         return event == XMLStreamConstants.END_ELEMENT &&
-                name != null && name.equals(endedElement);
+               name != null && name.equals(endedElement);
     }
 
-    public boolean readNext() throws XMLStreamException {
-        if (reader.hasNext()) {
-            updateState();
-            return true;
-        } else {
-            return false;
+    public boolean readNext() throws StaxerXmlStreamException {
+        try {
+            if (reader.hasNext()) {
+                updateState();
+                return true;
+            } else {
+                return false;
+            }
+        } catch (XMLStreamException e) {
+            throw new StaxerXmlStreamException(e);
         }
     }
 
-    public String readCharacters(XmlName endElement) throws XMLStreamException {
+    public String readCharacters() throws StaxerXmlStreamException {
+        return readCharacters(lastStartedElement);
+    }
+
+    public String readCharacters(XmlName endElement) throws StaxerXmlStreamException {
         StringBuilder result = new StringBuilder();
         while (readNext()) {
             if (elementEnded(endElement)) {

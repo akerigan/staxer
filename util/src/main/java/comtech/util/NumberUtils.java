@@ -93,6 +93,26 @@ public class NumberUtils {
         return null;
     }
 
+    public static Double parseDouble(String s) {
+        try {
+            if (!StringUtils.isEmpty(s)) {
+                return Double.valueOf(s);
+            }
+        } catch (NumberFormatException ignored) {
+        }
+        return null;
+    }
+
+    public static BigDecimal parseBigDecimal(String s) {
+        try {
+            if (!StringUtils.isEmpty(s)) {
+                return new BigDecimal(s);
+            }
+        } catch (NumberFormatException ignored) {
+        }
+        return null;
+    }
+
     public static Number firstNotEmpty(Number... nn) {
         if (nn != null) {
             for (Number n : nn) {

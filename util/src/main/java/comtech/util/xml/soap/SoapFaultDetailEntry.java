@@ -1,22 +1,21 @@
-package comtech.staxer.domain;
+package comtech.util.xml.soap;
 
 import comtech.util.props.StringMapProperties;
-import comtech.util.xml.ReadXml;
-import comtech.util.xml.XmlName;
-import comtech.util.xml.XmlStreamReader;
+import comtech.util.xml.*;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlValue;
-import javax.xml.stream.XMLStreamException;
 
 /**
  * @author Vlad Vinichenko (akerigan@gmail.com)
  * @since 2011-05-04 17:13 (Europe/Moscow)
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public class SoapFaultDetailEntry implements ReadXml {
+public class SoapFaultDetailEntry implements StaxerXmlReader, StaxerXmlWriter {
+
+    private static final XmlName XML_NAME_TYPE = new XmlName("type");
 
     @XmlAttribute(name = "type")
     private String type;
@@ -47,10 +46,20 @@ public class SoapFaultDetailEntry implements ReadXml {
         this.value = value;
     }
 
-    public void readXml(XmlStreamReader reader, XmlName elementName) throws XMLStreamException {
-        StringMapProperties attributes = reader.getAttributes();
-        type = attributes.get("type");
-        value = reader.readCharacters(elementName);
+    public void readXmlAttributes(StringMapProperties attributes) throws StaxerXmlStreamException {
+        type = attributes.get(XML_NAME_TYPE.toString());
+    }
+
+    public void readXmlContent(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
+        value = xmlReader.readCharacters();
+    }
+
+    public void writeXmlAttributes(StaxerXmlStreamWriter xmlWriter) throws StaxerXmlStreamException {
+        xmlWriter.attribute(XML_NAME_TYPE, type);
+    }
+
+    public void writeXmlContent(StaxerXmlStreamWriter xmlWriter) throws StaxerXmlStreamException {
+        xmlWriter.text(value);
     }
 
     @Override
