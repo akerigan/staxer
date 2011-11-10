@@ -289,7 +289,7 @@ public class StaxerUtils {
                 String fieldJaxbXmlSchema = null;
                 String fieldJavaConverter = null;
                 String fieldXmlConverter = null;
-                boolean fieldTypeEnum = false;
+                boolean enumField = false;
                 if (fieldXsdType != null) {
                     fieldJaxbXmlSchema = fieldXsdType.getJaxbXmlSchema();
                     fieldTypeJavaName = fieldXsdType.getJavaName();
@@ -306,7 +306,7 @@ public class StaxerUtils {
                         WebServiceEnum enumFieldType = webServiceEnumsMap.get(fieldXmlType);
                         if (enumFieldType != null) {
                             fieldTypeJavaName = enumFieldType.getJavaName();
-                            fieldTypeEnum = true;
+                            enumField = true;
                         }
                     }
                 }
@@ -495,26 +495,26 @@ public class StaxerUtils {
                                 readXmlElements.append(fieldJavaName);
                                 readXmlElements.append(" = ");
                             }
-                            if (fieldTypeEnum) {
+                            if (enumField) {
                                 readXmlElements.append(fieldTypeJavaName);
                                 readXmlElements.append(".getByCode(");
-                                readXmlValue.append("xmlReader.readCharacters(elementName)");
+                                readXmlElements.append("xmlReader.readCharacters()");
                                 readXmlElements.append(");\n");
                             } else {
+                                imports.add("comtech.util.xml.XmlUtils");
                                 readXmlElements.append("XmlUtils.readXml(xmlReader, ");
                                 readXmlElements.append(fieldTypeJavaName);
                                 readXmlElements.append(".class, ");
                                 readXmlElements.append(constantName);
                                 if (nillableField) {
-                                    writeXmlNamespaces.add(XmlConstants.NAMESPACE_URI_XSI);
-                                    writeXmlElements.append(", true");
+                                    readXmlElements.append(", true");
                                 } else {
-                                    writeXmlElements.append(", false");
+                                    readXmlElements.append(", false");
                                 }
                                 readXmlElements.append(");\n");
                             }
                             if (arrayField) {
-                                readXmlElements.append("                if ");
+                                readXmlElements.append("                if (");
                                 readXmlElements.append(fieldJavaName);
                                 readXmlElements.append("Item != null) {\n");
                                 readXmlElements.append("                    ");
@@ -531,12 +531,12 @@ public class StaxerUtils {
                         if (fieldJavaConverterNotEmpty) {
                             readXmlValue.append(fieldJavaConverter);
                             readXmlValue.append("(");
-                        } else if (fieldTypeEnum) {
+                        } else if (enumField) {
                             readXmlValue.append(fieldTypeJavaName);
                             readXmlValue.append(".getByCode(");
                         }
-                        readXmlValue.append("xmlReader.readCharacters(elementName)");
-                        if (fieldJavaConverterNotEmpty || fieldTypeEnum) {
+                        readXmlValue.append("xmlReader.readCharacters()");
+                        if (fieldJavaConverterNotEmpty || enumField) {
                             readXmlValue.append(")");
                         }
                         readXmlValue.append(";\n");
@@ -547,14 +547,14 @@ public class StaxerUtils {
                         if (fieldJavaConverterNotEmpty) {
                             readXmlAttributes.append(fieldJavaConverter);
                             readXmlAttributes.append("(");
-                        } else if (fieldTypeEnum) {
+                        } else if (enumField) {
                             readXmlAttributes.append(fieldTypeJavaName);
                             readXmlAttributes.append(".getByCode(");
                         }
                         readXmlAttributes.append("attributes.get(");
                         readXmlAttributes.append(constantName);
                         readXmlAttributes.append(".toString())");
-                        if (fieldJavaConverterNotEmpty || fieldTypeEnum) {
+                        if (fieldJavaConverterNotEmpty || enumField) {
                             readXmlAttributes.append(")");
                         }
                         readXmlAttributes.append(";\n");
@@ -594,12 +594,38 @@ public class StaxerUtils {
                                     writeXmlElements.append(", false");
                                 }
                                 writeXmlElements.append(");\n");
+                            } else if (enumField) {
+                                writeXmlElements.append("                String ");
+                                writeXmlElements.append(fieldJavaName);
+                                writeXmlElements.append("ItemCode = null;\n");
+                                writeXmlElements.append("                if (");
+                                writeXmlElements.append(fieldJavaName);
+                                writeXmlElements.append("Item != null) {\n");
+                                writeXmlElements.append("                    ");
+                                writeXmlElements.append(fieldJavaName);
+                                writeXmlElements.append("ItemCode = ");
+                                writeXmlElements.append(fieldJavaName);
+                                writeXmlElements.append("Item.getCode();\n");
+                                writeXmlElements.append("                }\n");
+                                writeXmlElements.append("                xmlWriter.element(");
+                                writeXmlElements.append(constantName);
+                                writeXmlElements.append(", ");
+                                writeXmlElements.append(fieldJavaName);
+                                writeXmlElements.append("ItemCode");
+                                if (nillableField) {
+                                    writeXmlNamespaces.add(XmlConstants.NAMESPACE_URI_XSI);
+                                    writeXmlElements.append(", true");
+                                } else {
+                                    writeXmlElements.append(", false");
+                                }
+                                writeXmlElements.append(");\n");
                             } else {
                                 imports.add("comtech.util.xml.XmlUtils");
                                 writeXmlElements.append("                XmlUtils.writeXmlElement(xmlWriter, ");
-                                writeXmlElements.append(fieldJavaName);
-                                writeXmlElements.append(".class, ");
                                 writeXmlElements.append(constantName);
+                                writeXmlElements.append(", ");
+                                writeXmlElements.append(fieldJavaName);
+                                writeXmlElements.append("Item");
                                 if (nillableField) {
                                     writeXmlNamespaces.add(XmlConstants.NAMESPACE_URI_XSI);
                                     writeXmlElements.append(", true");
@@ -630,11 +656,37 @@ public class StaxerUtils {
                                     writeXmlElements.append(", false");
                                 }
                                 writeXmlElements.append(");\n");
-                            } else {
-                                writeXmlElements.append("                XmlUtils.writeXmlElement(xmlWriter, ");
+                            } else if (enumField) {
+                                writeXmlElements.append("        String ");
                                 writeXmlElements.append(fieldJavaName);
-                                writeXmlElements.append(".class, ");
+                                writeXmlElements.append("Code = null;\n");
+                                writeXmlElements.append("        if (");
+                                writeXmlElements.append(fieldJavaName);
+                                writeXmlElements.append(" != null) {\n");
+                                writeXmlElements.append("            ");
+                                writeXmlElements.append(fieldJavaName);
+                                writeXmlElements.append("Code = ");
+                                writeXmlElements.append(fieldJavaName);
+                                writeXmlElements.append(".getCode();\n");
+                                writeXmlElements.append("        }\n");
+                                writeXmlElements.append("        xmlWriter.element(");
                                 writeXmlElements.append(constantName);
+                                writeXmlElements.append(", ");
+                                writeXmlElements.append(fieldJavaName);
+                                writeXmlElements.append("Code");
+                                if (nillableField) {
+                                    writeXmlNamespaces.add(XmlConstants.NAMESPACE_URI_XSI);
+                                    writeXmlElements.append(", true");
+                                } else {
+                                    writeXmlElements.append(", false");
+                                }
+                                writeXmlElements.append(");\n");
+                            } else {
+                                imports.add("comtech.util.xml.XmlUtils");
+                                writeXmlElements.append("        XmlUtils.writeXmlElement(xmlWriter, ");
+                                writeXmlElements.append(constantName);
+                                writeXmlElements.append(", ");
+                                writeXmlElements.append(fieldJavaName);
                                 if (nillableField) {
                                     writeXmlNamespaces.add(XmlConstants.NAMESPACE_URI_XSI);
                                     writeXmlElements.append(", true");
@@ -645,7 +697,7 @@ public class StaxerUtils {
                             }
                         }
                     } else if (valueField) {
-                        if (fieldTypeEnum) {
+                        if (enumField) {
                             writeXmlValue.append("        if(");
                             writeXmlValue.append(fieldJavaName);
                             writeXmlValue.append(" != null) {\n");
@@ -667,7 +719,7 @@ public class StaxerUtils {
                             writeXmlValue.append(";\n");
                         }
                     } else {
-                        if (fieldTypeEnum) {
+                        if (enumField) {
                             writeXmlAttributes.append("        if(");
                             writeXmlAttributes.append(fieldJavaName);
                             writeXmlAttributes.append(" != null) {\n");
@@ -962,7 +1014,6 @@ public class StaxerUtils {
                 writer.append("import ");
                 writer.append(packageName);
                 writer.append(".bean.*;\n\n");
-                writer.append("import javax.xml.stream.XMLStreamException;\n");
                 writer.append("\n");
                 writer.append("public class ");
                 writer.append(serviceName);

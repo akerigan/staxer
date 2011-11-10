@@ -80,14 +80,82 @@
             </xsd:complexType>
 
             <xsd:complexType name="EchoCustomTypes">
-                <xsd:sequence/>
+                <xsd:complexContent>
+                    <xsd:extension base="tns:CustomTypes">
+                        <xsd:sequence>
+                            <xsd:element minOccurs="0" name="nillElemEnum" type="tns:EnumType" nillable="true"/>
+                            <xsd:element minOccurs="0" name="nillElemValue" type="tns:ValueType" nillable="true"/>
+                            <xsd:element minOccurs="0" name="nillElemOval" type="tns:Oval" nillable="true"/>
+                        </xsd:sequence>
+                    </xsd:extension>
+                </xsd:complexContent>
             </xsd:complexType>
             <xsd:element name="echoCustomTypes" type="tns:EchoCustomTypes"/>
             <xsd:complexType name="EchoCustomTypesResponse">
-                <xsd:sequence>
-                </xsd:sequence>
+                <xsd:complexContent>
+                    <xsd:extension base="tns:CustomTypes">
+                        <xsd:sequence>
+                            <xsd:element minOccurs="0" name="nillElemEnum" type="tns:EnumType" nillable="true"/>
+                            <xsd:element minOccurs="0" name="nillElemValue" type="tns:ValueType" nillable="true"/>
+                            <xsd:element minOccurs="0" name="nillElemOval" type="tns:Oval" nillable="true"/>
+                        </xsd:sequence>
+                    </xsd:extension>
+                </xsd:complexContent>
             </xsd:complexType>
             <xsd:element name="echoCustomTypesResponse" type="tns:EchoCustomTypesResponse"/>
+
+            <xsd:complexType name="CustomTypes">
+                <xsd:sequence>
+                    <xsd:element minOccurs="0" name="elemEnum" type="tns:EnumType"/>
+                    <xsd:element minOccurs="0" maxOccurs="unbounded" name="lstEnum" type="tns:EnumType"/>
+                    <xsd:element minOccurs="0" name="elemValue" type="tns:ValueType"/>
+                    <xsd:element minOccurs="0" maxOccurs="unbounded" name="lstValue" type="tns:ValueType"/>
+                    <xsd:element minOccurs="0" name="elemOval" type="tns:Oval"/>
+                    <xsd:element minOccurs="0" maxOccurs="unbounded" name="lstOval" type="tns:Oval"/>
+                </xsd:sequence>
+                <xsd:attribute name="attEnum" type="tns:EnumType"/>
+            </xsd:complexType>
+
+            <xsd:complexType name="ValueType">
+                <xsd:simpleContent>
+                    <xsd:extension base="xsd:integer">
+                        <xsd:attribute name="attBoolean" type="xsd:boolean"/>
+                    </xsd:extension>
+                </xsd:simpleContent>
+            </xsd:complexType>
+
+            <xsd:simpleType name="EnumType">
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="ONE"/>
+                    <xsd:enumeration value="TWO"/>
+                    <xsd:enumeration value="THREE"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+
+            <xsd:complexType name="Point">
+                <xsd:sequence>
+                    <xsd:element minOccurs="0" name="x" type="xsd:double"/>
+                    <xsd:element minOccurs="0" name="y" type="xsd:double"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:complexType name="Circle">
+                <xsd:complexContent>
+                    <xsd:extension base="tns:Point">
+                        <xsd:attribute name="radius" type="xsd:double"/>
+                    </xsd:extension>
+                </xsd:complexContent>
+            </xsd:complexType>
+
+            <xsd:complexType name="Oval">
+                <xsd:complexContent>
+                    <xsd:extension base="tns:Circle">
+                        <xsd:sequence>
+                            <xsd:element minOccurs="0" name="secondRadius" type="xsd:double"/>
+                        </xsd:sequence>
+                    </xsd:extension>
+                </xsd:complexContent>
+            </xsd:complexType>
 
         </xsd:schema>
     </wsdl:types>

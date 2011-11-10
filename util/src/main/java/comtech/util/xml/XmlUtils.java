@@ -134,12 +134,12 @@ public class XmlUtils {
     public static void writeXmlElement(
             StaxerXmlStreamWriter xmlWriter, StaxerXmlWriter staxerXmlWriter, XmlName elementName
     ) throws StaxerXmlStreamException {
-        writeXmlElement(xmlWriter, staxerXmlWriter, elementName, false);
+        writeXmlElement(xmlWriter, elementName, staxerXmlWriter, false);
     }
 
     public static void writeXmlElement(
-            StaxerXmlStreamWriter xmlWriter, StaxerXmlWriter staxerXmlWriter,
-            XmlName elementName, boolean nillable
+            StaxerXmlStreamWriter xmlWriter, XmlName elementName, StaxerXmlWriter staxerXmlWriter,
+            boolean nillable
     ) throws StaxerXmlStreamException {
         try {
             if (staxerXmlWriter != null) {

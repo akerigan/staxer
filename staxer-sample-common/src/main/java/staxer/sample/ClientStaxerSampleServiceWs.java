@@ -9,6 +9,7 @@ import staxer.sample.bean.EchoCustomTypesResponse;
 import staxer.sample.bean.EchoXsdTypesRequest;
 import staxer.sample.bean.EchoXsdTypesResponse;
 
+
 public class ClientStaxerSampleServiceWs {
 
     public static final XmlName XML_NAME_ECHO_XSD_TYPES = new XmlName("http://staxer.sample/", "echoXsdTypes");
