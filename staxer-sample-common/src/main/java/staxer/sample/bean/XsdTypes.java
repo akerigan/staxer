@@ -14,116 +14,116 @@ import java.util.Date;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class XsdTypes implements StaxerXmlReader, StaxerXmlWriter {
 
-    public static final XmlName XML_NAME_ELEM_STRING = new XmlName("elemString");
-    public static final XmlName XML_NAME_ELEM_INTEGER = new XmlName("elemInteger");
-    public static final XmlName XML_NAME_ELEM_CHARACTER = new XmlName("elemCharacter");
-    public static final XmlName XML_NAME_ELEM_FLOAT = new XmlName("elemFloat");
-    public static final XmlName XML_NAME_ELEM_DOUBLE = new XmlName("elemDouble");
-    public static final XmlName XML_NAME_ELEM_DECIMAL = new XmlName("elemDecimal");
-    public static final XmlName XML_NAME_ELEM_DATE_TIME = new XmlName("elemDateTime");
-    public static final XmlName XML_NAME_ELEM_BOOLEAN = new XmlName("elemBoolean");
-    public static final XmlName XML_NAME_ELEM_BASE64_BINARY = new XmlName("elemBase64Binary");
-    public static final XmlName XML_NAME_LST_STRING = new XmlName("lstString");
-    public static final XmlName XML_NAME_LST_INTEGER = new XmlName("lstInteger");
-    public static final XmlName XML_NAME_LST_CHARACTER = new XmlName("lstCharacter");
-    public static final XmlName XML_NAME_LST_FLOAT = new XmlName("lstFloat");
-    public static final XmlName XML_NAME_LST_DOUBLE = new XmlName("lstDouble");
-    public static final XmlName XML_NAME_LST_DECIMAL = new XmlName("lstDecimal");
-    public static final XmlName XML_NAME_LST_DATE_TIME = new XmlName("lstDateTime");
-    public static final XmlName XML_NAME_LST_BOOLEAN = new XmlName("lstBoolean");
-    public static final XmlName XML_NAME_LST_BASE64_BINARY = new XmlName("lstBase64Binary");
-    public static final XmlName XML_NAME_ATT_STRING = new XmlName("attString");
-    public static final XmlName XML_NAME_ATT_INTEGER = new XmlName("attInteger");
-    public static final XmlName XML_NAME_ATT_CHARACTER = new XmlName("attCharacter");
-    public static final XmlName XML_NAME_ATT_FLOAT = new XmlName("attFloat");
-    public static final XmlName XML_NAME_ATT_DOUBLE = new XmlName("attDouble");
-    public static final XmlName XML_NAME_ATT_DECIMAL = new XmlName("attDecimal");
-    public static final XmlName XML_NAME_ATT_DATE_TIME = new XmlName("attDateTime");
-    public static final XmlName XML_NAME_ATT_BOOLEAN = new XmlName("attBoolean");
-    public static final XmlName XML_NAME_ATT_BASE64_BINARY = new XmlName("attBase64Binary");
+    public static final XmlName XML_NAME_ELEM_STRING = new XmlName("http://staxer.sample/", "elemString");
+    public static final XmlName XML_NAME_ELEM_INTEGER = new XmlName("http://staxer.sample/", "elemInteger");
+    public static final XmlName XML_NAME_ELEM_CHARACTER = new XmlName("http://staxer.sample/", "elemCharacter");
+    public static final XmlName XML_NAME_ELEM_FLOAT = new XmlName("http://staxer.sample/", "elemFloat");
+    public static final XmlName XML_NAME_ELEM_DOUBLE = new XmlName("http://staxer.sample/", "elemDouble");
+    public static final XmlName XML_NAME_ELEM_DECIMAL = new XmlName("http://staxer.sample/", "elemDecimal");
+    public static final XmlName XML_NAME_ELEM_DATE_TIME = new XmlName("http://staxer.sample/", "elemDateTime");
+    public static final XmlName XML_NAME_ELEM_BOOLEAN = new XmlName("http://staxer.sample/", "elemBoolean");
+    public static final XmlName XML_NAME_ELEM_BASE64_BINARY = new XmlName("http://staxer.sample/", "elemBase64Binary");
+    public static final XmlName XML_NAME_LST_STRING = new XmlName("http://staxer.sample/", "lstString");
+    public static final XmlName XML_NAME_LST_INTEGER = new XmlName("http://staxer.sample/", "lstInteger");
+    public static final XmlName XML_NAME_LST_CHARACTER = new XmlName("http://staxer.sample/", "lstCharacter");
+    public static final XmlName XML_NAME_LST_FLOAT = new XmlName("http://staxer.sample/", "lstFloat");
+    public static final XmlName XML_NAME_LST_DOUBLE = new XmlName("http://staxer.sample/", "lstDouble");
+    public static final XmlName XML_NAME_LST_DECIMAL = new XmlName("http://staxer.sample/", "lstDecimal");
+    public static final XmlName XML_NAME_LST_DATE_TIME = new XmlName("http://staxer.sample/", "lstDateTime");
+    public static final XmlName XML_NAME_LST_BOOLEAN = new XmlName("http://staxer.sample/", "lstBoolean");
+    public static final XmlName XML_NAME_LST_BASE64_BINARY = new XmlName("http://staxer.sample/", "lstBase64Binary");
+    public static final XmlName XML_NAME_ATT_STRING = new XmlName("http://staxer.sample/", "attString");
+    public static final XmlName XML_NAME_ATT_INTEGER = new XmlName("http://staxer.sample/", "attInteger");
+    public static final XmlName XML_NAME_ATT_CHARACTER = new XmlName("http://staxer.sample/", "attCharacter");
+    public static final XmlName XML_NAME_ATT_FLOAT = new XmlName("http://staxer.sample/", "attFloat");
+    public static final XmlName XML_NAME_ATT_DOUBLE = new XmlName("http://staxer.sample/", "attDouble");
+    public static final XmlName XML_NAME_ATT_DECIMAL = new XmlName("http://staxer.sample/", "attDecimal");
+    public static final XmlName XML_NAME_ATT_DATE_TIME = new XmlName("http://staxer.sample/", "attDateTime");
+    public static final XmlName XML_NAME_ATT_BOOLEAN = new XmlName("http://staxer.sample/", "attBoolean");
+    public static final XmlName XML_NAME_ATT_BASE64_BINARY = new XmlName("http://staxer.sample/", "attBase64Binary");
 
-    @XmlElement(name = "elemString")
+    @XmlElement(name = "elemString", namespace = "http://staxer.sample/")
     private String elemString;
 
-    @XmlElement(name = "elemInteger")
+    @XmlElement(name = "elemInteger", namespace = "http://staxer.sample/")
     private Integer elemInteger;
 
-    @XmlElement(name = "elemCharacter")
+    @XmlElement(name = "elemCharacter", namespace = "http://staxer.sample/")
     private Integer elemCharacter;
 
-    @XmlElement(name = "elemFloat")
+    @XmlElement(name = "elemFloat", namespace = "http://staxer.sample/")
     private Float elemFloat;
 
-    @XmlElement(name = "elemDouble")
+    @XmlElement(name = "elemDouble", namespace = "http://staxer.sample/")
     private Double elemDouble;
 
-    @XmlElement(name = "elemDecimal")
+    @XmlElement(name = "elemDecimal", namespace = "http://staxer.sample/")
     private BigDecimal elemDecimal;
 
-    @XmlElement(name = "elemDateTime")
+    @XmlElement(name = "elemDateTime", namespace = "http://staxer.sample/")
     @XmlSchemaType(name = "dateTime")
     private Date elemDateTime;
 
-    @XmlElement(name = "elemBoolean")
+    @XmlElement(name = "elemBoolean", namespace = "http://staxer.sample/")
     private Boolean elemBoolean;
 
-    @XmlElement(name = "elemBase64Binary")
+    @XmlElement(name = "elemBase64Binary", namespace = "http://staxer.sample/")
     private byte[] elemBase64Binary;
 
-    @XmlElement(name = "lstString")
+    @XmlElement(name = "lstString", namespace = "http://staxer.sample/")
     private ArrayList<String> lstString = new ArrayList<String>();
 
-    @XmlElement(name = "lstInteger")
+    @XmlElement(name = "lstInteger", namespace = "http://staxer.sample/")
     private ArrayList<Integer> lstInteger = new ArrayList<Integer>();
 
-    @XmlElement(name = "lstCharacter")
+    @XmlElement(name = "lstCharacter", namespace = "http://staxer.sample/")
     private ArrayList<Integer> lstCharacter = new ArrayList<Integer>();
 
-    @XmlElement(name = "lstFloat")
+    @XmlElement(name = "lstFloat", namespace = "http://staxer.sample/")
     private ArrayList<Float> lstFloat = new ArrayList<Float>();
 
-    @XmlElement(name = "lstDouble")
+    @XmlElement(name = "lstDouble", namespace = "http://staxer.sample/")
     private ArrayList<Double> lstDouble = new ArrayList<Double>();
 
-    @XmlElement(name = "lstDecimal")
+    @XmlElement(name = "lstDecimal", namespace = "http://staxer.sample/")
     private ArrayList<BigDecimal> lstDecimal = new ArrayList<BigDecimal>();
 
-    @XmlElement(name = "lstDateTime")
+    @XmlElement(name = "lstDateTime", namespace = "http://staxer.sample/")
     @XmlSchemaType(name = "dateTime")
     private ArrayList<Date> lstDateTime = new ArrayList<Date>();
 
-    @XmlElement(name = "lstBoolean")
+    @XmlElement(name = "lstBoolean", namespace = "http://staxer.sample/")
     private ArrayList<Boolean> lstBoolean = new ArrayList<Boolean>();
 
-    @XmlElement(name = "lstBase64Binary")
+    @XmlElement(name = "lstBase64Binary", namespace = "http://staxer.sample/")
     private ArrayList<byte[]> lstBase64Binary = new ArrayList<byte[]>();
 
-    @XmlAttribute(name = "attString")
+    @XmlAttribute(name = "attString", namespace = "http://staxer.sample/")
     private String attString;
 
-    @XmlAttribute(name = "attInteger")
+    @XmlAttribute(name = "attInteger", namespace = "http://staxer.sample/")
     private Integer attInteger;
 
-    @XmlAttribute(name = "attCharacter")
+    @XmlAttribute(name = "attCharacter", namespace = "http://staxer.sample/")
     private Integer attCharacter;
 
-    @XmlAttribute(name = "attFloat")
+    @XmlAttribute(name = "attFloat", namespace = "http://staxer.sample/")
     private Float attFloat;
 
-    @XmlAttribute(name = "attDouble")
+    @XmlAttribute(name = "attDouble", namespace = "http://staxer.sample/")
     private Double attDouble;
 
-    @XmlAttribute(name = "attDecimal")
+    @XmlAttribute(name = "attDecimal", namespace = "http://staxer.sample/")
     private BigDecimal attDecimal;
 
-    @XmlAttribute(name = "attDateTime")
+    @XmlAttribute(name = "attDateTime", namespace = "http://staxer.sample/")
     @XmlSchemaType(name = "dateTime")
     private Date attDateTime;
 
-    @XmlAttribute(name = "attBoolean")
+    @XmlAttribute(name = "attBoolean", namespace = "http://staxer.sample/")
     private Boolean attBoolean;
 
-    @XmlAttribute(name = "attBase64Binary")
+    @XmlAttribute(name = "attBase64Binary", namespace = "http://staxer.sample/")
     private byte[] attBase64Binary;
 
     public String getElemString() {

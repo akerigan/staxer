@@ -136,10 +136,10 @@ public class StaxerUtils {
             writer.append("\n\n");
             writer.append(
                     "import javax.xml.bind.annotation.XmlEnum;\n" +
-                    "import javax.xml.bind.annotation.XmlEnumValue;\n" +
-                    "import java.util.HashMap;\n" +
-                    "import java.util.Map;\n" +
-                    "\n"
+                            "import javax.xml.bind.annotation.XmlEnumValue;\n" +
+                            "import java.util.HashMap;\n" +
+                            "import java.util.Map;\n" +
+                            "\n"
             );
             if (writeJaxbAnnotations) {
                 writer.append(
@@ -174,43 +174,43 @@ public class StaxerUtils {
                     "    private static Map<String, ");
             writer.append(enumTypeJavaName);
             writer.append("> map;\n" +
-                          "    private String code;\n" +
-                          "\n" +
-                          "    static {\n" +
-                          "        map = new HashMap<String, ");
+                    "    private String code;\n" +
+                    "\n" +
+                    "    static {\n" +
+                    "        map = new HashMap<String, ");
             writer.append(enumTypeJavaName);
             writer.append(
                     ">();\n" +
-                    "        for ("
+                            "        for ("
             );
             writer.append(enumTypeJavaName);
             writer.append(" value : ");
             writer.append(enumTypeJavaName);
             writer.append(
                     ".values()) {\n" +
-                    "            map.put(value.code, value);\n" +
-                    "        }\n" +
-                    "    }\n" +
-                    "\n" +
-                    "    "
+                            "            map.put(value.code, value);\n" +
+                            "        }\n" +
+                            "    }\n" +
+                            "\n" +
+                            "    "
             );
             writer.append(enumTypeJavaName);
             writer.append(
                     "(String code) {\n" +
-                    "        this.code = code;\n" +
-                    "    }\n" +
-                    "\n" +
-                    "    public String getCode() {\n" +
-                    "        return code;\n" +
-                    "    }\n" +
-                    "\n" +
-                    "    public static "
+                            "        this.code = code;\n" +
+                            "    }\n" +
+                            "\n" +
+                            "    public String getCode() {\n" +
+                            "        return code;\n" +
+                            "    }\n" +
+                            "\n" +
+                            "    public static "
             );
             writer.append(enumTypeJavaName);
             writer.append(
                     " getByCode(String code) {\n" +
-                    "        return map.get(code);\n" +
-                    "    }\n\n"
+                            "        return map.get(code);\n" +
+                            "    }\n\n"
             );
             writer.append("}\n");
 
@@ -443,9 +443,9 @@ public class StaxerUtils {
                         if (readXmlElements.length() == 0) {
                             readXmlElements.append(
                                     "        XmlName rootElementName = xmlReader.getLastStartedElement();\n" +
-                                    "        while (xmlReader.readNext()) {\n" +
-                                    "            if (xmlReader.elementEnded(rootElementName)) {\n" +
-                                    "                break;\n"
+                                            "        while (xmlReader.readNext()) {\n" +
+                                            "            if (xmlReader.elementEnded(rootElementName)) {\n" +
+                                            "                break;\n"
                             );
                         }
                         if (fieldXsdType != null) {
@@ -783,8 +783,8 @@ public class StaxerUtils {
 
             writer.append(
                     "    public void readXmlAttributes(\n" +
-                    "            StringMapProperties attributes\n" +
-                    "    ) throws StaxerXmlStreamException {\n"
+                            "            StringMapProperties attributes\n" +
+                            "    ) throws StaxerXmlStreamException {\n"
             );
             if (superTypeJavaName != null) {
                 writer.append("        super.readXmlAttributes(attributes);\n");
@@ -796,8 +796,8 @@ public class StaxerUtils {
 
             writer.append(
                     "    public void readXmlContent(\n" +
-                    "            StaxerXmlStreamReader xmlReader\n" +
-                    "    ) throws StaxerXmlStreamException {\n"
+                            "            StaxerXmlStreamReader xmlReader\n" +
+                            "    ) throws StaxerXmlStreamException {\n"
             );
             if (superTypeJavaName != null) {
                 writer.append("        super.readXmlContent(xmlReader);\n");
@@ -806,7 +806,7 @@ public class StaxerUtils {
                 writer.append(readXmlElements.toString());
                 writer.append(
                         "            }\n" +
-                        "        }\n"
+                                "        }\n"
                 );
             }
             writer.append(readXmlValue.toString());
@@ -816,27 +816,27 @@ public class StaxerUtils {
 
             writer.append(
                     "    public void writeXmlAttributes(\n" +
-                    "            StaxerXmlStreamWriter xmlWriter\n" +
-                    "    ) throws StaxerXmlStreamException {\n");
+                            "            StaxerXmlStreamWriter xmlWriter\n" +
+                            "    ) throws StaxerXmlStreamException {\n");
+            for (String namespace : writeXmlNamespaces) {
+                writer.append("        xmlWriter.declareNamespace(\"");
+                writer.append(namespace);
+                writer.append("\");\n");
+            }
             if (superTypeJavaName != null) {
                 writer.append("        super.writeXmlAttributes(xmlWriter);\n");
             }
             writer.append(writeXmlAttributes.toString());
-            for (String namespace : writeXmlNamespaces) {
-                writer.append("        writer.declareNamespace(\"");
-                writer.append(namespace);
-                writer.append("\");\n");
-            }
             writer.append(
                     "    }\n\n"
             );
 
             writer.append(
                     "    public void writeXmlContent(\n" +
-                    "            StaxerXmlStreamWriter xmlWriter\n" +
-                    "    ) throws StaxerXmlStreamException {\n");
+                            "            StaxerXmlStreamWriter xmlWriter\n" +
+                            "    ) throws StaxerXmlStreamException {\n");
             if (superTypeJavaName != null) {
-                writer.append("        super.writeXmlAttributes(xmlWriter);\n");
+                writer.append("        super.writeXmlContent(xmlWriter);\n");
             }
             writer.append(writeXmlElements.toString());
             writer.append(writeXmlValue.toString());
