@@ -1,7 +1,7 @@
 package comtech.staxer.server;
 
 import comtech.util.urlparams.ReadHttpParameters;
-import comtech.util.xml.StaxerXmlReader;
+import comtech.util.xml.StaxerReadXml;
 import comtech.util.xml.XmlName;
 
 /**
@@ -10,7 +10,7 @@ import comtech.util.xml.XmlName;
  */
 public interface ServerServiceWs {
 
-    public Class<? extends StaxerXmlReader> getReadXmlClass(XmlName requestXmlName);
+    public Class<? extends StaxerReadXml> getReadXmlClass(XmlName requestXmlName);
 
     public Class<? extends ReadHttpParameters> getReadHttpParametersClass(XmlName requestXmlName);
 

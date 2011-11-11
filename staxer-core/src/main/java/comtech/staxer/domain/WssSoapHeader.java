@@ -15,7 +15,7 @@ import java.util.Random;
  * Date: 15.02.2010
  * Time: 17:32:22
  */
-public class WssSoapHeader implements StaxerXmlWriter {
+public class WssSoapHeader implements StaxerWriteXml {
 
     public static final XmlName XML_NAME_SECURITY = new XmlName("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "Security");
 

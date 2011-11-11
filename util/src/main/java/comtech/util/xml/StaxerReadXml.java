@@ -1,15 +1,15 @@
 package comtech.util.xml;
 
-import comtech.util.props.StringMapProperties;
+import comtech.util.props.XmlNameMapProperties;
 
 /**
  * @author Vlad Vinichenko(akerigan@gmail.com)
  * @since 2011-10-14 22:11 (Europe/Moscow)
  */
-public interface StaxerXmlReader {
+public interface StaxerReadXml {
 
     public void readXmlAttributes(
-            StringMapProperties attributes
+            XmlNameMapProperties attributes
     ) throws StaxerXmlStreamException;
 
     public void readXmlContent(

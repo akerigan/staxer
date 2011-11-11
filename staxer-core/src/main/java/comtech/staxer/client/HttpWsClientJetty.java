@@ -94,7 +94,7 @@ public class HttpWsClientJetty implements HttpWsClient {
         httpClient.setIdleTimeout(timeout * 1000);
     }
 
-    public <Q extends StaxerXmlWriter, A extends StaxerXmlReader> A processSoapQuery(
+    public <Q extends StaxerWriteXml, A extends StaxerReadXml> A processSoapQuery(
             WsRequest wsRequest, Q requestObject,
             XmlName requestXmlName, Class<A> responseClass
     ) throws WsClientException {
@@ -111,7 +111,7 @@ public class HttpWsClientJetty implements HttpWsClient {
         }
     }
 
-    public <A extends StaxerXmlReader> A processSoapQuery(
+    public <A extends StaxerReadXml> A processSoapQuery(
             WsRequest wsRequest, String soapRequestXml, Class<A> responseClass
     ) throws WsClientException {
         int requestId = requestIdHolder.addAndGet(1);
@@ -124,7 +124,7 @@ public class HttpWsClientJetty implements HttpWsClient {
                 if (bodyChildElement == null) {
                     throw new WsClientException(
                             name + ", rid=" + requestId +
-                            ", invalid XML: cant locate payload element"
+                                    ", invalid XML: cant locate payload element"
                     );
                 } else if (XML_NAME_SOAP_ENVELOPE_FAULT.equals(bodyChildElement)) {
                     SoapFault soapFault = XmlUtils.readXml(document, SoapFault.class, XML_NAME_SOAP_ENVELOPE_FAULT);
@@ -134,7 +134,7 @@ public class HttpWsClientJetty implements HttpWsClient {
             } else {
                 throw new WsClientException(
                         name + ", rid=" + requestId + ", invalid XML: cant locate '" +
-                        XML_NAME_SOAP_ENVELOPE_BODY + "' element"
+                                XML_NAME_SOAP_ENVELOPE_BODY + "' element"
                 );
             }
         } catch (StaxerXmlStreamException e) {
@@ -214,7 +214,7 @@ public class HttpWsClientJetty implements HttpWsClient {
                 log.warn(name + ", rid=" + requestId + ", method failed: " + responseContent);
                 throw new WsClientException(
                         name + ", rid=" + requestId + ", http status code: " +
-                        statusCode + ", response: " + responseContent);
+                                statusCode + ", response: " + responseContent);
             }
 
             headers.clear();

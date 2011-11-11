@@ -2,7 +2,7 @@ package staxer.sample.bean;
 
 import comtech.util.DateTimeUtils;
 import comtech.util.NumberUtils;
-import comtech.util.props.StringMapProperties;
+import comtech.util.props.XmlNameMapProperties;
 import comtech.util.xml.*;
 import org.apache.commons.codec.binary.Base64;
 
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class XsdTypes implements StaxerXmlReader, StaxerXmlWriter {
+public class XsdTypes implements StaxerReadXml, StaxerWriteXml {
 
     public static final XmlName XML_NAME_ELEM_STRING = new XmlName("http://staxer.sample/", "elemString");
     public static final XmlName XML_NAME_ELEM_INTEGER = new XmlName("http://staxer.sample/", "elemInteger");
@@ -307,17 +307,17 @@ public class XsdTypes implements StaxerXmlReader, StaxerXmlWriter {
     }
 
     public void readXmlAttributes(
-            StringMapProperties attributes
+            XmlNameMapProperties attributes
     ) throws StaxerXmlStreamException {
-        attString = attributes.get(XML_NAME_ATT_STRING.toString());
-        attInteger = NumberUtils.parseInteger(attributes.get(XML_NAME_ATT_INTEGER.toString()));
-        attCharacter = NumberUtils.parseInteger(attributes.get(XML_NAME_ATT_CHARACTER.toString()));
-        attFloat = NumberUtils.parseFloat(attributes.get(XML_NAME_ATT_FLOAT.toString()));
-        attDouble = NumberUtils.parseDouble(attributes.get(XML_NAME_ATT_DOUBLE.toString()));
-        attDecimal = NumberUtils.parseBigDecimal(attributes.get(XML_NAME_ATT_DECIMAL.toString()));
-        attDateTime = DateTimeUtils.parseXmlDate(attributes.get(XML_NAME_ATT_DATE_TIME.toString()));
-        attBoolean = Boolean.parseBoolean(attributes.get(XML_NAME_ATT_BOOLEAN.toString()));
-        attBase64Binary = Base64.decodeBase64(attributes.get(XML_NAME_ATT_BASE64_BINARY.toString()));
+        attString = attributes.get(XML_NAME_ATT_STRING);
+        attInteger = NumberUtils.parseInteger(attributes.get(XML_NAME_ATT_INTEGER));
+        attCharacter = NumberUtils.parseInteger(attributes.get(XML_NAME_ATT_CHARACTER));
+        attFloat = NumberUtils.parseFloat(attributes.get(XML_NAME_ATT_FLOAT));
+        attDouble = NumberUtils.parseDouble(attributes.get(XML_NAME_ATT_DOUBLE));
+        attDecimal = NumberUtils.parseBigDecimal(attributes.get(XML_NAME_ATT_DECIMAL));
+        attDateTime = DateTimeUtils.parseXmlDate(attributes.get(XML_NAME_ATT_DATE_TIME));
+        attBoolean = Boolean.parseBoolean(attributes.get(XML_NAME_ATT_BOOLEAN));
+        attBase64Binary = Base64.decodeBase64(attributes.get(XML_NAME_ATT_BASE64_BINARY));
     }
 
     public void readXmlContent(

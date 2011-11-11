@@ -1,6 +1,6 @@
 package comtech.util.xml.soap;
 
-import comtech.util.props.StringMapProperties;
+import comtech.util.props.XmlNameMapProperties;
 import comtech.util.xml.*;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "Fault", namespace = "http://schemas.xmlsoap.org/soap/envelope/")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class SoapFault implements StaxerXmlReader, StaxerXmlWriter {
+public class SoapFault implements StaxerReadXml, StaxerWriteXml {
 
     public static final XmlName XML_NAME_FAULTCODE = new XmlName("faultcode");
     public static final XmlName XML_NAME_FAULTSTRING = new XmlName("faultstring");
@@ -74,7 +74,7 @@ public class SoapFault implements StaxerXmlReader, StaxerXmlWriter {
         this.detail = detail;
     }
 
-    public void readXmlAttributes(StringMapProperties attributes) throws StaxerXmlStreamException {
+    public void readXmlAttributes(XmlNameMapProperties attributes) throws StaxerXmlStreamException {
     }
 
     public void readXmlContent(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {

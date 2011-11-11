@@ -2,8 +2,11 @@ package staxer.sample.bean;
 
 import comtech.util.DateTimeUtils;
 import comtech.util.NumberUtils;
-import comtech.util.props.StringMapProperties;
-import comtech.util.xml.*;
+import comtech.util.props.XmlNameMapProperties;
+import comtech.util.xml.StaxerXmlStreamException;
+import comtech.util.xml.StaxerXmlStreamReader;
+import comtech.util.xml.StaxerXmlStreamWriter;
+import comtech.util.xml.XmlName;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.xml.bind.annotation.*;
@@ -12,7 +15,7 @@ import java.util.Date;
 
 @XmlRootElement(name = "echoXsdTypesResponse", namespace = "http://staxer.sample/")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class EchoXsdTypesResponse extends XsdTypes implements StaxerXmlReader, StaxerXmlWriter {
+public class EchoXsdTypesResponse extends XsdTypes {
 
     public static final XmlName XML_NAME_NILL_ELEM_STRING = new XmlName("http://staxer.sample/", "nillElemString");
     public static final XmlName XML_NAME_NILL_ELEM_INTEGER = new XmlName("http://staxer.sample/", "nillElemInteger");
@@ -124,12 +127,14 @@ public class EchoXsdTypesResponse extends XsdTypes implements StaxerXmlReader, S
         this.nillElemBase64Binary = nillElemBase64Binary;
     }
 
+    @Override
     public void readXmlAttributes(
-            StringMapProperties attributes
+            XmlNameMapProperties attributes
     ) throws StaxerXmlStreamException {
         super.readXmlAttributes(attributes);
     }
 
+    @Override
     public void readXmlContent(
             StaxerXmlStreamReader xmlReader
     ) throws StaxerXmlStreamException {
@@ -160,6 +165,7 @@ public class EchoXsdTypesResponse extends XsdTypes implements StaxerXmlReader, S
         }
     }
 
+    @Override
     public void writeXmlAttributes(
             StaxerXmlStreamWriter xmlWriter
     ) throws StaxerXmlStreamException {
@@ -167,6 +173,7 @@ public class EchoXsdTypesResponse extends XsdTypes implements StaxerXmlReader, S
         super.writeXmlAttributes(xmlWriter);
     }
 
+    @Override
     public void writeXmlContent(
             StaxerXmlStreamWriter xmlWriter
     ) throws StaxerXmlStreamException {

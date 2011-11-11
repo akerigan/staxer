@@ -1,6 +1,6 @@
 package comtech.staxer.domain;
 
-import comtech.util.props.StringMapProperties;
+import comtech.util.props.XmlNameMapProperties;
 import comtech.util.xml.*;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -14,12 +14,12 @@ import javax.xml.bind.annotation.XmlRootElement;
  * Time: 16:51:04
  */
 @XmlRootElement(name = "Security",
-                namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
+        namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class WssSecurity implements StaxerXmlReader, StaxerXmlWriter {
+public class WssSecurity implements StaxerReadXml, StaxerWriteXml {
 
     @XmlElement(name = "UsernameToken",
-                namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
+            namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
     private WssUsernameToken usernameToken;
 
     public WssUsernameToken getUsernameToken() {
@@ -30,7 +30,7 @@ public class WssSecurity implements StaxerXmlReader, StaxerXmlWriter {
         this.usernameToken = usernameToken;
     }
 
-    public void readXmlAttributes(StringMapProperties attributes) throws StaxerXmlStreamException {
+    public void readXmlAttributes(XmlNameMapProperties attributes) throws StaxerXmlStreamException {
     }
 
     public void readXmlContent(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {

@@ -1,6 +1,6 @@
 package comtech.staxer.domain;
 
-import comtech.util.props.StringMapProperties;
+import comtech.util.props.XmlNameMapProperties;
 import comtech.util.xml.*;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlValue;
  * Time: 16:58:17
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public class WssPassword implements StaxerXmlReader, StaxerXmlWriter {
+public class WssPassword implements StaxerReadXml, StaxerWriteXml {
 
     public static final XmlName XML_NAME_TYPE = new XmlName("Type");
 
@@ -40,8 +40,8 @@ public class WssPassword implements StaxerXmlReader, StaxerXmlWriter {
         this.value = value;
     }
 
-    public void readXmlAttributes(StringMapProperties attributes) throws StaxerXmlStreamException {
-        type = attributes.get(XML_NAME_TYPE.toString());
+    public void readXmlAttributes(XmlNameMapProperties attributes) throws StaxerXmlStreamException {
+        type = attributes.get(XML_NAME_TYPE);
     }
 
     public void readXmlContent(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {

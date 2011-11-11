@@ -1,7 +1,7 @@
 package comtech.util.xml;
 
 import comtech.util.StringUtils;
-import comtech.util.props.StringMapProperties;
+import comtech.util.props.XmlNameMapProperties;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -113,12 +113,12 @@ public class StaxerXmlStreamReader {
         return qName != null;
     }
 
-    public StringMapProperties getAttributes() {
+    public XmlNameMapProperties getAttributes() {
         int attributeCount = reader.getAttributeCount();
-        StringMapProperties result = new StringMapProperties();
+        XmlNameMapProperties result = new XmlNameMapProperties();
         if (attributeCount != 0) {
             for (int i = 0; i < attributeCount; i++) {
-                result.put(reader.getAttributeName(i).toString(), reader.getAttributeValue(i));
+                result.put(new XmlName(reader.getAttributeName(i)), reader.getAttributeValue(i));
             }
         }
         return result;
@@ -160,7 +160,7 @@ public class StaxerXmlStreamReader {
 
     public boolean elementStarted(XmlName name) {
         return event == XMLStreamConstants.START_ELEMENT
-               && name != null && name.equals(lastStartedElement);
+                && name != null && name.equals(lastStartedElement);
     }
 
     public boolean elementEnded() {
@@ -169,7 +169,7 @@ public class StaxerXmlStreamReader {
 
     public boolean elementEnded(XmlName name) {
         return event == XMLStreamConstants.END_ELEMENT &&
-               name != null && name.equals(endedElement);
+                name != null && name.equals(endedElement);
     }
 
     public boolean readNext() throws StaxerXmlStreamException {
@@ -207,5 +207,10 @@ public class StaxerXmlStreamReader {
             return null;
         }
     }
+
+    public boolean isCurrentElement(XmlName elementName) {
+        return lastStartedElement != null && lastStartedElement.equals(elementName);
+    }
+
 }
 

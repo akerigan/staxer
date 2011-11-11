@@ -8,12 +8,12 @@ import java.util.Map;
 @XmlEnum
 public enum EnumType {
 
-    @XmlEnumValue("ONE")
-    ONE("ONE"),
-    @XmlEnumValue("TWO")
-    TWO("TWO"),
-    @XmlEnumValue("THREE")
-    THREE("THREE");
+    @XmlEnumValue("one")
+    ONE("one"),
+    @XmlEnumValue("two")
+    TWO("two"),
+    @XmlEnumValue("three")
+    THREE("three");
 
     private static Map<String, EnumType> map;
     private String code;

@@ -2,11 +2,13 @@ package comtech.util.xml;
 
 import comtech.util.StringUtils;
 
+import javax.xml.namespace.QName;
+
 /**
  * @author Vlad Vinichenko (akerigan@gmail.com)
  * @since 2011-10-27 14:18 (Europe/Moscow)
  */
-public class XmlName {
+public class XmlName implements Comparable<XmlName> {
 
     private String namespaceURI;
     private String localPart;
@@ -28,6 +30,12 @@ public class XmlName {
         this.namespaceURI = StringUtils.notEmptyElseNull(namespaceURI);
         this.localPart = localPart;
         this.prefix = StringUtils.notEmptyElseNull(prefix);
+    }
+
+    public XmlName(QName qName) {
+        this.namespaceURI = StringUtils.notEmptyElseNull(qName.getNamespaceURI());
+        this.localPart = qName.getLocalPart();
+        this.prefix = StringUtils.notEmptyElseNull(qName.getPrefix());
     }
 
     public String getNamespaceURI() {
@@ -65,12 +73,16 @@ public class XmlName {
         if (objectToTest == null || !(objectToTest instanceof XmlName)) {
             return false;
         }
-        XmlName xmlName = (XmlName) objectToTest;
-        if (namespaceURI != null) {
-            return localPart.equals(xmlName.localPart)
-                   && namespaceURI.equals(xmlName.namespaceURI);
+        if (hashCode() == objectToTest.hashCode()) {
+            XmlName xmlName = (XmlName) objectToTest;
+            if (namespaceURI != null) {
+                return localPart.equals(xmlName.localPart)
+                        && namespaceURI.equals(xmlName.namespaceURI);
+            } else {
+                return localPart.equals(xmlName.localPart);
+            }
         } else {
-            return localPart.equals(xmlName.localPart);
+            return false;
         }
     }
 
@@ -96,4 +108,10 @@ public class XmlName {
         return toStringValue;
     }
 
+    public int compareTo(XmlName otherXmlName) {
+        if (otherXmlName == null) {
+            return 1;
+        }
+        return toString().compareTo(otherXmlName.toString());
+    }
 }

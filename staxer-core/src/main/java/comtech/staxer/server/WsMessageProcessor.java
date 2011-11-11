@@ -94,7 +94,7 @@ public abstract class WsMessageProcessor {
                 XmlName requestXmlName = null;
                 Method method = null;
                 XmlName responseXmlName = null;
-                StaxerXmlWriter response = null;
+                StaxerWriteXml response = null;
                 if (HttpMethod.GET == httpHelper.getMethod()) {
                     requestXmlName = new XmlName(
                             httpHelper.getRequestParameter("namespace"),
@@ -118,24 +118,24 @@ public abstract class WsMessageProcessor {
                             new StaxerXmlStreamReader(new StringReader(requestBody.toString()));
                     if (document.readStartElement(XML_NAME_SOAP_ENVELOPE)) {
                         if (!document.elementStarted(XML_NAME_SOAP_ENVELOPE_BODY)
-                            && !document.readStartElement(XML_NAME_SOAP_ENVELOPE_BODY)) {
+                                && !document.readStartElement(XML_NAME_SOAP_ENVELOPE_BODY)) {
                             response = new SoapFault("env:Sender", "Invalid SOAP message");
                         } else {
                             requestXmlName = document.readStartElement();
                             if (requestXmlName == null) {
                                 response = new SoapFault("env:Sender", "Invalid SOAP message");
                             } else {
-                                Class<? extends StaxerXmlReader> payloadClass =
+                                Class<? extends StaxerReadXml> payloadClass =
                                         serviceWs.getReadXmlClass(requestXmlName);
                                 responseXmlName = serviceWs.getResponseXmlName(requestXmlName);
                                 if (payloadClass == null) {
                                     response = new SoapFault("env:Server", "Cant handle element: " + requestXmlName);
                                 } else {
-                                    StaxerXmlReader xmlReaderInstance = payloadClass.newInstance();
-                                    xmlReaderInstance.readXmlAttributes(document.getAttributes());
-                                    xmlReaderInstance.readXmlContent(document);
+                                    StaxerReadXml readXmlInstance = payloadClass.newInstance();
+                                    readXmlInstance.readXmlAttributes(document.getAttributes());
+                                    readXmlInstance.readXmlContent(document);
                                     wsMessage = buildMessage(wsRequestId, httpHelper, document);
-                                    wsMessage.setBody(xmlReaderInstance);
+                                    wsMessage.setBody(readXmlInstance);
                                     String methodName = serviceWs.getMethodName(requestXmlName);
                                     method = serviceWs.getClass().getMethod(methodName, WsMessage.class);
                                 }
@@ -150,7 +150,7 @@ public abstract class WsMessageProcessor {
                 if (response == null && method != null) {
                     try {
                         preProcess(wsMessage, httpHelper, requestXmlName);
-                        response = (StaxerXmlWriter) method.invoke(serviceWs, wsMessage);
+                        response = (StaxerWriteXml) method.invoke(serviceWs, wsMessage);
                     } catch (Exception e) {
                         getLog().error("", e);
                         response = faultProcess(e, wsMessage, requestXmlName);
@@ -169,7 +169,7 @@ public abstract class WsMessageProcessor {
                 byte[] soapResponseBytes = soapResponse.toByteArray();
                 if (log.isInfoEnabled()) {
                     log.info("----- Response -----\nID: " + wsRequestId + "\n"
-                             + new String(soapResponseBytes, "UTF-8") + "\n--------------------\n"
+                            + new String(soapResponseBytes, "UTF-8") + "\n--------------------\n"
                     );
                 }
                 responseOutputStream.write(soapResponseBytes);
@@ -274,7 +274,7 @@ public abstract class WsMessageProcessor {
                 }
                 log.warn(
                         "wsreq " + wsRequestId + " - digests not match: "
-                        + digest + "!=" + usernameToken.getPassword().getValue().trim()
+                                + digest + "!=" + usernameToken.getPassword().getValue().trim()
                 );
             } catch (NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);

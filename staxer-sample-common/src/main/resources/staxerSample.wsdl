@@ -116,21 +116,21 @@
                 <xsd:attribute name="attEnum" type="tns:EnumType"/>
             </xsd:complexType>
 
+            <xsd:simpleType name="EnumType">
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="one"/>
+                    <xsd:enumeration value="two"/>
+                    <xsd:enumeration value="three"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+
             <xsd:complexType name="ValueType">
                 <xsd:simpleContent>
-                    <xsd:extension base="xsd:integer">
+                    <xsd:extension base="tns:EnumType">
                         <xsd:attribute name="attBoolean" type="xsd:boolean"/>
                     </xsd:extension>
                 </xsd:simpleContent>
             </xsd:complexType>
-
-            <xsd:simpleType name="EnumType">
-                <xsd:restriction base="xsd:string">
-                    <xsd:enumeration value="ONE"/>
-                    <xsd:enumeration value="TWO"/>
-                    <xsd:enumeration value="THREE"/>
-                </xsd:restriction>
-            </xsd:simpleType>
 
             <xsd:complexType name="Point">
                 <xsd:sequence>

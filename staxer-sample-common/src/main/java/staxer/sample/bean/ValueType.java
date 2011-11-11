@@ -1,7 +1,6 @@
 package staxer.sample.bean;
 
-import comtech.util.NumberUtils;
-import comtech.util.props.StringMapProperties;
+import comtech.util.props.XmlNameMapProperties;
 import comtech.util.xml.*;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -10,21 +9,21 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlValue;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ValueType implements StaxerXmlReader, StaxerXmlWriter {
+public class ValueType implements StaxerReadXml, StaxerWriteXml {
 
     public static final XmlName XML_NAME_ATT_BOOLEAN = new XmlName("http://staxer.sample/", "attBoolean");
 
     @XmlValue
-    private Integer value;
+    private EnumType value;
 
     @XmlAttribute(name = "attBoolean", namespace = "http://staxer.sample/")
     private Boolean attBoolean;
 
-    public Integer getValue() {
+    public EnumType getValue() {
         return value;
     }
 
-    public void setValue(Integer value) {
+    public void setValue(EnumType value) {
         this.value = value;
     }
 
@@ -37,15 +36,15 @@ public class ValueType implements StaxerXmlReader, StaxerXmlWriter {
     }
 
     public void readXmlAttributes(
-            StringMapProperties attributes
+            XmlNameMapProperties attributes
     ) throws StaxerXmlStreamException {
-        attBoolean = Boolean.parseBoolean(attributes.get(XML_NAME_ATT_BOOLEAN.toString()));
+        attBoolean = Boolean.parseBoolean(attributes.get(XML_NAME_ATT_BOOLEAN));
     }
 
     public void readXmlContent(
             StaxerXmlStreamReader xmlReader
     ) throws StaxerXmlStreamException {
-        value = NumberUtils.parseInteger(xmlReader.readCharacters());
+        value = EnumType.getByCode(xmlReader.readCharacters());
     }
 
     public void writeXmlAttributes(
@@ -57,7 +56,9 @@ public class ValueType implements StaxerXmlReader, StaxerXmlWriter {
     public void writeXmlContent(
             StaxerXmlStreamWriter xmlWriter
     ) throws StaxerXmlStreamException {
-        xmlWriter.text(value);
+        if (value != null) {
+            xmlWriter.text(value.getCode());
+        }
     }
 
     @Override

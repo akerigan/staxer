@@ -1,6 +1,6 @@
 package staxer.sample.bean;
 
-import comtech.util.props.StringMapProperties;
+import comtech.util.props.XmlNameMapProperties;
 import comtech.util.xml.*;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class CustomTypes implements StaxerXmlReader, StaxerXmlWriter {
+public class CustomTypes implements StaxerReadXml, StaxerWriteXml {
 
     public static final XmlName XML_NAME_ELEM_ENUM = new XmlName("http://staxer.sample/", "elemEnum");
     public static final XmlName XML_NAME_LST_ENUM = new XmlName("http://staxer.sample/", "lstEnum");
@@ -86,9 +86,9 @@ public class CustomTypes implements StaxerXmlReader, StaxerXmlWriter {
     }
 
     public void readXmlAttributes(
-            StringMapProperties attributes
+            XmlNameMapProperties attributes
     ) throws StaxerXmlStreamException {
-        attEnum = EnumType.getByCode(attributes.get(XML_NAME_ATT_ENUM.toString()));
+        attEnum = EnumType.getByCode(attributes.get(XML_NAME_ATT_ENUM));
     }
 
     public void readXmlContent(

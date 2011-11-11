@@ -1,6 +1,6 @@
 package comtech.util.xml;
 
-import comtech.util.props.StringMapProperties;
+import comtech.util.props.XmlNameMapProperties;
 import comtech.util.xml.soap.SoapFault;
 
 import java.io.InputStream;
@@ -18,7 +18,7 @@ import static comtech.util.xml.XmlConstants.XML_NAME_XSI_NIL;
  */
 public class XmlUtils {
 
-    public static <T extends StaxerXmlReader> T readXml(
+    public static <T extends StaxerReadXml> T readXml(
             InputStream inputStream, String charset, Class<T> cls, XmlName elementName
     ) throws StaxerXmlStreamException {
         try {
@@ -30,7 +30,7 @@ public class XmlUtils {
         }
     }
 
-    public static <T extends StaxerXmlReader> T readXml(
+    public static <T extends StaxerReadXml> T readXml(
             Reader reader, Class<T> cls, XmlName elementName
     ) throws StaxerXmlStreamException {
         try {
@@ -42,13 +42,13 @@ public class XmlUtils {
         }
     }
 
-    public static <T extends StaxerXmlReader> T readXml(
+    public static <T extends StaxerReadXml> T readXml(
             StaxerXmlStreamReader xmlReader, Class<T> cls, XmlName elementName
     ) throws StaxerXmlStreamException {
         return readXml(xmlReader, cls, elementName, false);
     }
 
-    public static <T extends StaxerXmlReader> T readXml(
+    public static <T extends StaxerReadXml> T readXml(
             StaxerXmlStreamReader xmlReader, Class<T> cls,
             XmlName elementName, boolean nillable
     ) throws StaxerXmlStreamException {
@@ -57,8 +57,8 @@ public class XmlUtils {
                 xmlReader.readStartElement(elementName);
             }
             if (xmlReader.elementStarted(elementName)) {
-                StringMapProperties attributes = xmlReader.getAttributes();
-                if (nillable && attributes.getBoolean(XML_NAME_XSI_NIL.toString())) {
+                XmlNameMapProperties attributes = xmlReader.getAttributes();
+                if (nillable && attributes.getBoolean(XML_NAME_XSI_NIL)) {
                     return null;
                 }
                 T t = cls.newInstance();
@@ -77,17 +77,17 @@ public class XmlUtils {
 
     public static void writeXml(
             OutputStream outputStream, String charset, int indentSize,
-            StaxerXmlWriter staxerXmlWriter, XmlName rootElementName
+            StaxerWriteXml staxerWriteXml, XmlName rootElementName
     ) throws StaxerXmlStreamException {
         try {
-            if (staxerXmlWriter != null && rootElementName != null) {
+            if (staxerWriteXml != null && rootElementName != null) {
                 StaxerXmlStreamWriter xmlWriter = new StaxerXmlStreamWriter(
                         outputStream, charset, indentSize
                 );
                 xmlWriter.startDocument();
                 xmlWriter.startElement(rootElementName);
-                staxerXmlWriter.writeXmlAttributes(xmlWriter);
-                staxerXmlWriter.writeXmlContent(xmlWriter);
+                staxerWriteXml.writeXmlAttributes(xmlWriter);
+                staxerWriteXml.writeXmlContent(xmlWriter);
                 xmlWriter.endElement();
                 xmlWriter.endDocument();
             }
@@ -100,7 +100,7 @@ public class XmlUtils {
 
     public static void writeSoapEnvelopedElement(
             OutputStream outputStream, String charset, int indentSize,
-            StaxerXmlWriter staxerXmlWriter, XmlName payloadElementName
+            StaxerWriteXml staxerWriteXml, XmlName payloadElementName
     ) throws StaxerXmlStreamException {
         try {
             StaxerXmlStreamWriter xmlWriter = new StaxerXmlStreamWriter(
@@ -109,14 +109,14 @@ public class XmlUtils {
             xmlWriter.startDocument();
             xmlWriter.startElement(XmlConstants.XML_NAME_SOAP_ENVELOPE);
             xmlWriter.startElement(XmlConstants.XML_NAME_SOAP_ENVELOPE_BODY);
-            if (staxerXmlWriter != null) {
-                if (staxerXmlWriter instanceof SoapFault) {
+            if (staxerWriteXml != null) {
+                if (staxerWriteXml instanceof SoapFault) {
                     payloadElementName = XML_NAME_SOAP_ENVELOPE_FAULT;
                 }
                 if (payloadElementName != null) {
                     xmlWriter.startElement(payloadElementName);
-                    staxerXmlWriter.writeXmlAttributes(xmlWriter);
-                    staxerXmlWriter.writeXmlAttributes(xmlWriter);
+                    staxerWriteXml.writeXmlAttributes(xmlWriter);
+                    staxerWriteXml.writeXmlAttributes(xmlWriter);
                     xmlWriter.endElement();
                 }
             }
@@ -132,20 +132,20 @@ public class XmlUtils {
     }
 
     public static void writeXmlElement(
-            StaxerXmlStreamWriter xmlWriter, StaxerXmlWriter staxerXmlWriter, XmlName elementName
+            StaxerXmlStreamWriter xmlWriter, StaxerWriteXml staxerWriteXml, XmlName elementName
     ) throws StaxerXmlStreamException {
-        writeXmlElement(xmlWriter, elementName, staxerXmlWriter, false);
+        writeXmlElement(xmlWriter, elementName, staxerWriteXml, false);
     }
 
     public static void writeXmlElement(
-            StaxerXmlStreamWriter xmlWriter, XmlName elementName, StaxerXmlWriter staxerXmlWriter,
+            StaxerXmlStreamWriter xmlWriter, XmlName elementName, StaxerWriteXml staxerWriteXml,
             boolean nillable
     ) throws StaxerXmlStreamException {
         try {
-            if (staxerXmlWriter != null) {
+            if (staxerWriteXml != null) {
                 xmlWriter.startElement(elementName);
-                staxerXmlWriter.writeXmlAttributes(xmlWriter);
-                staxerXmlWriter.writeXmlContent(xmlWriter);
+                staxerWriteXml.writeXmlAttributes(xmlWriter);
+                staxerWriteXml.writeXmlContent(xmlWriter);
                 xmlWriter.endElement();
             } else if (nillable) {
                 xmlWriter.startElement(elementName);

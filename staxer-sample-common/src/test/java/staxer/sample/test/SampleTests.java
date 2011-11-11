@@ -1,12 +1,8 @@
 package staxer.sample.test;
 
-import comtech.util.xml.StaxerXmlStreamException;
-import comtech.util.xml.StaxerXmlStreamWriter;
-import comtech.util.xml.XmlName;
-import comtech.util.xml.XmlUtils;
+import comtech.util.xml.*;
 import junit.framework.TestCase;
-import staxer.sample.bean.EchoXsdTypesRequest;
-import staxer.sample.bean.XsdTypes;
+import staxer.sample.bean.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
@@ -19,8 +15,10 @@ import java.math.BigDecimal;
  */
 public class SampleTests extends TestCase {
 
-    public static final XmlName XML_NAME_XSD_TYPES = new XmlName("http://staxer.sample/", "xsdType");
-    public static final XmlName XML_NAME_ECHO_XSD_TYPES = new XmlName("http://staxer.sample/", "echoXsdType");
+    public static final XmlName XML_NAME_XSD_TYPES = new XmlName("http://staxer.sample/", "xsdTypes");
+    public static final XmlName XML_NAME_ECHO_XSD_TYPES = new XmlName("http://staxer.sample/", "echoXsdTypes");
+    public static final XmlName XML_NAME_CUSTOM_TYPES = new XmlName("http://staxer.sample/", "customTypes");
+    public static final XmlName XML_NAME_ECHO_CUSTOM_TYPES = new XmlName("http://staxer.sample/", "echoCustomTypes");
 
     public static final String CONSTANT_STRING = "АБВГДЕ";
     private static final boolean CONSTANT_BOOLEAN = true;
@@ -73,20 +71,45 @@ public class SampleTests extends TestCase {
         xsdTypes.getLstString().add(CONSTANT_STRING);
     }
 
-    public String createXsdTypesXml(XsdTypes xsdTypes) throws StaxerXmlStreamException, UnsupportedEncodingException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        StaxerXmlStreamWriter xmlWriter = new StaxerXmlStreamWriter(baos, "UTF-8", 4);
-        xmlWriter.startDocument();
-        XmlUtils.writeXmlElement(xmlWriter, xsdTypes, XML_NAME_XSD_TYPES);
-        xmlWriter.endDocument();
-        return new String(baos.toByteArray(), "UTF-8");
+    public void fillCustomTypes(CustomTypes customTypes) throws UnsupportedEncodingException {
+        customTypes.setAttEnum(EnumType.ONE);
+        customTypes.setElemEnum(EnumType.ONE);
+        customTypes.setElemOval(createOval());
+        customTypes.setElemValue(createValue());
+        customTypes.getLstEnum().add(EnumType.ONE);
+        customTypes.getLstEnum().add(EnumType.ONE);
+        customTypes.getLstEnum().add(EnumType.ONE);
+        customTypes.getLstOval().add(createOval());
+        customTypes.getLstOval().add(createOval());
+        customTypes.getLstOval().add(createOval());
+        customTypes.getLstValue().add(createValue());
+        customTypes.getLstValue().add(createValue());
+        customTypes.getLstValue().add(createValue());
     }
 
-    public String createEchoXsdTypesXml(EchoXsdTypesRequest echoXsdTypesRequest) throws StaxerXmlStreamException, UnsupportedEncodingException {
+    public Oval createOval() {
+        Oval result = new Oval();
+        result.setX(CONSTANT_DOUBLE);
+        result.setY(CONSTANT_DOUBLE);
+        result.setRadius(CONSTANT_DOUBLE);
+        result.setSecondRadius(CONSTANT_DOUBLE);
+        return result;
+    }
+
+    private ValueType createValue() {
+        ValueType result = new ValueType();
+        result.setAttBoolean(CONSTANT_BOOLEAN);
+//        result.setValue(EnumType.ONE);
+        return result;
+    }
+
+    public String createXml(
+            StaxerWriteXml staxerWriteXml, XmlName elementName
+    ) throws StaxerXmlStreamException, UnsupportedEncodingException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         StaxerXmlStreamWriter xmlWriter = new StaxerXmlStreamWriter(baos, "UTF-8", 4);
         xmlWriter.startDocument();
-        XmlUtils.writeXmlElement(xmlWriter, echoXsdTypesRequest, XML_NAME_ECHO_XSD_TYPES);
+        XmlUtils.writeXmlElement(xmlWriter, staxerWriteXml, elementName);
         xmlWriter.endDocument();
         return new String(baos.toByteArray(), "UTF-8");
     }
@@ -94,11 +117,11 @@ public class SampleTests extends TestCase {
     public void testXsdTypes() throws UnsupportedEncodingException, StaxerXmlStreamException {
         XsdTypes xsdTypes1 = new XsdTypes();
         fillXsdTypes(xsdTypes1);
-        String xml1 = createXsdTypesXml(xsdTypes1);
+        String xml1 = createXml(xsdTypes1, XML_NAME_XSD_TYPES);
         System.out.println("xml1 = " + xml1);
 
         XsdTypes xsdTypes2 = XmlUtils.readXml(new StringReader(xml1), XsdTypes.class, XML_NAME_XSD_TYPES);
-        String xml2 = createXsdTypesXml(xsdTypes2);
+        String xml2 = createXml(xsdTypes2, XML_NAME_XSD_TYPES);
         System.out.println("xml2 = " + xml2);
 
         assertEquals(xml1, xml2);
@@ -108,13 +131,27 @@ public class SampleTests extends TestCase {
         EchoXsdTypesRequest echoXsdTypesRequest1 = new EchoXsdTypesRequest();
         fillXsdTypes(echoXsdTypesRequest1);
 
-        String xml1 = createEchoXsdTypesXml(echoXsdTypesRequest1);
+        String xml1 = createXml(echoXsdTypesRequest1, XML_NAME_ECHO_XSD_TYPES);
         System.out.println("xml1 = " + xml1);
 
         EchoXsdTypesRequest echoXsdTypesRequest2 = XmlUtils.readXml(new StringReader(xml1), EchoXsdTypesRequest.class, XML_NAME_ECHO_XSD_TYPES);
-        String xml2 = createEchoXsdTypesXml(echoXsdTypesRequest2);
+        String xml2 = createXml(echoXsdTypesRequest2, XML_NAME_ECHO_XSD_TYPES);
         System.out.println("xml2 = " + xml2);
 
         assertEquals(xml1, xml2);
     }
+
+    public void testCustomTypes() throws UnsupportedEncodingException, StaxerXmlStreamException {
+        CustomTypes customTypes1 = new CustomTypes();
+        fillCustomTypes(customTypes1);
+        String xml1 = createXml(customTypes1, XML_NAME_CUSTOM_TYPES);
+        System.out.println("xml1 = " + xml1);
+
+        CustomTypes customTypes2 = XmlUtils.readXml(new StringReader(xml1), CustomTypes.class, XML_NAME_CUSTOM_TYPES);
+        String xml2 = createXml(customTypes2, XML_NAME_CUSTOM_TYPES);
+        System.out.println("xml2 = " + xml2);
+
+        assertEquals(xml1, xml2);
+    }
+
 }

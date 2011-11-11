@@ -1,6 +1,6 @@
 package staxer.sample.bean;
 
-import comtech.util.props.StringMapProperties;
+import comtech.util.props.XmlNameMapProperties;
 import comtech.util.xml.*;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "echoCustomTypes", namespace = "http://staxer.sample/")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class EchoCustomTypesRequest extends CustomTypes implements StaxerXmlReader, StaxerXmlWriter {
+public class EchoCustomTypesRequest extends CustomTypes {
 
     public static final XmlName XML_NAME_NILL_ELEM_ENUM = new XmlName("http://staxer.sample/", "nillElemEnum");
     public static final XmlName XML_NAME_NILL_ELEM_VALUE = new XmlName("http://staxer.sample/", "nillElemValue");
@@ -49,12 +49,14 @@ public class EchoCustomTypesRequest extends CustomTypes implements StaxerXmlRead
         this.nillElemOval = nillElemOval;
     }
 
+    @Override
     public void readXmlAttributes(
-            StringMapProperties attributes
+            XmlNameMapProperties attributes
     ) throws StaxerXmlStreamException {
         super.readXmlAttributes(attributes);
     }
 
+    @Override
     public void readXmlContent(
             StaxerXmlStreamReader xmlReader
     ) throws StaxerXmlStreamException {
@@ -73,6 +75,7 @@ public class EchoCustomTypesRequest extends CustomTypes implements StaxerXmlRead
         }
     }
 
+    @Override
     public void writeXmlAttributes(
             StaxerXmlStreamWriter xmlWriter
     ) throws StaxerXmlStreamException {
@@ -80,6 +83,7 @@ public class EchoCustomTypesRequest extends CustomTypes implements StaxerXmlRead
         super.writeXmlAttributes(xmlWriter);
     }
 
+    @Override
     public void writeXmlContent(
             StaxerXmlStreamWriter xmlWriter
     ) throws StaxerXmlStreamException {

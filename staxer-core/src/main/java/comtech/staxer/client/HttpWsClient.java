@@ -1,7 +1,7 @@
 package comtech.staxer.client;
 
-import comtech.util.xml.StaxerXmlReader;
-import comtech.util.xml.StaxerXmlWriter;
+import comtech.util.xml.StaxerReadXml;
+import comtech.util.xml.StaxerWriteXml;
 import comtech.util.xml.XmlName;
 
 /**
@@ -20,12 +20,12 @@ public interface HttpWsClient {
 
     public void setProcessTimeout(int timeout);
 
-    public <Q extends StaxerXmlWriter, A extends StaxerXmlReader> A processSoapQuery(
+    public <Q extends StaxerWriteXml, A extends StaxerReadXml> A processSoapQuery(
             WsRequest wsRequest, Q requestObject,
             XmlName requestXmlName, Class<A> responseClass
     ) throws WsClientException;
 
-    public <A extends StaxerXmlReader> A processSoapQuery(
+    public <A extends StaxerReadXml> A processSoapQuery(
             WsRequest wsRequest, String soapRequestXml, Class<A> responseClass
     ) throws WsClientException;
 

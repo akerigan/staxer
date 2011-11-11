@@ -1,15 +1,18 @@
 package staxer.sample.bean;
 
 import comtech.util.NumberUtils;
-import comtech.util.props.StringMapProperties;
-import comtech.util.xml.*;
+import comtech.util.props.XmlNameMapProperties;
+import comtech.util.xml.StaxerXmlStreamException;
+import comtech.util.xml.StaxerXmlStreamReader;
+import comtech.util.xml.StaxerXmlStreamWriter;
+import comtech.util.xml.XmlName;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Oval extends Circle implements StaxerXmlReader, StaxerXmlWriter {
+public class Oval extends Circle {
 
     public static final XmlName XML_NAME_SECOND_RADIUS = new XmlName("http://staxer.sample/", "secondRadius");
 
@@ -24,12 +27,14 @@ public class Oval extends Circle implements StaxerXmlReader, StaxerXmlWriter {
         this.secondRadius = secondRadius;
     }
 
+    @Override
     public void readXmlAttributes(
-            StringMapProperties attributes
+            XmlNameMapProperties attributes
     ) throws StaxerXmlStreamException {
         super.readXmlAttributes(attributes);
     }
 
+    @Override
     public void readXmlContent(
             StaxerXmlStreamReader xmlReader
     ) throws StaxerXmlStreamException {
@@ -44,12 +49,14 @@ public class Oval extends Circle implements StaxerXmlReader, StaxerXmlWriter {
         }
     }
 
+    @Override
     public void writeXmlAttributes(
             StaxerXmlStreamWriter xmlWriter
     ) throws StaxerXmlStreamException {
         super.writeXmlAttributes(xmlWriter);
     }
 
+    @Override
     public void writeXmlContent(
             StaxerXmlStreamWriter xmlWriter
     ) throws StaxerXmlStreamException {

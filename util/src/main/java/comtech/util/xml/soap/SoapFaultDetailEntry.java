@@ -1,6 +1,6 @@
 package comtech.util.xml.soap;
 
-import comtech.util.props.StringMapProperties;
+import comtech.util.props.XmlNameMapProperties;
 import comtech.util.xml.*;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlValue;
  * @since 2011-05-04 17:13 (Europe/Moscow)
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public class SoapFaultDetailEntry implements StaxerXmlReader, StaxerXmlWriter {
+public class SoapFaultDetailEntry implements StaxerReadXml, StaxerWriteXml {
 
     private static final XmlName XML_NAME_TYPE = new XmlName("type");
 
@@ -46,8 +46,8 @@ public class SoapFaultDetailEntry implements StaxerXmlReader, StaxerXmlWriter {
         this.value = value;
     }
 
-    public void readXmlAttributes(StringMapProperties attributes) throws StaxerXmlStreamException {
-        type = attributes.get(XML_NAME_TYPE.toString());
+    public void readXmlAttributes(XmlNameMapProperties attributes) throws StaxerXmlStreamException {
+        type = attributes.get(XML_NAME_TYPE);
     }
 
     public void readXmlContent(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {

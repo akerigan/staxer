@@ -1,7 +1,7 @@
 package staxer.sample.bean;
 
 import comtech.util.NumberUtils;
-import comtech.util.props.StringMapProperties;
+import comtech.util.props.XmlNameMapProperties;
 import comtech.util.xml.*;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Point implements StaxerXmlReader, StaxerXmlWriter {
+public class Point implements StaxerReadXml, StaxerWriteXml {
 
     public static final XmlName XML_NAME_X = new XmlName("http://staxer.sample/", "x");
     public static final XmlName XML_NAME_Y = new XmlName("http://staxer.sample/", "y");
@@ -37,7 +37,7 @@ public class Point implements StaxerXmlReader, StaxerXmlWriter {
     }
 
     public void readXmlAttributes(
-            StringMapProperties attributes
+            XmlNameMapProperties attributes
     ) throws StaxerXmlStreamException {
     }
 

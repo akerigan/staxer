@@ -231,11 +231,9 @@ public class StaxerUtils {
             writer.append("\n\n");
 
             TreeSet<String> imports = new TreeSet<String>();
-            imports.add("comtech.util.xml.StaxerXmlReader");
-            imports.add("comtech.util.xml.StaxerXmlWriter");
             imports.add("comtech.util.xml.StaxerXmlStreamReader");
             imports.add("comtech.util.xml.StaxerXmlStreamWriter");
-            imports.add("comtech.util.props.StringMapProperties");
+            imports.add("comtech.util.props.XmlNameMapProperties");
             imports.add("comtech.util.xml.StaxerXmlStreamException");
 
             Map<XmlName, String> constantsMap = new HashMap<XmlName, String>();
@@ -252,35 +250,25 @@ public class StaxerUtils {
             StringBuilder writeXmlValue = new StringBuilder();
             StringBuilder toStringMethod = new StringBuilder();
 
-            toStringMethod.append("    @Override\n");
-            toStringMethod.append("    public String toString() {\n");
-            toStringMethod.append("        final StringBuilder sb = new StringBuilder();\n");
-            toStringMethod.append("        sb.append(\"<");
-            toStringMethod.append(typeJavaName);
-            toStringMethod.append(">\\n\");\n");
-            toStringMethod.append("        toString(sb);\n");
-            toStringMethod.append("        sb.append(\"</");
-            toStringMethod.append(typeJavaName);
-            toStringMethod.append(">\\n\");\n");
-            toStringMethod.append("        return sb.toString();\n");
-            toStringMethod.append("    }\n");
-            toStringMethod.append("\n");
-            toStringMethod.append("    public void toString(StringBuilder sb) {\n");
 
             String superTypeJavaName = null;
+            List<WebServiceTypeField> allTypeFields = new ArrayList<WebServiceTypeField>();
             XmlName superTypeXmlName = type.getSuperTypeXmlName();
-            if (superTypeXmlName != null) {
+            while (superTypeXmlName != null) {
                 WebServiceType superType = webServiceTypesMap.get(superTypeXmlName);
                 if (superType != null) {
-                    superTypeJavaName = superType.getJavaName();
+                    if (superTypeJavaName == null) {
+                        superTypeJavaName = superType.getJavaName();
+                    }
+                    allTypeFields.addAll(superType.getFields());
+                    superTypeXmlName = superType.getSuperTypeXmlName();
+                } else {
+                    superTypeXmlName = null;
                 }
             }
 
-            if (!StringUtils.isEmpty(superTypeJavaName)) {
-                toStringMethod.append("        super.toString(sb);\n");
-            }
-
             List<WebServiceTypeField> typeFields = type.getFields();
+            allTypeFields.addAll(typeFields);
             for (WebServiceTypeField field : typeFields) {
                 XmlName fieldXmlType = field.getXmlType();
                 WebServiceXsdType fieldXsdType = XSD_JAVA_TYPE_MAP.get(fieldXmlType);
@@ -313,7 +301,6 @@ public class StaxerUtils {
 
                 if (!StringUtils.isEmpty(fieldTypeJavaName)) {
                     if (field.isArray()) {
-//                        imports.add("import java.util.List;\n");
                         imports.add("java.util.ArrayList");
                     }
 
@@ -553,7 +540,7 @@ public class StaxerUtils {
                         }
                         readXmlAttributes.append("attributes.get(");
                         readXmlAttributes.append(constantName);
-                        readXmlAttributes.append(".toString())");
+                        readXmlAttributes.append(")");
                         if (fieldJavaConverterNotEmpty || enumField) {
                             readXmlAttributes.append(")");
                         }
@@ -720,7 +707,7 @@ public class StaxerUtils {
                         }
                     } else {
                         if (enumField) {
-                            writeXmlAttributes.append("        if(");
+                            writeXmlAttributes.append("        if (");
                             writeXmlAttributes.append(fieldJavaName);
                             writeXmlAttributes.append(" != null) {\n");
                             writeXmlAttributes.append("            xmlWriter.attribute(");
@@ -809,6 +796,11 @@ public class StaxerUtils {
                 classJaxbAnnotations.append("@XmlAccessorType(XmlAccessType.FIELD)\n");
             }
 
+            if (superTypeJavaName == null) {
+                imports.add("comtech.util.xml.StaxerReadXml");
+                imports.add("comtech.util.xml.StaxerWriteXml");
+            }
+
             for (String className : imports) {
                 writer.append("import ");
                 writer.append(className);
@@ -824,8 +816,10 @@ public class StaxerUtils {
             if (superTypeJavaName != null) {
                 writer.append(" extends ");
                 writer.append(superTypeJavaName);
+            } else {
+                writer.append(" implements StaxerReadXml, StaxerWriteXml");
             }
-            writer.append(" implements StaxerXmlReader, StaxerXmlWriter {\n\n");
+            writer.append(" {\n\n");
             if (constants.length() > 0) {
                 writer.append(constants.toString());
                 writer.append("\n");
@@ -833,9 +827,12 @@ public class StaxerUtils {
             writer.append(fields.toString());
             writer.append(gettersSetters.toString());
 
+            if (superTypeJavaName != null) {
+                writer.append("    @Override\n");
+            }
             writer.append(
                     "    public void readXmlAttributes(\n" +
-                            "            StringMapProperties attributes\n" +
+                            "            XmlNameMapProperties attributes\n" +
                             "    ) throws StaxerXmlStreamException {\n"
             );
             if (superTypeJavaName != null) {
@@ -846,6 +843,9 @@ public class StaxerUtils {
                     "    }\n\n"
             );
 
+            if (superTypeJavaName != null) {
+                writer.append("    @Override\n");
+            }
             writer.append(
                     "    public void readXmlContent(\n" +
                             "            StaxerXmlStreamReader xmlReader\n" +
@@ -866,6 +866,9 @@ public class StaxerUtils {
                     "    }\n\n"
             );
 
+            if (superTypeJavaName != null) {
+                writer.append("    @Override\n");
+            }
             writer.append(
                     "    public void writeXmlAttributes(\n" +
                             "            StaxerXmlStreamWriter xmlWriter\n" +
@@ -883,6 +886,9 @@ public class StaxerUtils {
                     "    }\n\n"
             );
 
+            if (superTypeJavaName != null) {
+                writer.append("    @Override\n");
+            }
             writer.append(
                     "    public void writeXmlContent(\n" +
                             "            StaxerXmlStreamWriter xmlWriter\n" +
@@ -896,6 +902,23 @@ public class StaxerUtils {
                     "    }\n\n"
             );
 
+            writer.append("    @Override\n");
+            writer.append("    public String toString() {\n");
+            writer.append("        final StringBuilder sb = new StringBuilder();\n");
+            writer.append("        sb.append(\"<");
+            writer.append(typeJavaName);
+            writer.append(">\\n\");\n");
+            writer.append("        toString(sb);\n");
+            writer.append("        sb.append(\"</");
+            writer.append(typeJavaName);
+            writer.append(">\\n\");\n");
+            writer.append("        return sb.toString();\n");
+            writer.append("    }\n");
+            writer.append("\n");
+            writer.append("    public void toString(StringBuilder sb) {\n");
+            if (superTypeJavaName != null) {
+                writer.append("        super.toString(sb);\n");
+            }
             writer.append(toStringMethod.toString());
             writer.append("}\n");
 

@@ -1,6 +1,6 @@
 package comtech.staxer.domain;
 
-import comtech.util.props.StringMapProperties;
+import comtech.util.props.XmlNameMapProperties;
 import comtech.util.xml.*;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlElement;
  * Time: 16:51:27
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public class WssUsernameToken implements StaxerXmlReader, StaxerXmlWriter {
+public class WssUsernameToken implements StaxerReadXml, StaxerWriteXml {
 
     public static final XmlName XML_NAME_USERNAME = new XmlName("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "Username");
     public static final XmlName XML_NAME_PASSWORD = new XmlName("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "Password");
@@ -21,19 +21,19 @@ public class WssUsernameToken implements StaxerXmlReader, StaxerXmlWriter {
     public static final XmlName XML_NAME_CREATED = new XmlName("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "Created");
 
     @XmlElement(name = "Username",
-                namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
+            namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
     private String userName;
 
     @XmlElement(name = "Password",
-                namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
+            namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
     private WssPassword password;
 
     @XmlElement(name = "Nonce",
-                namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
+            namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
     private WssNonce nonce;
 
     @XmlElement(name = "Created",
-                namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd")
+            namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd")
     private String created;
 
     public String getUserName() {
@@ -68,7 +68,7 @@ public class WssUsernameToken implements StaxerXmlReader, StaxerXmlWriter {
         this.created = created;
     }
 
-    public void readXmlAttributes(StringMapProperties attributes) throws StaxerXmlStreamException {
+    public void readXmlAttributes(XmlNameMapProperties attributes) throws StaxerXmlStreamException {
     }
 
     public void readXmlContent(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
