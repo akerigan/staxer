@@ -1,7 +1,7 @@
-package comtech.util.servlet.helper;
+package comtech.util.http.helper;
 
-import comtech.util.servlet.ServletContextURIResolver;
-import comtech.util.servlet.response.HttpResponseContentType;
+import comtech.util.http.ServletContextURIResolver;
+import comtech.util.http.response.HttpResponseContentType;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;

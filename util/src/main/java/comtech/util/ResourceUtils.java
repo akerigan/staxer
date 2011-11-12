@@ -1,6 +1,6 @@
 package comtech.util;
 
-import comtech.util.servlet.helper.HttpHelper;
+import comtech.util.http.helper.HttpHelper;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.client.HttpClient;

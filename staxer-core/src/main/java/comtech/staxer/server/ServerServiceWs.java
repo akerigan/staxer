@@ -1,6 +1,6 @@
 package comtech.staxer.server;
 
-import comtech.util.urlparams.ReadHttpParameters;
+import comtech.util.http.helper.ReadHttpParameters;
 import comtech.util.xml.StaxerReadXml;
 import comtech.util.xml.XmlName;
 

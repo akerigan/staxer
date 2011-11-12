@@ -1,4 +1,4 @@
-package comtech.util.servlet.helper;
+package comtech.util.http.helper;
 
 import comtech.util.DateTimeUtils;
 import comtech.util.StringUtils;

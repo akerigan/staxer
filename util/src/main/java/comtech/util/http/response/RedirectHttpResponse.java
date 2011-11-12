@@ -1,6 +1,6 @@
-package comtech.util.servlet.response;
+package comtech.util.http.response;
 
-import comtech.util.servlet.helper.HttpHelper;
+import comtech.util.http.helper.HttpHelper;
 
 import java.io.IOException;
 

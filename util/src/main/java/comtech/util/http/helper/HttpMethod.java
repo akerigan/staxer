@@ -1,4 +1,4 @@
-package comtech.util.servlet.helper;
+package comtech.util.http.helper;
 
 /**
  * User: Vlad Vinichenko (akerigan@gmail.com)

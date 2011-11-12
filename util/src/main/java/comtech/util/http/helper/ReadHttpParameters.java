@@ -1,6 +1,4 @@
-package comtech.util.urlparams;
-
-import comtech.util.servlet.helper.HttpHelper;
+package comtech.util.http.helper;
 
 /**
  * @author Vlad Vinichenko (akerigan@gmail.com)

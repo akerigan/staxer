@@ -1,7 +1,7 @@
 package comtech.staxer.server;
 
 import comtech.staxer.StaxerException;
-import comtech.util.servlet.helper.HttpHelper;
+import comtech.util.http.helper.HttpHelper;
 import comtech.util.xml.XmlConstants;
 import comtech.util.xml.XmlUtils;
 import comtech.util.xml.soap.SoapFault;

@@ -1,10 +1,7 @@
-package comtech.util.servlet;
-
-import comtech.util.StringUtils;
+package comtech.util.http;
 
 import javax.servlet.*;
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * User: Ванин Борис

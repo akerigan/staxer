@@ -1,4 +1,4 @@
-package comtech.util.servlet;
+package comtech.util.http;
 
 import javax.servlet.*;
 import java.io.IOException;

@@ -1,10 +1,10 @@
-package comtech.util.servlet.response;
+package comtech.util.http.response;
 
+import comtech.util.http.helper.HttpHelper;
 import comtech.util.json.JsonException;
 import comtech.util.json.JsonObject;
 import comtech.util.json.JsonObjectNull;
 import comtech.util.json.JsonUtils;
-import comtech.util.servlet.helper.HttpHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

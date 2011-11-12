@@ -1,4 +1,4 @@
-package comtech.util.servlet;
+package comtech.util.http;
 
 import org.apache.log4j.PropertyConfigurator;
 import org.springframework.util.ResourceUtils;

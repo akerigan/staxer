@@ -1,4 +1,4 @@
-package comtech.util.servlet.response;
+package comtech.util.http.response;
 
 /**
  * User: Vlad Vinichenko (akerigan@gmail.com)

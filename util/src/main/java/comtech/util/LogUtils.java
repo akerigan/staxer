@@ -1,6 +1,6 @@
 package comtech.util;
 
-import comtech.util.servlet.helper.HttpHelper;
+import comtech.util.http.helper.HttpHelper;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
