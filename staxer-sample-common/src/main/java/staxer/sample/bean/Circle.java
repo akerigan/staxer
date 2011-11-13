@@ -36,10 +36,10 @@ public class Circle extends Point {
     }
 
     @Override
-    public void readXmlContent(
+    public boolean readXmlContentElement(
             StaxerXmlStreamReader xmlReader
     ) throws StaxerXmlStreamException {
-        super.readXmlContent(xmlReader);
+        return super.readXmlContentElement(xmlReader);
     }
 
     @Override

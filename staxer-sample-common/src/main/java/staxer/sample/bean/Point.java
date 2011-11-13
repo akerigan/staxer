@@ -45,15 +45,23 @@ public class Point implements StaxerReadXml, StaxerWriteXml {
             StaxerXmlStreamReader xmlReader
     ) throws StaxerXmlStreamException {
         XmlName rootElementName = xmlReader.getLastStartedElement();
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(rootElementName)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_X)) {
-                x = NumberUtils.parseDouble(xmlReader.readCharacters(XML_NAME_X));
-            } else if (xmlReader.elementStarted(XML_NAME_Y)) {
-                y = NumberUtils.parseDouble(xmlReader.readCharacters(XML_NAME_Y));
-            }
+        while (xmlReader.readNext() && !xmlReader.elementEnded(rootElementName)) {
+            readXmlContentElement(xmlReader);
         }
+    }
+
+    public boolean readXmlContentElement(
+            StaxerXmlStreamReader xmlReader
+    ) throws StaxerXmlStreamException {
+        if (xmlReader.elementStarted(XML_NAME_X)) {
+            x = NumberUtils.parseDouble(xmlReader.readCharacters(XML_NAME_X));
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_Y)) {
+            y = NumberUtils.parseDouble(xmlReader.readCharacters(XML_NAME_Y));
+            return true;
+        }
+        return false;
     }
 
     public void writeXmlAttributes(

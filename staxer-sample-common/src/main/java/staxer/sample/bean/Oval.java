@@ -35,18 +35,14 @@ public class Oval extends Circle {
     }
 
     @Override
-    public void readXmlContent(
+    public boolean readXmlContentElement(
             StaxerXmlStreamReader xmlReader
     ) throws StaxerXmlStreamException {
-        super.readXmlContent(xmlReader);
-        XmlName rootElementName = xmlReader.getLastStartedElement();
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(rootElementName)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_SECOND_RADIUS)) {
-                secondRadius = NumberUtils.parseDouble(xmlReader.readCharacters(XML_NAME_SECOND_RADIUS));
-            }
+        if (xmlReader.elementStarted(XML_NAME_SECOND_RADIUS)) {
+            secondRadius = NumberUtils.parseDouble(xmlReader.readCharacters(XML_NAME_SECOND_RADIUS));
+            return true;
         }
+        return super.readXmlContentElement(xmlReader);
     }
 
     @Override
