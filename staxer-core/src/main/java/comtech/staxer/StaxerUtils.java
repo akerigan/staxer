@@ -136,10 +136,10 @@ public class StaxerUtils {
             writer.append("\n\n");
             writer.append(
                     "import javax.xml.bind.annotation.XmlEnum;\n" +
-                            "import javax.xml.bind.annotation.XmlEnumValue;\n" +
-                            "import java.util.HashMap;\n" +
-                            "import java.util.Map;\n" +
-                            "\n"
+                    "import javax.xml.bind.annotation.XmlEnumValue;\n" +
+                    "import java.util.HashMap;\n" +
+                    "import java.util.Map;\n" +
+                    "\n"
             );
             if (writeJaxbAnnotations) {
                 writer.append(
@@ -174,43 +174,43 @@ public class StaxerUtils {
                     "    private static Map<String, ");
             writer.append(enumTypeJavaName);
             writer.append("> map;\n" +
-                    "    private String code;\n" +
-                    "\n" +
-                    "    static {\n" +
-                    "        map = new HashMap<String, ");
+                          "    private String code;\n" +
+                          "\n" +
+                          "    static {\n" +
+                          "        map = new HashMap<String, ");
             writer.append(enumTypeJavaName);
             writer.append(
                     ">();\n" +
-                            "        for ("
+                    "        for ("
             );
             writer.append(enumTypeJavaName);
             writer.append(" value : ");
             writer.append(enumTypeJavaName);
             writer.append(
                     ".values()) {\n" +
-                            "            map.put(value.code, value);\n" +
-                            "        }\n" +
-                            "    }\n" +
-                            "\n" +
-                            "    "
+                    "            map.put(value.code, value);\n" +
+                    "        }\n" +
+                    "    }\n" +
+                    "\n" +
+                    "    "
             );
             writer.append(enumTypeJavaName);
             writer.append(
                     "(String code) {\n" +
-                            "        this.code = code;\n" +
-                            "    }\n" +
-                            "\n" +
-                            "    public String getCode() {\n" +
-                            "        return code;\n" +
-                            "    }\n" +
-                            "\n" +
-                            "    public static "
+                    "        this.code = code;\n" +
+                    "    }\n" +
+                    "\n" +
+                    "    public String getCode() {\n" +
+                    "        return code;\n" +
+                    "    }\n" +
+                    "\n" +
+                    "    public static "
             );
             writer.append(enumTypeJavaName);
             writer.append(
                     " getByCode(String code) {\n" +
-                            "        return map.get(code);\n" +
-                            "    }\n\n"
+                    "        return map.get(code);\n" +
+                    "    }\n\n"
             );
             writer.append("}\n");
 
@@ -243,8 +243,8 @@ public class StaxerUtils {
             StringBuilder fields = new StringBuilder();
             StringBuilder gettersSetters = new StringBuilder();
             StringBuilder readXmlAttributes = new StringBuilder();
-            StringBuilder readXmlElements = new StringBuilder();
-            StringBuilder readXmlValue = new StringBuilder();
+            StringBuilder readXmlContentElement = new StringBuilder();
+            StringBuilder readXmlContent = new StringBuilder();
             StringBuilder writeXmlElements = new StringBuilder();
             StringBuilder writeXmlAttributes = new StringBuilder();
             StringBuilder writeXmlValue = new StringBuilder();
@@ -427,106 +427,107 @@ public class StaxerUtils {
 
                     boolean fieldJavaConverterNotEmpty = !StringUtils.isEmpty(fieldJavaConverter);
                     if (elementField) {
-                        if (readXmlElements.length() == 0) {
-                            readXmlElements.append(
+                        if (readXmlContentElement.length() == 0) {
+                            readXmlContent.append(
                                     "        XmlName rootElementName = xmlReader.getLastStartedElement();\n" +
-                                            "        while (xmlReader.readNext()) {\n" +
-                                            "            if (xmlReader.elementEnded(rootElementName)) {\n" +
-                                            "                break;\n"
+                                    "        while (xmlReader.readNext() && !xmlReader.elementEnded(rootElementName)) {\n" +
+                                    "            readXmlContentElement(xmlReader);\n" +
+                                    "        }\n"
                             );
                         }
                         if (fieldXsdType != null) {
-                            readXmlElements.append("            } else if (xmlReader.elementStarted(");
-                            readXmlElements.append(constantName);
-                            readXmlElements.append(")) {\n                ");
+                            readXmlContentElement.append("        if (xmlReader.elementStarted(");
+                            readXmlContentElement.append(constantName);
+                            readXmlContentElement.append(")) {\n            ");
                             if (arrayField) {
-                                readXmlElements.append(fieldTypeJavaName);
-                                readXmlElements.append(" ");
-                                readXmlElements.append(fieldJavaName);
-                                readXmlElements.append("Item = ");
+                                readXmlContentElement.append(fieldTypeJavaName);
+                                readXmlContentElement.append(" ");
+                                readXmlContentElement.append(fieldJavaName);
+                                readXmlContentElement.append("Item = ");
                             } else {
-                                readXmlElements.append(fieldJavaName);
-                                readXmlElements.append(" = ");
+                                readXmlContentElement.append(fieldJavaName);
+                                readXmlContentElement.append(" = ");
                             }
                             if (fieldJavaConverterNotEmpty) {
-                                readXmlElements.append(fieldJavaConverter);
-                                readXmlElements.append("(");
+                                readXmlContentElement.append(fieldJavaConverter);
+                                readXmlContentElement.append("(");
                             }
-                            readXmlElements.append("xmlReader.readCharacters(");
-                            readXmlElements.append(constantName);
+                            readXmlContentElement.append("xmlReader.readCharacters(");
+                            readXmlContentElement.append(constantName);
                             if (fieldJavaConverterNotEmpty) {
-                                readXmlElements.append(")");
+                                readXmlContentElement.append(")");
                             }
-                            readXmlElements.append(");\n");
+                            readXmlContentElement.append(");\n");
                             if (arrayField) {
-                                readXmlElements.append("                if (");
-                                readXmlElements.append(fieldJavaName);
-                                readXmlElements.append("Item != null) {\n");
-                                readXmlElements.append("                    ");
-                                readXmlElements.append(fieldJavaName);
-                                readXmlElements.append(".add(");
-                                readXmlElements.append(fieldJavaName);
-                                readXmlElements.append("Item);\n");
-                                readXmlElements.append("                }\n");
+                                readXmlContentElement.append("            if (");
+                                readXmlContentElement.append(fieldJavaName);
+                                readXmlContentElement.append("Item != null) {\n");
+                                readXmlContentElement.append("                ");
+                                readXmlContentElement.append(fieldJavaName);
+                                readXmlContentElement.append(".add(");
+                                readXmlContentElement.append(fieldJavaName);
+                                readXmlContentElement.append("Item);\n");
+                                readXmlContentElement.append("            }\n");
                             }
                         } else {
-                            readXmlElements.append("            } else if (xmlReader.elementStarted(");
-                            readXmlElements.append(constantName);
-                            readXmlElements.append(")) {\n                ");
+                            readXmlContentElement.append("        if (xmlReader.elementStarted(");
+                            readXmlContentElement.append(constantName);
+                            readXmlContentElement.append(")) {\n            ");
                             if (arrayField) {
-                                readXmlElements.append(fieldTypeJavaName);
-                                readXmlElements.append(" ");
-                                readXmlElements.append(fieldJavaName);
-                                readXmlElements.append("Item = ");
+                                readXmlContentElement.append(fieldTypeJavaName);
+                                readXmlContentElement.append(" ");
+                                readXmlContentElement.append(fieldJavaName);
+                                readXmlContentElement.append("Item = ");
                             } else {
-                                readXmlElements.append(fieldJavaName);
-                                readXmlElements.append(" = ");
+                                readXmlContentElement.append(fieldJavaName);
+                                readXmlContentElement.append(" = ");
                             }
                             if (enumField) {
-                                readXmlElements.append(fieldTypeJavaName);
-                                readXmlElements.append(".getByCode(");
-                                readXmlElements.append("xmlReader.readCharacters()");
-                                readXmlElements.append(");\n");
+                                readXmlContentElement.append(fieldTypeJavaName);
+                                readXmlContentElement.append(".getByCode(");
+                                readXmlContentElement.append("xmlReader.readCharacters()");
+                                readXmlContentElement.append(");\n");
                             } else {
                                 imports.add("comtech.util.xml.XmlUtils");
-                                readXmlElements.append("XmlUtils.readXml(xmlReader, ");
-                                readXmlElements.append(fieldTypeJavaName);
-                                readXmlElements.append(".class, ");
-                                readXmlElements.append(constantName);
+                                readXmlContentElement.append("XmlUtils.readXml(xmlReader, ");
+                                readXmlContentElement.append(fieldTypeJavaName);
+                                readXmlContentElement.append(".class, ");
+                                readXmlContentElement.append(constantName);
                                 if (nillableField) {
-                                    readXmlElements.append(", true");
+                                    readXmlContentElement.append(", true");
                                 } else {
-                                    readXmlElements.append(", false");
+                                    readXmlContentElement.append(", false");
                                 }
-                                readXmlElements.append(");\n");
+                                readXmlContentElement.append(");\n");
                             }
                             if (arrayField) {
-                                readXmlElements.append("                if (");
-                                readXmlElements.append(fieldJavaName);
-                                readXmlElements.append("Item != null) {\n");
-                                readXmlElements.append("                    ");
-                                readXmlElements.append(fieldJavaName);
-                                readXmlElements.append(".add(");
-                                readXmlElements.append(fieldJavaName);
-                                readXmlElements.append("Item");
-                                readXmlElements.append(");\n");
-                                readXmlElements.append("                }\n");
+                                readXmlContentElement.append("                if (");
+                                readXmlContentElement.append(fieldJavaName);
+                                readXmlContentElement.append("Item != null) {\n");
+                                readXmlContentElement.append("                    ");
+                                readXmlContentElement.append(fieldJavaName);
+                                readXmlContentElement.append(".add(");
+                                readXmlContentElement.append(fieldJavaName);
+                                readXmlContentElement.append("Item");
+                                readXmlContentElement.append(");\n");
+                                readXmlContentElement.append("                }\n");
                             }
                         }
+                        readXmlContentElement.append("            return true;\n        }\n");
                     } else if (valueField) {
-                        readXmlValue.append("        value = ");
+                        readXmlContent.append("        value = ");
                         if (fieldJavaConverterNotEmpty) {
-                            readXmlValue.append(fieldJavaConverter);
-                            readXmlValue.append("(");
+                            readXmlContent.append(fieldJavaConverter);
+                            readXmlContent.append("(");
                         } else if (enumField) {
-                            readXmlValue.append(fieldTypeJavaName);
-                            readXmlValue.append(".getByCode(");
+                            readXmlContent.append(fieldTypeJavaName);
+                            readXmlContent.append(".getByCode(");
                         }
-                        readXmlValue.append("xmlReader.readCharacters()");
+                        readXmlContent.append("xmlReader.readCharacters()");
                         if (fieldJavaConverterNotEmpty || enumField) {
-                            readXmlValue.append(")");
+                            readXmlContent.append(")");
                         }
-                        readXmlValue.append(";\n");
+                        readXmlContent.append(";\n");
                     } else {
                         readXmlAttributes.append("        ");
                         readXmlAttributes.append(fieldJavaName);
@@ -832,8 +833,8 @@ public class StaxerUtils {
             }
             writer.append(
                     "    public void readXmlAttributes(\n" +
-                            "            XmlNameMapProperties attributes\n" +
-                            "    ) throws StaxerXmlStreamException {\n"
+                    "            XmlNameMapProperties attributes\n" +
+                    "    ) throws StaxerXmlStreamException {\n"
             );
             if (superTypeJavaName != null) {
                 writer.append("        super.readXmlAttributes(attributes);\n");
@@ -843,25 +844,30 @@ public class StaxerUtils {
                     "    }\n\n"
             );
 
-            if (superTypeJavaName != null) {
+            if (superTypeJavaName == null) {
+                writer.append(
+                        "    public void readXmlContent(\n" +
+                        "            StaxerXmlStreamReader xmlReader\n" +
+                        "    ) throws StaxerXmlStreamException {\n"
+                );
+                writer.append(readXmlContent.toString());
+                writer.append(
+                        "    }\n\n"
+                );
+            } else {
                 writer.append("    @Override\n");
             }
-            writer.append(
-                    "    public void readXmlContent(\n" +
-                            "            StaxerXmlStreamReader xmlReader\n" +
-                            "    ) throws StaxerXmlStreamException {\n"
-            );
+            writer.append("    public boolean readXmlContentElement(\n" +
+                          "            StaxerXmlStreamReader xmlReader\n" +
+                          "    ) throws StaxerXmlStreamException {\n");
+            if (readXmlContentElement.length() != 0) {
+                writer.append(readXmlContentElement.toString());
+            }
             if (superTypeJavaName != null) {
-                writer.append("        super.readXmlContent(xmlReader);\n");
+                writer.append("        return super.readXmlContentElement(xmlReader);\n");
+            } else {
+                writer.append("        return false;\n");
             }
-            if (readXmlElements.length() != 0) {
-                writer.append(readXmlElements.toString());
-                writer.append(
-                        "            }\n" +
-                                "        }\n"
-                );
-            }
-            writer.append(readXmlValue.toString());
             writer.append(
                     "    }\n\n"
             );
@@ -871,8 +877,8 @@ public class StaxerUtils {
             }
             writer.append(
                     "    public void writeXmlAttributes(\n" +
-                            "            StaxerXmlStreamWriter xmlWriter\n" +
-                            "    ) throws StaxerXmlStreamException {\n");
+                    "            StaxerXmlStreamWriter xmlWriter\n" +
+                    "    ) throws StaxerXmlStreamException {\n");
             for (String namespace : writeXmlNamespaces) {
                 writer.append("        xmlWriter.declareNamespace(\"");
                 writer.append(namespace);
@@ -891,8 +897,8 @@ public class StaxerUtils {
             }
             writer.append(
                     "    public void writeXmlContent(\n" +
-                            "            StaxerXmlStreamWriter xmlWriter\n" +
-                            "    ) throws StaxerXmlStreamException {\n");
+                    "            StaxerXmlStreamWriter xmlWriter\n" +
+                    "    ) throws StaxerXmlStreamException {\n");
             if (superTypeJavaName != null) {
                 writer.append("        super.writeXmlContent(xmlWriter);\n");
             }

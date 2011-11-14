@@ -96,29 +96,47 @@ public class CustomTypes implements StaxerReadXml, StaxerWriteXml {
     ) throws StaxerXmlStreamException {
         XmlName rootElementName = xmlReader.getLastStartedElement();
         while (xmlReader.readNext() && !xmlReader.elementEnded(rootElementName)) {
-            if (xmlReader.elementStarted(XML_NAME_ELEM_ENUM)) {
-                elemEnum = EnumType.getByCode(xmlReader.readCharacters());
-            } else if (xmlReader.elementStarted(XML_NAME_LST_ENUM)) {
-                EnumType lstEnumItem = EnumType.getByCode(xmlReader.readCharacters());
-                if (lstEnumItem != null) {
-                    lstEnum.add(lstEnumItem);
-                }
-            } else if (xmlReader.elementStarted(XML_NAME_ELEM_VALUE)) {
-                elemValue = XmlUtils.readXml(xmlReader, ValueType.class, XML_NAME_ELEM_VALUE, false);
-            } else if (xmlReader.elementStarted(XML_NAME_LST_VALUE)) {
-                ValueType lstValueItem = XmlUtils.readXml(xmlReader, ValueType.class, XML_NAME_LST_VALUE, false);
-                if (lstValueItem != null) {
-                    lstValue.add(lstValueItem);
-                }
-            } else if (xmlReader.elementStarted(XML_NAME_ELEM_OVAL)) {
-                elemOval = XmlUtils.readXml(xmlReader, Oval.class, XML_NAME_ELEM_OVAL, false);
-            } else if (xmlReader.elementStarted(XML_NAME_LST_OVAL)) {
-                Oval lstOvalItem = XmlUtils.readXml(xmlReader, Oval.class, XML_NAME_LST_OVAL, false);
-                if (lstOvalItem != null) {
-                    lstOval.add(lstOvalItem);
-                }
-            }
+            readXmlContentElement(xmlReader);
         }
+    }
+
+    public boolean readXmlContentElement(
+            StaxerXmlStreamReader xmlReader
+    ) throws StaxerXmlStreamException {
+        if (xmlReader.elementStarted(XML_NAME_ELEM_ENUM)) {
+            elemEnum = EnumType.getByCode(xmlReader.readCharacters());
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_LST_ENUM)) {
+            EnumType lstEnumItem = EnumType.getByCode(xmlReader.readCharacters());
+            if (lstEnumItem != null) {
+                lstEnum.add(lstEnumItem);
+            }
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_ELEM_VALUE)) {
+            elemValue = XmlUtils.readXml(xmlReader, ValueType.class, XML_NAME_ELEM_VALUE, false);
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_LST_VALUE)) {
+            ValueType lstValueItem = XmlUtils.readXml(xmlReader, ValueType.class, XML_NAME_LST_VALUE, false);
+            if (lstValueItem != null) {
+                lstValue.add(lstValueItem);
+            }
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_ELEM_OVAL)) {
+            elemOval = XmlUtils.readXml(xmlReader, Oval.class, XML_NAME_ELEM_OVAL, false);
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_LST_OVAL)) {
+            Oval lstOvalItem = XmlUtils.readXml(xmlReader, Oval.class, XML_NAME_LST_OVAL, false);
+            if (lstOvalItem != null) {
+                lstOval.add(lstOvalItem);
+            }
+            return true;
+        }
+        return false;
     }
 
     public void writeXmlAttributes(

@@ -47,6 +47,12 @@ public class ValueType implements StaxerReadXml, StaxerWriteXml {
         value = EnumType.getByCode(xmlReader.readCharacters());
     }
 
+    public boolean readXmlContentElement(
+            StaxerXmlStreamReader xmlReader
+    ) throws StaxerXmlStreamException {
+        return false;
+    }
+
     public void writeXmlAttributes(
             StaxerXmlStreamWriter xmlWriter
     ) throws StaxerXmlStreamException {

@@ -57,20 +57,22 @@ public class EchoCustomTypesResponse extends CustomTypes {
     }
 
     @Override
-    public void readXmlContent(
+    public boolean readXmlContentElement(
             StaxerXmlStreamReader xmlReader
     ) throws StaxerXmlStreamException {
-        super.readXmlContent(xmlReader);
-        XmlName rootElementName = xmlReader.getLastStartedElement();
-        while (xmlReader.readNext() && !xmlReader.elementEnded(rootElementName)) {
-            if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_ENUM)) {
-                nillElemEnum = EnumType.getByCode(xmlReader.readCharacters());
-            } else if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_VALUE)) {
-                nillElemValue = XmlUtils.readXml(xmlReader, ValueType.class, XML_NAME_NILL_ELEM_VALUE, true);
-            } else if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_OVAL)) {
-                nillElemOval = XmlUtils.readXml(xmlReader, Oval.class, XML_NAME_NILL_ELEM_OVAL, true);
-            }
+        if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_ENUM)) {
+            nillElemEnum = EnumType.getByCode(xmlReader.readCharacters());
+            return true;
         }
+        if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_VALUE)) {
+            nillElemValue = XmlUtils.readXml(xmlReader, ValueType.class, XML_NAME_NILL_ELEM_VALUE, true);
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_OVAL)) {
+            nillElemOval = XmlUtils.readXml(xmlReader, Oval.class, XML_NAME_NILL_ELEM_OVAL, true);
+            return true;
+        }
+        return super.readXmlContentElement(xmlReader);
     }
 
     @Override

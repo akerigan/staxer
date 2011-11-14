@@ -135,32 +135,46 @@ public class EchoXsdTypesRequest extends XsdTypes {
     }
 
     @Override
-    public void readXmlContent(
+    public boolean readXmlContentElement(
             StaxerXmlStreamReader xmlReader
     ) throws StaxerXmlStreamException {
-        super.readXmlContent(xmlReader);
-        XmlName rootElementName = xmlReader.getLastStartedElement();
-        while (xmlReader.readNext() && !xmlReader.elementEnded(rootElementName)) {
-            if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_STRING)) {
-                nillElemString = xmlReader.readCharacters(XML_NAME_NILL_ELEM_STRING);
-            } else if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_INTEGER)) {
-                nillElemInteger = NumberUtils.parseInteger(xmlReader.readCharacters(XML_NAME_NILL_ELEM_INTEGER));
-            } else if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_CHARACTER)) {
-                nillElemCharacter = NumberUtils.parseInteger(xmlReader.readCharacters(XML_NAME_NILL_ELEM_CHARACTER));
-            } else if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_FLOAT)) {
-                nillElemFloat = NumberUtils.parseFloat(xmlReader.readCharacters(XML_NAME_NILL_ELEM_FLOAT));
-            } else if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_DOUBLE)) {
-                nillElemDouble = NumberUtils.parseDouble(xmlReader.readCharacters(XML_NAME_NILL_ELEM_DOUBLE));
-            } else if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_DECIMAL)) {
-                nillElemDecimal = NumberUtils.parseBigDecimal(xmlReader.readCharacters(XML_NAME_NILL_ELEM_DECIMAL));
-            } else if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_DATE_TIME)) {
-                nillElemDateTime = DateTimeUtils.parseXmlDate(xmlReader.readCharacters(XML_NAME_NILL_ELEM_DATE_TIME));
-            } else if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_BOOLEAN)) {
-                nillElemBoolean = Boolean.parseBoolean(xmlReader.readCharacters(XML_NAME_NILL_ELEM_BOOLEAN));
-            } else if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_BASE64_BINARY)) {
-                nillElemBase64Binary = Base64.decodeBase64(xmlReader.readCharacters(XML_NAME_NILL_ELEM_BASE64_BINARY));
-            }
+        if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_STRING)) {
+            nillElemString = xmlReader.readCharacters(XML_NAME_NILL_ELEM_STRING);
+            return true;
         }
+        if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_INTEGER)) {
+            nillElemInteger = NumberUtils.parseInteger(xmlReader.readCharacters(XML_NAME_NILL_ELEM_INTEGER));
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_CHARACTER)) {
+            nillElemCharacter = NumberUtils.parseInteger(xmlReader.readCharacters(XML_NAME_NILL_ELEM_CHARACTER));
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_FLOAT)) {
+            nillElemFloat = NumberUtils.parseFloat(xmlReader.readCharacters(XML_NAME_NILL_ELEM_FLOAT));
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_DOUBLE)) {
+            nillElemDouble = NumberUtils.parseDouble(xmlReader.readCharacters(XML_NAME_NILL_ELEM_DOUBLE));
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_DECIMAL)) {
+            nillElemDecimal = NumberUtils.parseBigDecimal(xmlReader.readCharacters(XML_NAME_NILL_ELEM_DECIMAL));
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_DATE_TIME)) {
+            nillElemDateTime = DateTimeUtils.parseXmlDate(xmlReader.readCharacters(XML_NAME_NILL_ELEM_DATE_TIME));
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_BOOLEAN)) {
+            nillElemBoolean = Boolean.parseBoolean(xmlReader.readCharacters(XML_NAME_NILL_ELEM_BOOLEAN));
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_BASE64_BINARY)) {
+            nillElemBase64Binary = Base64.decodeBase64(xmlReader.readCharacters(XML_NAME_NILL_ELEM_BASE64_BINARY));
+            return true;
+        }
+        return super.readXmlContentElement(xmlReader);
     }
 
     @Override

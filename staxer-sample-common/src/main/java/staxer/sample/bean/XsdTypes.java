@@ -325,71 +325,113 @@ public class XsdTypes implements StaxerReadXml, StaxerWriteXml {
     ) throws StaxerXmlStreamException {
         XmlName rootElementName = xmlReader.getLastStartedElement();
         while (xmlReader.readNext() && !xmlReader.elementEnded(rootElementName)) {
-            if (xmlReader.elementStarted(XML_NAME_ELEM_STRING)) {
-                elemString = xmlReader.readCharacters(XML_NAME_ELEM_STRING);
-            } else if (xmlReader.elementStarted(XML_NAME_ELEM_INTEGER)) {
-                elemInteger = NumberUtils.parseInteger(xmlReader.readCharacters(XML_NAME_ELEM_INTEGER));
-            } else if (xmlReader.elementStarted(XML_NAME_ELEM_CHARACTER)) {
-                elemCharacter = NumberUtils.parseInteger(xmlReader.readCharacters(XML_NAME_ELEM_CHARACTER));
-            } else if (xmlReader.elementStarted(XML_NAME_ELEM_FLOAT)) {
-                elemFloat = NumberUtils.parseFloat(xmlReader.readCharacters(XML_NAME_ELEM_FLOAT));
-            } else if (xmlReader.elementStarted(XML_NAME_ELEM_DOUBLE)) {
-                elemDouble = NumberUtils.parseDouble(xmlReader.readCharacters(XML_NAME_ELEM_DOUBLE));
-            } else if (xmlReader.elementStarted(XML_NAME_ELEM_DECIMAL)) {
-                elemDecimal = NumberUtils.parseBigDecimal(xmlReader.readCharacters(XML_NAME_ELEM_DECIMAL));
-            } else if (xmlReader.elementStarted(XML_NAME_ELEM_DATE_TIME)) {
-                elemDateTime = DateTimeUtils.parseXmlDate(xmlReader.readCharacters(XML_NAME_ELEM_DATE_TIME));
-            } else if (xmlReader.elementStarted(XML_NAME_ELEM_BOOLEAN)) {
-                elemBoolean = Boolean.parseBoolean(xmlReader.readCharacters(XML_NAME_ELEM_BOOLEAN));
-            } else if (xmlReader.elementStarted(XML_NAME_ELEM_BASE64_BINARY)) {
-                elemBase64Binary = Base64.decodeBase64(xmlReader.readCharacters(XML_NAME_ELEM_BASE64_BINARY));
-            } else if (xmlReader.elementStarted(XML_NAME_LST_STRING)) {
-                String lstStringItem = xmlReader.readCharacters(XML_NAME_LST_STRING);
-                if (lstStringItem != null) {
-                    lstString.add(lstStringItem);
-                }
-            } else if (xmlReader.elementStarted(XML_NAME_LST_INTEGER)) {
-                Integer lstIntegerItem = NumberUtils.parseInteger(xmlReader.readCharacters(XML_NAME_LST_INTEGER));
-                if (lstIntegerItem != null) {
-                    lstInteger.add(lstIntegerItem);
-                }
-            } else if (xmlReader.elementStarted(XML_NAME_LST_CHARACTER)) {
-                Integer lstCharacterItem = NumberUtils.parseInteger(xmlReader.readCharacters(XML_NAME_LST_CHARACTER));
-                if (lstCharacterItem != null) {
-                    lstCharacter.add(lstCharacterItem);
-                }
-            } else if (xmlReader.elementStarted(XML_NAME_LST_FLOAT)) {
-                Float lstFloatItem = NumberUtils.parseFloat(xmlReader.readCharacters(XML_NAME_LST_FLOAT));
-                if (lstFloatItem != null) {
-                    lstFloat.add(lstFloatItem);
-                }
-            } else if (xmlReader.elementStarted(XML_NAME_LST_DOUBLE)) {
-                Double lstDoubleItem = NumberUtils.parseDouble(xmlReader.readCharacters(XML_NAME_LST_DOUBLE));
-                if (lstDoubleItem != null) {
-                    lstDouble.add(lstDoubleItem);
-                }
-            } else if (xmlReader.elementStarted(XML_NAME_LST_DECIMAL)) {
-                BigDecimal lstDecimalItem = NumberUtils.parseBigDecimal(xmlReader.readCharacters(XML_NAME_LST_DECIMAL));
-                if (lstDecimalItem != null) {
-                    lstDecimal.add(lstDecimalItem);
-                }
-            } else if (xmlReader.elementStarted(XML_NAME_LST_DATE_TIME)) {
-                Date lstDateTimeItem = DateTimeUtils.parseXmlDate(xmlReader.readCharacters(XML_NAME_LST_DATE_TIME));
-                if (lstDateTimeItem != null) {
-                    lstDateTime.add(lstDateTimeItem);
-                }
-            } else if (xmlReader.elementStarted(XML_NAME_LST_BOOLEAN)) {
-                Boolean lstBooleanItem = Boolean.parseBoolean(xmlReader.readCharacters(XML_NAME_LST_BOOLEAN));
-                if (lstBooleanItem != null) {
-                    lstBoolean.add(lstBooleanItem);
-                }
-            } else if (xmlReader.elementStarted(XML_NAME_LST_BASE64_BINARY)) {
-                byte[] lstBase64BinaryItem = Base64.decodeBase64(xmlReader.readCharacters(XML_NAME_LST_BASE64_BINARY));
-                if (lstBase64BinaryItem != null) {
-                    lstBase64Binary.add(lstBase64BinaryItem);
-                }
-            }
+            readXmlContentElement(xmlReader);
         }
+    }
+
+    public boolean readXmlContentElement(
+            StaxerXmlStreamReader xmlReader
+    ) throws StaxerXmlStreamException {
+        if (xmlReader.elementStarted(XML_NAME_ELEM_STRING)) {
+            elemString = xmlReader.readCharacters(XML_NAME_ELEM_STRING);
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_ELEM_INTEGER)) {
+            elemInteger = NumberUtils.parseInteger(xmlReader.readCharacters(XML_NAME_ELEM_INTEGER));
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_ELEM_CHARACTER)) {
+            elemCharacter = NumberUtils.parseInteger(xmlReader.readCharacters(XML_NAME_ELEM_CHARACTER));
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_ELEM_FLOAT)) {
+            elemFloat = NumberUtils.parseFloat(xmlReader.readCharacters(XML_NAME_ELEM_FLOAT));
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_ELEM_DOUBLE)) {
+            elemDouble = NumberUtils.parseDouble(xmlReader.readCharacters(XML_NAME_ELEM_DOUBLE));
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_ELEM_DECIMAL)) {
+            elemDecimal = NumberUtils.parseBigDecimal(xmlReader.readCharacters(XML_NAME_ELEM_DECIMAL));
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_ELEM_DATE_TIME)) {
+            elemDateTime = DateTimeUtils.parseXmlDate(xmlReader.readCharacters(XML_NAME_ELEM_DATE_TIME));
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_ELEM_BOOLEAN)) {
+            elemBoolean = Boolean.parseBoolean(xmlReader.readCharacters(XML_NAME_ELEM_BOOLEAN));
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_ELEM_BASE64_BINARY)) {
+            elemBase64Binary = Base64.decodeBase64(xmlReader.readCharacters(XML_NAME_ELEM_BASE64_BINARY));
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_LST_STRING)) {
+            String lstStringItem = xmlReader.readCharacters(XML_NAME_LST_STRING);
+            if (lstStringItem != null) {
+                lstString.add(lstStringItem);
+            }
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_LST_INTEGER)) {
+            Integer lstIntegerItem = NumberUtils.parseInteger(xmlReader.readCharacters(XML_NAME_LST_INTEGER));
+            if (lstIntegerItem != null) {
+                lstInteger.add(lstIntegerItem);
+            }
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_LST_CHARACTER)) {
+            Integer lstCharacterItem = NumberUtils.parseInteger(xmlReader.readCharacters(XML_NAME_LST_CHARACTER));
+            if (lstCharacterItem != null) {
+                lstCharacter.add(lstCharacterItem);
+            }
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_LST_FLOAT)) {
+            Float lstFloatItem = NumberUtils.parseFloat(xmlReader.readCharacters(XML_NAME_LST_FLOAT));
+            if (lstFloatItem != null) {
+                lstFloat.add(lstFloatItem);
+            }
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_LST_DOUBLE)) {
+            Double lstDoubleItem = NumberUtils.parseDouble(xmlReader.readCharacters(XML_NAME_LST_DOUBLE));
+            if (lstDoubleItem != null) {
+                lstDouble.add(lstDoubleItem);
+            }
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_LST_DECIMAL)) {
+            BigDecimal lstDecimalItem = NumberUtils.parseBigDecimal(xmlReader.readCharacters(XML_NAME_LST_DECIMAL));
+            if (lstDecimalItem != null) {
+                lstDecimal.add(lstDecimalItem);
+            }
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_LST_DATE_TIME)) {
+            Date lstDateTimeItem = DateTimeUtils.parseXmlDate(xmlReader.readCharacters(XML_NAME_LST_DATE_TIME));
+            if (lstDateTimeItem != null) {
+                lstDateTime.add(lstDateTimeItem);
+            }
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_LST_BOOLEAN)) {
+            Boolean lstBooleanItem = Boolean.parseBoolean(xmlReader.readCharacters(XML_NAME_LST_BOOLEAN));
+            if (lstBooleanItem != null) {
+                lstBoolean.add(lstBooleanItem);
+            }
+            return true;
+        }
+        if (xmlReader.elementStarted(XML_NAME_LST_BASE64_BINARY)) {
+            byte[] lstBase64BinaryItem = Base64.decodeBase64(xmlReader.readCharacters(XML_NAME_LST_BASE64_BINARY));
+            if (lstBase64BinaryItem != null) {
+                lstBase64Binary.add(lstBase64BinaryItem);
+            }
+            return true;
+        }
+        return false;
     }
 
     public void writeXmlAttributes(
