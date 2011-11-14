@@ -120,7 +120,7 @@ public class WsBeansMojo extends AbstractMojo {
             }
             if (webService != null) {
                 StaxerUtils.createJavaWebService(
-                        webService, new File(sourceDir), packageName, true, createServerService, createClientService
+                        webService, new File(baseDir, sourceDir), packageName, true, createServerService, createClientService
                 );
             } else {
                 throw new MojoExecutionException("Web service is empty");

@@ -41,7 +41,7 @@
 
     <profiles>
         <profile>
-            <id>staxerTestWsBeans</id>
+            <id>staxerSampleWsBeans</id>
             <build>
                 <plugins>
                     <plugin>
@@ -56,8 +56,8 @@
                                 </goals>
                                 <phase>generate-sources</phase>
                                 <configuration>
-                                    <wsdlUrl>/src/main/resources/staxerSample.wsdl</wsdlUrl>
-                                    <packageName>staxer.sample.test</packageName>
+                                    <wsdlUrl>src/main/resources/staxerSample.wsdl</wsdlUrl>
+                                    <packageName>staxer.sample</packageName>
                                     <sourceDir>/src/main/java</sourceDir>
                                     <createClientService>true</createClientService>
                                     <createServerService>true</createServerService>
