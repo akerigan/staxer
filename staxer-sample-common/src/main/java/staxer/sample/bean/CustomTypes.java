@@ -95,10 +95,8 @@ public class CustomTypes implements StaxerReadXml, StaxerWriteXml {
             StaxerXmlStreamReader xmlReader
     ) throws StaxerXmlStreamException {
         XmlName rootElementName = xmlReader.getLastStartedElement();
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(rootElementName)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_ELEM_ENUM)) {
+        while (xmlReader.readNext() && !xmlReader.elementEnded(rootElementName)) {
+            if (xmlReader.elementStarted(XML_NAME_ELEM_ENUM)) {
                 elemEnum = EnumType.getByCode(xmlReader.readCharacters());
             } else if (xmlReader.elementStarted(XML_NAME_LST_ENUM)) {
                 EnumType lstEnumItem = EnumType.getByCode(xmlReader.readCharacters());

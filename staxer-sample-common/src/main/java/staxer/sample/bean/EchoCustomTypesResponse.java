@@ -62,10 +62,8 @@ public class EchoCustomTypesResponse extends CustomTypes {
     ) throws StaxerXmlStreamException {
         super.readXmlContent(xmlReader);
         XmlName rootElementName = xmlReader.getLastStartedElement();
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(rootElementName)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_ENUM)) {
+        while (xmlReader.readNext() && !xmlReader.elementEnded(rootElementName)) {
+            if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_ENUM)) {
                 nillElemEnum = EnumType.getByCode(xmlReader.readCharacters());
             } else if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_VALUE)) {
                 nillElemValue = XmlUtils.readXml(xmlReader, ValueType.class, XML_NAME_NILL_ELEM_VALUE, true);

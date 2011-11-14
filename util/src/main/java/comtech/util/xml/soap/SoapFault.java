@@ -79,10 +79,8 @@ public class SoapFault implements StaxerReadXml, StaxerWriteXml {
 
     public void readXmlContent(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
         XmlName rootElementName = xmlReader.getLastStartedElement();
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(rootElementName)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_FAULTCODE)) {
+        while (xmlReader.readNext() && !xmlReader.elementEnded(rootElementName)) {
+            if (xmlReader.elementStarted(XML_NAME_FAULTCODE)) {
                 code = xmlReader.readCharacters(XML_NAME_FAULTCODE);
             } else if (xmlReader.elementStarted(XML_NAME_FAULTSTRING)) {
                 string = xmlReader.readCharacters(XML_NAME_FAULTSTRING);

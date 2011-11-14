@@ -14,12 +14,12 @@ import javax.xml.bind.annotation.XmlRootElement;
  * Time: 16:51:04
  */
 @XmlRootElement(name = "Security",
-        namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
+                namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class WssSecurity implements StaxerReadXml, StaxerWriteXml {
 
     @XmlElement(name = "UsernameToken",
-            namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
+                namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
     private WssUsernameToken usernameToken;
 
     public WssUsernameToken getUsernameToken() {
@@ -35,10 +35,8 @@ public class WssSecurity implements StaxerReadXml, StaxerWriteXml {
 
     public void readXmlContent(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
         XmlName rootElement = xmlReader.getLastStartedElement();
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(rootElement)) {
-                break;
-            } else if (xmlReader.elementStarted(XmlConstants.XML_NAME_WSS_USERNAME_TOKEN)) {
+        while (xmlReader.readNext() && !xmlReader.elementEnded(rootElement)) {
+            if (xmlReader.elementStarted(XmlConstants.XML_NAME_WSS_USERNAME_TOKEN)) {
                 usernameToken = XmlUtils.readXml(xmlReader, WssUsernameToken.class, XmlConstants.XML_NAME_WSS_USERNAME_TOKEN);
             }
         }

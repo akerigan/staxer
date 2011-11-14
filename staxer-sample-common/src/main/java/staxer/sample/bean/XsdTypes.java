@@ -324,10 +324,8 @@ public class XsdTypes implements StaxerReadXml, StaxerWriteXml {
             StaxerXmlStreamReader xmlReader
     ) throws StaxerXmlStreamException {
         XmlName rootElementName = xmlReader.getLastStartedElement();
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(rootElementName)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_ELEM_STRING)) {
+        while (xmlReader.readNext() && !xmlReader.elementEnded(rootElementName)) {
+            if (xmlReader.elementStarted(XML_NAME_ELEM_STRING)) {
                 elemString = xmlReader.readCharacters(XML_NAME_ELEM_STRING);
             } else if (xmlReader.elementStarted(XML_NAME_ELEM_INTEGER)) {
                 elemInteger = NumberUtils.parseInteger(xmlReader.readCharacters(XML_NAME_ELEM_INTEGER));

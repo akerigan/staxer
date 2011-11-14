@@ -140,10 +140,8 @@ public class EchoXsdTypesRequest extends XsdTypes {
     ) throws StaxerXmlStreamException {
         super.readXmlContent(xmlReader);
         XmlName rootElementName = xmlReader.getLastStartedElement();
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(rootElementName)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_STRING)) {
+        while (xmlReader.readNext() && !xmlReader.elementEnded(rootElementName)) {
+            if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_STRING)) {
                 nillElemString = xmlReader.readCharacters(XML_NAME_NILL_ELEM_STRING);
             } else if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_INTEGER)) {
                 nillElemInteger = NumberUtils.parseInteger(xmlReader.readCharacters(XML_NAME_NILL_ELEM_INTEGER));

@@ -21,19 +21,19 @@ public class WssUsernameToken implements StaxerReadXml, StaxerWriteXml {
     public static final XmlName XML_NAME_CREATED = new XmlName("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "Created");
 
     @XmlElement(name = "Username",
-            namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
+                namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
     private String userName;
 
     @XmlElement(name = "Password",
-            namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
+                namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
     private WssPassword password;
 
     @XmlElement(name = "Nonce",
-            namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
+                namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd")
     private WssNonce nonce;
 
     @XmlElement(name = "Created",
-            namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd")
+                namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd")
     private String created;
 
     public String getUserName() {
@@ -73,10 +73,8 @@ public class WssUsernameToken implements StaxerReadXml, StaxerWriteXml {
 
     public void readXmlContent(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
         XmlName rootElementName = xmlReader.getLastStartedElement();
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(rootElementName)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_USERNAME)) {
+        while (xmlReader.readNext() && !xmlReader.elementEnded(rootElementName)) {
+            if (xmlReader.elementStarted(XML_NAME_USERNAME)) {
                 userName = xmlReader.readCharacters(XML_NAME_USERNAME);
             } else if (xmlReader.elementStarted(XML_NAME_PASSWORD)) {
                 password = XmlUtils.readXml(xmlReader, WssPassword.class, XML_NAME_PASSWORD);

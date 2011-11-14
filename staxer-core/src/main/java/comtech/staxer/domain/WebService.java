@@ -88,10 +88,8 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
     public void readXmlContent(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
         XmlName currentElementName = xmlReader.getLastStartedElement();
         xmlReader.updateNamespacesMap(namespacesMap);
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(currentElementName)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_WSDL_TYPES)) {
+        while (xmlReader.readNext() && !xmlReader.elementEnded(currentElementName)) {
+            if (xmlReader.elementStarted(XML_NAME_WSDL_TYPES)) {
                 readWsdlTypes(xmlReader);
             } else if (xmlReader.elementStarted(XML_NAME_WSDL_MESSAGE)) {
                 readWsdlMessage(xmlReader);
@@ -104,10 +102,8 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
     }
 
     private void readWsdlTypes(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(XML_NAME_WSDL_TYPES)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_XSD_SCHEMA)) {
+        while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_WSDL_TYPES)) {
+            if (xmlReader.elementStarted(XML_NAME_XSD_SCHEMA)) {
                 readXsdSchema(xmlReader);
             }
         }
@@ -126,10 +122,8 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
         xsdAttributesQualified = "qualified".equalsIgnoreCase(
                 attributes.get(XML_NAME_ATTRIBUTE_FORM_DEFAULT)
         );
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(XML_NAME_XSD_SCHEMA)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_XSD_COMPLEX_TYPE)) {
+        while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_SCHEMA)) {
+            if (xmlReader.elementStarted(XML_NAME_XSD_COMPLEX_TYPE)) {
                 readXsdComplexType(xmlReader);
             } else if (xmlReader.elementStarted(XML_NAME_XSD_SIMPLE_TYPE)) {
                 readXsdSimpleType(xmlReader);
@@ -153,14 +147,10 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
 
         typesMap.put(type.getXmlName(), type);
 
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(XML_NAME_XSD_COMPLEX_TYPE)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_XSD_SIMPLE_CONTENT)) {
-                while (xmlReader.readNext()) {
-                    if (xmlReader.elementEnded(XML_NAME_XSD_SIMPLE_CONTENT)) {
-                        break;
-                    } else if (xmlReader.elementStarted(XML_NAME_XSD_EXTENSION)) {
+        while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_COMPLEX_TYPE)) {
+            if (xmlReader.elementStarted(XML_NAME_XSD_SIMPLE_CONTENT)) {
+                while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_SIMPLE_CONTENT)) {
+                    if (xmlReader.elementStarted(XML_NAME_XSD_EXTENSION)) {
                         attributes = xmlReader.getAttributes();
                         WebServiceTypeField field = new WebServiceTypeField();
                         field.setJavaName("value");
@@ -178,10 +168,8 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
                     }
                 }
             } else if (xmlReader.elementStarted(XML_NAME_XSD_COMPLEX_CONTENT)) {
-                while (xmlReader.readNext()) {
-                    if (xmlReader.elementEnded(XML_NAME_XSD_COMPLEX_CONTENT)) {
-                        break;
-                    } else if (xmlReader.elementStarted(XML_NAME_XSD_EXTENSION)) {
+                while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_COMPLEX_CONTENT)) {
+                    if (xmlReader.elementStarted(XML_NAME_XSD_EXTENSION)) {
                         attributes = xmlReader.getAttributes();
                         type.setSuperTypeXmlName(unpackXmlName(attributes.get(XML_NAME_BASE), namespacesMap));
                     } else {
@@ -234,29 +222,23 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
         enumType.setXmlName(xmlName);
         enumType.setJavaName(capitalize3(localName));
         enumsMap.put(enumType.getXmlName(), enumType);
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(XML_NAME_XSD_SIMPLE_TYPE)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_XSD_RESTRICTION)) {
+        while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_SIMPLE_TYPE)) {
+            if (xmlReader.elementStarted(XML_NAME_XSD_RESTRICTION)) {
                 attributes = xmlReader.getAttributes();
                 enumType.setXmlType(unpackXmlName(attributes.get(XML_NAME_BASE), namespacesMap));
-                while (xmlReader.readNext()) {
-                    if (xmlReader.elementEnded(XML_NAME_XSD_RESTRICTION)) {
-                        break;
-                    } else {
-                        if (xmlReader.elementStarted(XML_NAME_XSD_ENUMERATION)) {
-                            attributes = xmlReader.getAttributes();
-                            String value = attributes.get(XML_NAME_VALUE);
-                            WebServiceEnumValue enumValue = new WebServiceEnumValue();
-                            enumValue.setValue(value);
-                            char first = value.charAt(0);
-                            if (first >= '0' && first <= '9') {
-                                enumValue.setJavaName(toEnumName("value_" + value));
-                            } else {
-                                enumValue.setJavaName(toEnumName(value));
-                            }
-                            enumType.getValues().add(enumValue);
+                while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_RESTRICTION)) {
+                    if (xmlReader.elementStarted(XML_NAME_XSD_ENUMERATION)) {
+                        attributes = xmlReader.getAttributes();
+                        String value = attributes.get(XML_NAME_VALUE);
+                        WebServiceEnumValue enumValue = new WebServiceEnumValue();
+                        enumValue.setValue(value);
+                        char first = value.charAt(0);
+                        if (first >= '0' && first <= '9') {
+                            enumValue.setJavaName(toEnumName("value_" + value));
+                        } else {
+                            enumValue.setJavaName(toEnumName(value));
                         }
+                        enumType.getValues().add(enumValue);
                     }
                 }
             }
@@ -268,10 +250,8 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
             boolean xsdElementsQualified, boolean xsdAttributesQualified,
             String xsdTargetNamespace, Map<String, String> namespacesMap
     ) throws StaxerXmlStreamException {
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(XML_NAME_XSD_SEQUENCE)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_XSD_ELEMENT)) {
+        while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_SEQUENCE)) {
+            if (xmlReader.elementStarted(XML_NAME_XSD_ELEMENT)) {
                 type.getFields().add(createField(
                         xmlReader.getAttributes(), true, xsdElementsQualified,
                         xsdAttributesQualified, xsdTargetNamespace, namespacesMap
@@ -285,10 +265,8 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
         WebServiceMessage message = new WebServiceMessage();
         message.setName(new XmlName(wsdlTargetNamespace, attributes.get(XML_NAME_NAME)));
         messagesMap.put(message.getName(), message);
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(XML_NAME_WSDL_MESSAGE)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_WSDL_PART)) {
+        while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_WSDL_MESSAGE)) {
+            if (xmlReader.elementStarted(XML_NAME_WSDL_PART)) {
                 attributes = xmlReader.getAttributes();
                 WebServiceMessagePart part = new WebServiceMessagePart();
                 part.setName(new XmlName(wsdlTargetNamespace, attributes.get(XML_NAME_NAME)));
@@ -301,10 +279,8 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
     private void readWsdlPortType(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
         XmlNameMapProperties attributes = xmlReader.getAttributes();
         portTypeName = new XmlName(wsdlTargetNamespace, attributes.get(XML_NAME_NAME));
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(XML_NAME_WSDL_PORT_TYPE)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_WSDL_OPERATION)) {
+        while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_WSDL_PORT_TYPE)) {
+            if (xmlReader.elementStarted(XML_NAME_WSDL_OPERATION)) {
                 readWsdlPortOperation(xmlReader);
             }
         }
@@ -317,10 +293,8 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
         operation.setName(new XmlName(wsdlTargetNamespace, localName));
         operation.setJavaName(decapitalize(capitalize3(localName)));
         operationsMap.put(operation.getName(), operation);
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(XML_NAME_WSDL_OPERATION)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_WSDL_INPUT)) {
+        while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_WSDL_OPERATION)) {
+            if (xmlReader.elementStarted(XML_NAME_WSDL_INPUT)) {
                 attributes = xmlReader.getAttributes();
                 operation.setInputName(new XmlName(wsdlTargetNamespace, attributes.get(XML_NAME_NAME)));
                 operation.setInputMessage(unpackXmlName(attributes.get(XML_NAME_MESSAGE), namespacesMap));
@@ -335,10 +309,8 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
     private void readWsdlBinding(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
         XmlNameMapProperties attributes = xmlReader.getAttributes();
         bindingName = new XmlName(wsdlTargetNamespace, attributes.get(XML_NAME_NAME));
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(XML_NAME_WSDL_BINDING)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_SOAP_BINDING)) {
+        while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_WSDL_BINDING)) {
+            if (xmlReader.elementStarted(XML_NAME_SOAP_BINDING)) {
                 attributes = xmlReader.getAttributes();
                 soapStyle = attributes.get(XML_NAME_STYLE);
                 soapTransport = attributes.get(XML_NAME_TRANSPORT);
@@ -352,26 +324,20 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
         XmlNameMapProperties attributes = xmlReader.getAttributes();
         WebServiceOperation operation = operationsMap.get(new XmlName(wsdlTargetNamespace, attributes.get(XML_NAME_NAME)));
         if (operation != null) {
-            while (xmlReader.readNext()) {
-                if (xmlReader.elementEnded(XML_NAME_WSDL_OPERATION)) {
-                    break;
-                } else if (xmlReader.elementStarted(XML_NAME_SOAP_OPERATION)) {
+            while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_WSDL_OPERATION)) {
+                if (xmlReader.elementStarted(XML_NAME_SOAP_OPERATION)) {
                     attributes = xmlReader.getAttributes();
                     operation.setSoapAction(attributes.get(XML_NAME_SOAP_ACTION));
                 } else if (xmlReader.elementStarted(XML_NAME_WSDL_INPUT)) {
-                    while (xmlReader.readNext()) {
-                        if (xmlReader.elementEnded(XML_NAME_WSDL_INPUT)) {
-                            break;
-                        } else if (xmlReader.elementStarted(XML_NAME_SOAP_BODY)) {
+                    while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_WSDL_INPUT)) {
+                        if (xmlReader.elementStarted(XML_NAME_SOAP_BODY)) {
                             attributes = xmlReader.getAttributes();
                             operation.setInputSoapBody(attributes.get(XML_NAME_USE));
                         }
                     }
                 } else if (xmlReader.elementStarted(XML_NAME_WSDL_OUTPUT)) {
-                    while (xmlReader.readNext()) {
-                        if (xmlReader.elementEnded(XML_NAME_WSDL_OUTPUT)) {
-                            break;
-                        } else if (xmlReader.elementStarted(XML_NAME_SOAP_BODY)) {
+                    while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_WSDL_OUTPUT)) {
+                        if (xmlReader.elementStarted(XML_NAME_SOAP_BODY)) {
                             attributes = xmlReader.getAttributes();
                             operation.setOutputSoapBody(attributes.get(XML_NAME_USE));
                         }
@@ -404,10 +370,10 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
         result.setXmlType(unpackXmlName(attributes.get(XML_NAME_TYPE), namespacesMap));
         result.setNillable(attributes.getBoolean(XML_NAME_NILLABLE));
         result.setRequired(attributes.getInteger(XML_NAME_MIN_OCCURS) > 0
-                || "required".equals(attributes.get(XML_NAME_USE)));
+                           || "required".equals(attributes.get(XML_NAME_USE)));
         result.setArray(
                 "unbounded".equals(attributes.get(XML_NAME_MAX_OCCURS))
-                        || attributes.getInteger(XML_NAME_MAX_OCCURS) > 1
+                || attributes.getInteger(XML_NAME_MAX_OCCURS) > 1
         );
         result.setElementField(elementField);
         return result;

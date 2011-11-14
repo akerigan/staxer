@@ -30,10 +30,8 @@ public class SoapFaultDetail implements StaxerReadXml, StaxerWriteXml {
 
     public void readXmlContent(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
         XmlName rootElement = xmlReader.getLastStartedElement();
-        while (xmlReader.readNext()) {
-            if (xmlReader.elementEnded(rootElement)) {
-                break;
-            } else if (xmlReader.elementStarted(XML_NAME_ENTRY)) {
+        while (xmlReader.readNext() && !xmlReader.elementEnded(rootElement)) {
+            if (xmlReader.elementStarted(XML_NAME_ENTRY)) {
                 SoapFaultDetailEntry entryLocal = XmlUtils.readXml(xmlReader, SoapFaultDetailEntry.class, XML_NAME_ENTRY);
                 if (entryLocal != null) {
                     entries.add(entryLocal);

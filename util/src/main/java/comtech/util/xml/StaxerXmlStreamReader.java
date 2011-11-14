@@ -160,7 +160,7 @@ public class StaxerXmlStreamReader {
 
     public boolean elementStarted(XmlName name) {
         return event == XMLStreamConstants.START_ELEMENT
-                && name != null && name.equals(lastStartedElement);
+               && name != null && name.equals(lastStartedElement);
     }
 
     public boolean elementEnded() {
@@ -169,7 +169,7 @@ public class StaxerXmlStreamReader {
 
     public boolean elementEnded(XmlName name) {
         return event == XMLStreamConstants.END_ELEMENT &&
-                name != null && name.equals(endedElement);
+               name != null && name.equals(endedElement);
     }
 
     public boolean readNext() throws StaxerXmlStreamException {
@@ -191,10 +191,8 @@ public class StaxerXmlStreamReader {
 
     public String readCharacters(XmlName endElement) throws StaxerXmlStreamException {
         StringBuilder result = new StringBuilder();
-        while (readNext()) {
-            if (elementEnded(endElement)) {
-                break;
-            } else if (event == XMLStreamConstants.CHARACTERS) {
+        while (readNext() && !elementEnded(endElement)) {
+            if (event == XMLStreamConstants.CHARACTERS) {
                 if (result.length() != 0) {
                     result.append(" ");
                 }
