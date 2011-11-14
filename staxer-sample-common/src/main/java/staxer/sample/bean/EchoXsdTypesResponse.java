@@ -2,6 +2,7 @@ package staxer.sample.bean;
 
 import comtech.util.DateTimeUtils;
 import comtech.util.NumberUtils;
+import comtech.util.StringUtils;
 import comtech.util.props.XmlNameMapProperties;
 import comtech.util.xml.StaxerXmlStreamException;
 import comtech.util.xml.StaxerXmlStreamReader;
@@ -167,7 +168,7 @@ public class EchoXsdTypesResponse extends XsdTypes {
             return true;
         }
         if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_BOOLEAN)) {
-            nillElemBoolean = Boolean.parseBoolean(xmlReader.readCharacters(XML_NAME_NILL_ELEM_BOOLEAN));
+            nillElemBoolean = StringUtils.parseBooleanInstance(xmlReader.readCharacters(XML_NAME_NILL_ELEM_BOOLEAN));
             return true;
         }
         if (xmlReader.elementStarted(XML_NAME_NILL_ELEM_BASE64_BINARY)) {

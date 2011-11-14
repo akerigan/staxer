@@ -58,7 +58,8 @@ public class StaxerUtils {
         XSD_JAVA_TYPE_MAP.put(new XmlName(NAMESPACE_URI_XSD, "double"), javaXsdType);
         javaXsdType = new WebServiceXsdType();
         javaXsdType.setJavaName("Boolean");
-        javaXsdType.setJavaConverter("Boolean.parseBoolean");
+        javaXsdType.getImports().add("comtech.util.StringUtils");
+        javaXsdType.setJavaConverter("StringUtils.parseBooleanInstance");
         XSD_JAVA_TYPE_MAP.put(new XmlName(NAMESPACE_URI_XSD, "boolean"), javaXsdType);
         javaXsdType = new WebServiceXsdType();
         javaXsdType.setJavaName("byte[]");
@@ -501,16 +502,16 @@ public class StaxerUtils {
                                 readXmlContentElement.append(");\n");
                             }
                             if (arrayField) {
-                                readXmlContentElement.append("                if (");
+                                readXmlContentElement.append("            if (");
                                 readXmlContentElement.append(fieldJavaName);
                                 readXmlContentElement.append("Item != null) {\n");
-                                readXmlContentElement.append("                    ");
+                                readXmlContentElement.append("                ");
                                 readXmlContentElement.append(fieldJavaName);
                                 readXmlContentElement.append(".add(");
                                 readXmlContentElement.append(fieldJavaName);
                                 readXmlContentElement.append("Item");
                                 readXmlContentElement.append(");\n");
-                                readXmlContentElement.append("                }\n");
+                                readXmlContentElement.append("            }\n");
                             }
                         }
                         readXmlContentElement.append("            return true;\n        }\n");
@@ -686,7 +687,7 @@ public class StaxerUtils {
                         }
                     } else if (valueField) {
                         if (enumField) {
-                            writeXmlValue.append("        if(");
+                            writeXmlValue.append("        if (");
                             writeXmlValue.append(fieldJavaName);
                             writeXmlValue.append(" != null) {\n");
                             writeXmlValue.append("            xmlWriter.text(");

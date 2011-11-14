@@ -2,6 +2,7 @@ package staxer.sample.bean;
 
 import comtech.util.DateTimeUtils;
 import comtech.util.NumberUtils;
+import comtech.util.StringUtils;
 import comtech.util.props.XmlNameMapProperties;
 import comtech.util.xml.*;
 import org.apache.commons.codec.binary.Base64;
@@ -316,7 +317,7 @@ public class XsdTypes implements StaxerReadXml, StaxerWriteXml {
         attDouble = NumberUtils.parseDouble(attributes.get(XML_NAME_ATT_DOUBLE));
         attDecimal = NumberUtils.parseBigDecimal(attributes.get(XML_NAME_ATT_DECIMAL));
         attDateTime = DateTimeUtils.parseXmlDate(attributes.get(XML_NAME_ATT_DATE_TIME));
-        attBoolean = Boolean.parseBoolean(attributes.get(XML_NAME_ATT_BOOLEAN));
+        attBoolean = StringUtils.parseBooleanInstance(attributes.get(XML_NAME_ATT_BOOLEAN));
         attBase64Binary = Base64.decodeBase64(attributes.get(XML_NAME_ATT_BASE64_BINARY));
     }
 
@@ -361,7 +362,7 @@ public class XsdTypes implements StaxerReadXml, StaxerWriteXml {
             return true;
         }
         if (xmlReader.elementStarted(XML_NAME_ELEM_BOOLEAN)) {
-            elemBoolean = Boolean.parseBoolean(xmlReader.readCharacters(XML_NAME_ELEM_BOOLEAN));
+            elemBoolean = StringUtils.parseBooleanInstance(xmlReader.readCharacters(XML_NAME_ELEM_BOOLEAN));
             return true;
         }
         if (xmlReader.elementStarted(XML_NAME_ELEM_BASE64_BINARY)) {
@@ -418,7 +419,7 @@ public class XsdTypes implements StaxerReadXml, StaxerWriteXml {
             return true;
         }
         if (xmlReader.elementStarted(XML_NAME_LST_BOOLEAN)) {
-            Boolean lstBooleanItem = Boolean.parseBoolean(xmlReader.readCharacters(XML_NAME_LST_BOOLEAN));
+            Boolean lstBooleanItem = StringUtils.parseBooleanInstance(xmlReader.readCharacters(XML_NAME_LST_BOOLEAN));
             if (lstBooleanItem != null) {
                 lstBoolean.add(lstBooleanItem);
             }

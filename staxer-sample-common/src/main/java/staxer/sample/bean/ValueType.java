@@ -1,5 +1,6 @@
 package staxer.sample.bean;
 
+import comtech.util.StringUtils;
 import comtech.util.props.XmlNameMapProperties;
 import comtech.util.xml.*;
 
@@ -38,7 +39,7 @@ public class ValueType implements StaxerReadXml, StaxerWriteXml {
     public void readXmlAttributes(
             XmlNameMapProperties attributes
     ) throws StaxerXmlStreamException {
-        attBoolean = Boolean.parseBoolean(attributes.get(XML_NAME_ATT_BOOLEAN));
+        attBoolean = StringUtils.parseBooleanInstance(attributes.get(XML_NAME_ATT_BOOLEAN));
     }
 
     public void readXmlContent(

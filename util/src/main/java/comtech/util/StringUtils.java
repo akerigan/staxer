@@ -821,13 +821,19 @@ public class StringUtils {
         }
     }
 
+    public static Boolean parseBooleanInstance(String value) {
+        if ("true".equalsIgnoreCase(value)) {
+            return true;
+        } else if ("false".equalsIgnoreCase(value)) {
+            return false;
+        } else {
+            return null;
+        }
+    }
+
     public static Boolean parseBooleanInstance(String value, Boolean defaultValue) {
         if (value != null) {
-            try {
-                return Boolean.valueOf(value);
-            } catch (NumberFormatException e) {
-                return defaultValue;
-            }
+            return Boolean.valueOf(value);
         } else {
             return defaultValue;
         }
