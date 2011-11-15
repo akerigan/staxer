@@ -1,0 +1,72 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://staxer.sample/"
+            xmlns:tns="http://staxer.sample/" elementFormDefault="qualified" attributeFormDefault="qualified">
+
+    <xsd:include schemaLocation="staxerWsSampleCommon.xsd"/>
+
+    <xsd:complexType name="EchoXsdTypes">
+        <xsd:complexContent>
+            <xsd:extension base="tns:XsdTypes">
+                <xsd:sequence>
+                    <xsd:element minOccurs="0" name="nillElemString" type="xsd:string" nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemInteger" type="xsd:integer" nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemCharacter" type="xsd:unsignedShort"
+                                 nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemFloat" type="xsd:float" nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemDouble" type="xsd:double" nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemDecimal" type="xsd:decimal" nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemDateTime" type="xsd:dateTime" nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemBoolean" type="xsd:boolean" nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemBase64Binary" type="xsd:base64Binary"
+                                 nillable="true"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    <xsd:element name="echoXsdTypes" type="tns:EchoXsdTypes"/>
+    <xsd:complexType name="EchoXsdTypesResponse">
+        <xsd:complexContent>
+            <xsd:extension base="tns:XsdTypes">
+                <xsd:sequence>
+                    <xsd:element minOccurs="0" name="nillElemString" type="xsd:string" nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemInteger" type="xsd:integer" nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemCharacter" type="xsd:unsignedShort"
+                                 nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemFloat" type="xsd:float" nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemDouble" type="xsd:double" nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemDecimal" type="xsd:decimal" nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemDateTime" type="xsd:dateTime" nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemBoolean" type="xsd:boolean" nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemBase64Binary" type="xsd:base64Binary"
+                                 nillable="true"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    <xsd:element name="echoXsdTypesResponse" type="tns:EchoXsdTypesResponse"/>
+
+    <xsd:complexType name="EchoCustomTypes">
+        <xsd:complexContent>
+            <xsd:extension base="tns:CustomTypes">
+                <xsd:sequence>
+                    <xsd:element minOccurs="0" name="nillElemEnum" type="tns:EnumType" nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemValue" type="tns:ValueType" nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemOval" type="tns:Oval" nillable="true"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    <xsd:element name="echoCustomTypes" type="tns:EchoCustomTypes"/>
+    <xsd:complexType name="EchoCustomTypesResponse">
+        <xsd:complexContent>
+            <xsd:extension base="tns:CustomTypes">
+                <xsd:sequence>
+                    <xsd:element minOccurs="0" name="nillElemEnum" type="tns:EnumType" nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemValue" type="tns:ValueType" nillable="true"/>
+                    <xsd:element minOccurs="0" name="nillElemOval" type="tns:Oval" nillable="true"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    <xsd:element name="echoCustomTypesResponse" type="tns:EchoCustomTypesResponse"/>
+
+</xsd:schema>

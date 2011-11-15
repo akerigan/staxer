@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:tns="http://staxer.sample/" targetNamespace="http://staxer.sample/">
+    <wsdl:types>
+        <xsd:schema targetNamespace="http://staxer.sample/" elementFormDefault="qualified"
+                    attributeFormDefault="qualified">
+            <xsd:import namespace="http://staxer.sample/" schemaLocation="staxerSampleWsTypes.xsd"/>
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="echoXsdTypes">
+        <wsdl:part element="tns:echoXsdTypes" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="echoXsdTypesResponse">
+        <wsdl:part element="tns:echoXsdTypesResponse" name="echoXsdTypesResponse"/>
+    </wsdl:message>
+
+    <wsdl:message name="echoCustomTypes">
+        <wsdl:part element="tns:echoCustomTypes" name="parameters"/>
+    </wsdl:message>
+    <wsdl:message name="echoCustomTypesResponse">
+        <wsdl:part element="tns:echoCustomTypesResponse" name="echoCustomTypesResponse"/>
+    </wsdl:message>
+
+    <wsdl:portType name="staxerSampleService">
+
+        <wsdl:operation name="echoXsdTypes">
+            <wsdl:input message="tns:echoXsdTypes" name="echoXsdTypes"/>
+            <wsdl:output message="tns:echoXsdTypesResponse" name="echoXsdTypesResponse"/>
+        </wsdl:operation>
+
+        <wsdl:operation name="echoCustomTypes">
+            <wsdl:input message="tns:echoCustomTypes" name="echoCustomTypes"/>
+            <wsdl:output message="tns:echoCustomTypesResponse" name="echoCustomTypesResponse"/>
+        </wsdl:operation>
+
+    </wsdl:portType>
+
+</wsdl:definitions>
