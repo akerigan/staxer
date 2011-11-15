@@ -428,7 +428,7 @@ public class HttpRequestHelper {
 
     public String getWebappURL() {
         return request.getScheme() + "://" + request.getServerName() + ":" +
-                request.getServerPort() + request.getContextPath();
+               request.getServerPort() + request.getContextPath();
     }
 
     public String getServerName() {

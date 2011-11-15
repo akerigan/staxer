@@ -1,8 +1,6 @@
 package comtech.util;
 
-import java.text.DateFormatSymbols;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.text.*;
 import java.util.*;
 
 /**
@@ -47,23 +45,23 @@ public class DateTimeUtils {
     };
 
     private static String[] russianWeeks = new String[]{
+            "Суббота",
             "Воскресенье",
             "Понедельник",
             "Вторник",
             "Среда",
             "Четверг",
-            "Пятница",
-            "Суббота"
+            "Пятница"
     };
 
     private static String[] russianShortWeeks = new String[]{
+            "Суб",
             "Вос",
             "Пон",
             "Втр",
             "Срд",
             "Чтв",
-            "Пят",
-            "Суб"
+            "Пят"
     };
 
     static {
@@ -95,7 +93,7 @@ public class DateTimeUtils {
     }
 
     public static String formatDate(Date date, String format) {
-        return formatDate(date, format, "ru");
+        return formatDate(date, format, new Locale("ru", "RU"));
     }
 
     public static String formatDate(Date date, String format, String language) {
@@ -419,16 +417,63 @@ public class DateTimeUtils {
         }
     }
 
-    public static Date parseXmlDate(String s) {
+    public static Date parseXmlDate(String date) {
+        if (!StringUtils.isEmpty(date)) {
+            int len = date.length();
+            TimeZone timeZone;
+            if (date.charAt(len - 1) == 'Z') {
+                timeZone = TimeZone.getTimeZone("UTC");
+            } else if (date.charAt(len - 6) == '+') {
+                timeZone = TimeZone.getTimeZone("GMT" + date.substring(len - 6));
+            } else {
+                timeZone = TimeZone.getDefault();
+            }
+            SimpleDateFormat dateFormat;
+            if (len > 19 && date.charAt(19) == '.') {
+                dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+            } else {
+                dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+            }
+            dateFormat.setTimeZone(timeZone);
+            try {
+                return dateFormat.parse(date);
+            } catch (ParseException ignored) {
+            }
+        }
         return null;
     }
 
-    public static Date formatXmlDate(Date date) {
+    public static String formatXmlDate(Date date) {
         return formatXmlDate(date, null);
     }
 
-    public static Date formatXmlDate(Date date, TimeZone timezone) {
-        return null;
+    public static String formatXmlDate(Date date, TimeZone timeZone) {
+        if (date != null) {
+            if (timeZone == null) {
+                timeZone = TimeZone.getDefault();
+            }
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+            dateFormat.setTimeZone(timeZone);
+            StringBuilder result = new StringBuilder();
+            result.append(dateFormat.format(date));
+            int minutesOffset = (timeZone.getRawOffset()) / 60000;
+            if (minutesOffset == 0) {
+                result.append('Z');
+            } else {
+                if (minutesOffset > 0) {
+                    result.append('+');
+                } else {
+                    result.append('-');
+                }
+                NumberFormat numberFormat = new DecimalFormat("00");
+                result.append(numberFormat.format(minutesOffset / 60));
+                result.append(':');
+                result.append(numberFormat.format(minutesOffset % 60));
+            }
+            return result.toString();
+        } else {
+            return null;
+        }
     }
 
 }
