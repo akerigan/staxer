@@ -8,6 +8,7 @@ import org.eclipse.jetty.http.HttpStatus;
 
 import javax.servlet.ServletContext;
 import java.io.*;
+import java.net.URI;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterOutputStream;
@@ -159,14 +160,26 @@ public class ResourceUtils {
     }
 
     public static String getUrlContentAsString(
-            String url, String httpUser, String httpPassword
+            URI uri, String httpUser, String httpPassword, String charset
     ) throws Exception {
-        ContentExchange contentExchange = getUrlContentExchange(url, httpUser, httpPassword);
-        if (contentExchange != null) {
-            return contentExchange.getResponseContent();
-        } else {
-            return null;
+        if (uri != null) {
+            String scheme = uri.getScheme();
+            if ("http".equals(scheme)) {
+                ContentExchange contentExchange = getUrlContentExchange(uri.toString(), httpUser, httpPassword);
+                if (contentExchange != null) {
+                    return contentExchange.getResponseContent();
+                }
+            } else if ("file".equals(scheme)) {
+                File file = new File(uri);
+                Reader reader = new InputStreamReader(new FileInputStream(file), charset);
+                StringWriter writer = new StringWriter();
+                IOUtils.copy(reader, writer);
+                reader.close();
+                writer.close();
+                return writer.toString();
+            }
         }
+        return null;
     }
 
     public static byte[] getUrlContentAsBytes(

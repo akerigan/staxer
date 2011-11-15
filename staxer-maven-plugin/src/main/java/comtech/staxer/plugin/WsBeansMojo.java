@@ -3,15 +3,11 @@ package comtech.staxer.plugin;
 import comtech.staxer.StaxerUtils;
 import comtech.staxer.domain.WebService;
 import comtech.util.ResourceUtils;
-import comtech.util.xml.XmlConstants;
-import comtech.util.xml.XmlUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.StringReader;
+import java.net.URI;
 
 /**
  * Ws-client stub generator goal
@@ -98,29 +94,22 @@ public class WsBeansMojo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException {
         try {
-            WebService webService;
+            URI uri;
             if (wsdlUrl.startsWith("http")) {
-                String xml = ResourceUtils.getUrlContentAsString(wsdlUrl, httpUser, httpPassword);
-                if (xml != null) {
-                    webService = XmlUtils.readXml(
-                            new StringReader(xml), WebService.class,
-                            XmlConstants.XML_NAME_WSDL_DEFINITIONS
-                    );
-                } else {
-                    throw new MojoExecutionException("Url content is empty");
-                }
+                uri = URI.create(wsdlUrl);
             } else {
                 File wsdlFile = new File(baseDir, wsdlUrl);
-                InputStream inputStream = new FileInputStream(wsdlFile);
-                webService = XmlUtils.readXml(
-                        inputStream, wsdlCharset, WebService.class,
-                        XmlConstants.XML_NAME_WSDL_DEFINITIONS
-                );
-                inputStream.close();
+                uri = wsdlFile.toURI();
             }
+            String xml = ResourceUtils.getUrlContentAsString(uri, httpUser, httpPassword, wsdlCharset);
+            if (xml == null) {
+                throw new MojoExecutionException("Url content is empty");
+            }
+            WebService webService = StaxerUtils.readWebService(uri, httpUser, httpPassword, wsdlCharset);
             if (webService != null) {
                 StaxerUtils.createJavaWebService(
-                        webService, new File(baseDir, sourceDir), packageName, true, createServerService, createClientService
+                        webService, new File(baseDir, sourceDir), packageName,
+                        true, createServerService, createClientService
                 );
             } else {
                 throw new MojoExecutionException("Web service is empty");

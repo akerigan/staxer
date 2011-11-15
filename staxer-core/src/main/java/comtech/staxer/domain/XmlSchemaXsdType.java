@@ -1,6 +1,7 @@
 package comtech.staxer.domain;
 
-import javax.xml.namespace.QName;
+import comtech.util.xml.XmlName;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,20 +9,20 @@ import java.util.List;
  * @author Vlad Vinichenko (akerigan@gmail.com)
  * @since 2011-10-24 15:45 (Europe/Moscow)
  */
-public class WebServiceXsdType {
+public class XmlSchemaXsdType {
 
-    private QName xmlName;
+    private XmlName xmlName;
     private List<String> imports = new ArrayList<String>();
     private String jaxbXmlSchema;
     private String javaName;
     private String javaConverter;
     private String xmlConverter;
 
-    public QName getXmlName() {
+    public XmlName getXmlName() {
         return xmlName;
     }
 
-    public void setXmlName(QName xmlName) {
+    public void setXmlName(XmlName xmlName) {
         this.xmlName = xmlName;
     }
 

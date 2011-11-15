@@ -1,17 +1,17 @@
 package comtech.staxer;
 
 import comtech.staxer.domain.*;
+import comtech.util.ResourceUtils;
 import comtech.util.StringUtils;
 import comtech.util.file.FileUtils;
+import comtech.util.xml.StaxerXmlStreamReader;
 import comtech.util.xml.XmlConstants;
 import comtech.util.xml.XmlName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
+import java.net.URI;
 import java.util.*;
 
 import static comtech.util.StringUtils.capitalize2;
@@ -26,48 +26,48 @@ public class StaxerUtils {
 
     private static Logger log = LoggerFactory.getLogger(StaxerUtils.class);
 
-    public static Map<XmlName, WebServiceXsdType> XSD_JAVA_TYPE_MAP;
+    public static Map<XmlName, XmlSchemaXsdType> XSD_JAVA_TYPE_MAP;
 
     static {
-        XSD_JAVA_TYPE_MAP = new HashMap<XmlName, WebServiceXsdType>();
-        WebServiceXsdType javaXsdType = new WebServiceXsdType();
+        XSD_JAVA_TYPE_MAP = new HashMap<XmlName, XmlSchemaXsdType>();
+        XmlSchemaXsdType javaXsdType = new XmlSchemaXsdType();
         javaXsdType.setJavaName("String");
         XSD_JAVA_TYPE_MAP.put(new XmlName(NAMESPACE_URI_XSD, "string"), javaXsdType);
-        javaXsdType = new WebServiceXsdType();
+        javaXsdType = new XmlSchemaXsdType();
         javaXsdType.setJavaName("BigDecimal");
         javaXsdType.getImports().add("java.math.BigDecimal");
         javaXsdType.getImports().add("comtech.util.NumberUtils");
         javaXsdType.setJavaConverter("NumberUtils.parseBigDecimal");
         XSD_JAVA_TYPE_MAP.put(new XmlName(NAMESPACE_URI_XSD, "decimal"), javaXsdType);
-        javaXsdType = new WebServiceXsdType();
+        javaXsdType = new XmlSchemaXsdType();
         javaXsdType.setJavaName("Integer");
         javaXsdType.getImports().add("comtech.util.NumberUtils");
         javaXsdType.setJavaConverter("NumberUtils.parseInteger");
         XSD_JAVA_TYPE_MAP.put(new XmlName(NAMESPACE_URI_XSD, "unsignedShort"), javaXsdType);
         XSD_JAVA_TYPE_MAP.put(new XmlName(NAMESPACE_URI_XSD, "int"), javaXsdType);
         XSD_JAVA_TYPE_MAP.put(new XmlName(NAMESPACE_URI_XSD, "integer"), javaXsdType);
-        javaXsdType = new WebServiceXsdType();
+        javaXsdType = new XmlSchemaXsdType();
         javaXsdType.setJavaName("Float");
         javaXsdType.getImports().add("comtech.util.NumberUtils");
         javaXsdType.setJavaConverter("NumberUtils.parseFloat");
         XSD_JAVA_TYPE_MAP.put(new XmlName(NAMESPACE_URI_XSD, "float"), javaXsdType);
-        javaXsdType = new WebServiceXsdType();
+        javaXsdType = new XmlSchemaXsdType();
         javaXsdType.setJavaName("Double");
         javaXsdType.getImports().add("comtech.util.NumberUtils");
         javaXsdType.setJavaConverter("NumberUtils.parseDouble");
         XSD_JAVA_TYPE_MAP.put(new XmlName(NAMESPACE_URI_XSD, "double"), javaXsdType);
-        javaXsdType = new WebServiceXsdType();
+        javaXsdType = new XmlSchemaXsdType();
         javaXsdType.setJavaName("Boolean");
         javaXsdType.getImports().add("comtech.util.StringUtils");
         javaXsdType.setJavaConverter("StringUtils.parseBooleanInstance");
         XSD_JAVA_TYPE_MAP.put(new XmlName(NAMESPACE_URI_XSD, "boolean"), javaXsdType);
-        javaXsdType = new WebServiceXsdType();
+        javaXsdType = new XmlSchemaXsdType();
         javaXsdType.setJavaName("byte[]");
         javaXsdType.getImports().add("org.apache.commons.codec.binary.Base64");
         javaXsdType.setJavaConverter("Base64.decodeBase64");
         javaXsdType.setXmlConverter("Base64.encodeBase64String");
         XSD_JAVA_TYPE_MAP.put(new XmlName(NAMESPACE_URI_XSD, "base64Binary"), javaXsdType);
-        javaXsdType = new WebServiceXsdType();
+        javaXsdType = new XmlSchemaXsdType();
         javaXsdType.setJavaName("Date");
         javaXsdType.getImports().add("java.util.Date");
         javaXsdType.getImports().add("comtech.util.DateTimeUtils");
@@ -91,8 +91,8 @@ public class StaxerUtils {
         Map<XmlName, WebServiceMessage> webServiceMessagesMap = webService.getMessagesMap();
         Map<XmlName, WebServiceOperation> webServiceOperationsMap = webService.getOperationsMap();
         Map<XmlName, WebServiceMessage> messagesMap = webService.getMessagesMap();
-        Map<XmlName, WebServiceEnum> webServiceEnumsMap = webService.getEnumsMap();
-        Map<XmlName, WebServiceType> webServiceTypesMap = webService.getTypesMap();
+        Map<XmlName, XmlSchemaEnum> webServiceEnumsMap = webService.getEnumsMap();
+        Map<XmlName, XmlSchemaType> webServiceTypesMap = webService.getTypesMap();
         for (WebServiceOperation operation : webServiceOperationsMap.values()) {
             XmlName messageXmlName = operation.getInputMessage();
             if (messageXmlName == null) {
@@ -107,25 +107,25 @@ public class StaxerUtils {
                 if (xmlTypeName == null) {
                     continue;
                 }
-                WebServiceType webServiceType = webServiceTypesMap.get(xmlTypeName);
-                if (webServiceType == null) {
+                XmlSchemaType xmlSchemaType = webServiceTypesMap.get(xmlTypeName);
+                if (xmlSchemaType == null) {
                     continue;
                 }
-                String typeJavaName = webServiceType.getJavaName();
+                String typeJavaName = xmlSchemaType.getJavaName();
                 if (StringUtils.isEmpty(typeJavaName)) {
                     continue;
                 }
                 if (!typeJavaName.endsWith("Request")) {
                     if (typeJavaName.endsWith("Req")) {
-                        webServiceType.setJavaName(typeJavaName + "uest");
+                        xmlSchemaType.setJavaName(typeJavaName + "uest");
                     } else {
-                        webServiceType.setJavaName(typeJavaName + "Request");
+                        xmlSchemaType.setJavaName(typeJavaName + "Request");
                     }
                 }
             }
         }
 
-        for (WebServiceEnum enumType : webServiceEnumsMap.values()) {
+        for (XmlSchemaEnum enumType : webServiceEnumsMap.values()) {
             String enumTypeJavaName = enumType.getJavaName();
 
             File file = new File(beansDir, enumTypeJavaName + ".java");
@@ -153,7 +153,7 @@ public class StaxerUtils {
             writer.append(enumTypeJavaName);
             writer.append(" {\n\n");
             int idx = 1;
-            for (WebServiceEnumValue enumValue : enumType.getValues()) {
+            for (XmlSchemaEnumValue enumValue : enumType.getValues()) {
                 if (idx > 1) {
                     writer.append(",\n");
                 }
@@ -219,7 +219,7 @@ public class StaxerUtils {
             writer.close();
         }
 
-        for (WebServiceType type : webServiceTypesMap.values()) {
+        for (XmlSchemaType type : webServiceTypesMap.values()) {
             String typeJavaName = type.getJavaName();
             XmlName typeXmlName = type.getXmlName();
 
@@ -253,10 +253,10 @@ public class StaxerUtils {
 
 
             String superTypeJavaName = null;
-            List<WebServiceTypeField> allTypeFields = new ArrayList<WebServiceTypeField>();
+            List<XmlSchemaTypeField> allTypeFields = new ArrayList<XmlSchemaTypeField>();
             XmlName superTypeXmlName = type.getSuperTypeXmlName();
             while (superTypeXmlName != null) {
-                WebServiceType superType = webServiceTypesMap.get(superTypeXmlName);
+                XmlSchemaType superType = webServiceTypesMap.get(superTypeXmlName);
                 if (superType != null) {
                     if (superTypeJavaName == null) {
                         superTypeJavaName = superType.getJavaName();
@@ -268,11 +268,11 @@ public class StaxerUtils {
                 }
             }
 
-            List<WebServiceTypeField> typeFields = type.getFields();
+            List<XmlSchemaTypeField> typeFields = type.getFields();
             allTypeFields.addAll(typeFields);
-            for (WebServiceTypeField field : typeFields) {
+            for (XmlSchemaTypeField field : typeFields) {
                 XmlName fieldXmlType = field.getXmlType();
-                WebServiceXsdType fieldXsdType = XSD_JAVA_TYPE_MAP.get(fieldXmlType);
+                XmlSchemaXsdType fieldXsdType = XSD_JAVA_TYPE_MAP.get(fieldXmlType);
 
                 String fieldTypeJavaName = null;
                 String fieldJaxbXmlSchema = null;
@@ -288,11 +288,11 @@ public class StaxerUtils {
                 }
 
                 if (StringUtils.isEmpty(fieldTypeJavaName)) {
-                    WebServiceType fieldType = webServiceTypesMap.get(fieldXmlType);
+                    XmlSchemaType fieldType = webServiceTypesMap.get(fieldXmlType);
                     if (fieldType != null) {
                         fieldTypeJavaName = fieldType.getJavaName();
                     } else {
-                        WebServiceEnum enumFieldType = webServiceEnumsMap.get(fieldXmlType);
+                        XmlSchemaEnum enumFieldType = webServiceEnumsMap.get(fieldXmlType);
                         if (enumFieldType != null) {
                             fieldTypeJavaName = enumFieldType.getJavaName();
                             enumField = true;
@@ -954,7 +954,7 @@ public class StaxerUtils {
                 WebServiceMessagePart firstOutputPart = outputParts.get(0);
                 XmlName outputElement = firstOutputPart.getElement();
                 XmlName outputTypeName = globalElementTypeMap.get(outputElement);
-                WebServiceType outputType = webServiceTypesMap.get(outputTypeName);
+                XmlSchemaType outputType = webServiceTypesMap.get(outputTypeName);
                 if (outputType == null) {
                     continue;
                 }
@@ -967,7 +967,7 @@ public class StaxerUtils {
                 WebServiceMessagePart firstInputPart = inputParts.get(0);
                 XmlName inputElement = firstInputPart.getElement();
                 XmlName inputTypeName = globalElementTypeMap.get(inputElement);
-                WebServiceType inputType = webServiceTypesMap.get(inputTypeName);
+                XmlSchemaType inputType = webServiceTypesMap.get(inputTypeName);
                 if (inputType == null) {
                     continue;
                 }
@@ -1107,6 +1107,38 @@ public class StaxerUtils {
                 writer.close();
             }
         }
+    }
+
+    public static WebService readWebService(
+            URI uri, String httpUser, String httpPassword, String xmlCharset
+    ) throws Exception {
+        String xml = ResourceUtils.getUrlContentAsString(uri, httpUser, httpPassword, xmlCharset);
+        if (xml != null) {
+            WebService webService = new WebService(uri, httpUser, httpPassword, xmlCharset);
+            StaxerXmlStreamReader xmlReader = new StaxerXmlStreamReader(new StringReader(xml));
+            if (xmlReader.readStartElement(XmlConstants.XML_NAME_WSDL_DEFINITIONS)) {
+                webService.readXmlAttributes(xmlReader.getAttributes());
+                webService.readXmlContent(xmlReader);
+            }
+            return webService;
+        }
+        return null;
+    }
+
+    public static XmlSchema readXsdSchema(
+            String xsdTargetNamespace, URI uri, String httpUser, String httpPassword, String xmlCharset
+    ) throws Exception {
+        String xml = ResourceUtils.getUrlContentAsString(uri, httpUser, httpPassword, xmlCharset);
+        if (xml != null) {
+            XmlSchema xmlSchema = new XmlSchema(xsdTargetNamespace, uri, httpUser, httpPassword, xmlCharset);
+            StaxerXmlStreamReader xmlReader = new StaxerXmlStreamReader(new StringReader(xml));
+            if (xmlReader.readStartElement(XmlConstants.XML_NAME_XSD_SCHEMA)) {
+                xmlSchema.readXmlAttributes(xmlReader.getAttributes());
+                xmlSchema.readXmlContent(xmlReader);
+            }
+            return xmlSchema;
+        }
+        return null;
     }
 
 }

@@ -6,7 +6,7 @@ import comtech.util.xml.XmlName;
  * @author Vlad Vinichenko(akerigan@gmail.com)
  * @since 2011-10-15 15:04 (Europe/Moscow)
  */
-public class WebServiceTypeField {
+public class XmlSchemaTypeField {
 
     private XmlName xmlName;
     private String javaName;
@@ -84,7 +84,7 @@ public class WebServiceTypeField {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("<WebServiceTypeField>\n");
+        sb.append("<XmlSchemaTypeField>\n");
         sb.append("<xmlName>");
         sb.append(xmlName);
         sb.append("</xmlName>\n");
@@ -109,7 +109,7 @@ public class WebServiceTypeField {
         sb.append("<valueField>");
         sb.append(valueField);
         sb.append("</valueField>\n");
-        sb.append("</WebServiceTypeField>\n");
+        sb.append("</XmlSchemaTypeField>\n");
 
         return sb.toString();
     }

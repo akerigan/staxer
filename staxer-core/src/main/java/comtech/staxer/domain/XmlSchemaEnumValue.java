@@ -4,7 +4,7 @@ package comtech.staxer.domain;
  * @author Vlad Vinichenko (akerigan@gmail.com)
  * @since 2011-10-21 14:43 (Europe/Moscow)
  */
-public class WebServiceEnumValue {
+public class XmlSchemaEnumValue {
 
     private String javaName;
     private String value;
@@ -28,14 +28,14 @@ public class WebServiceEnumValue {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("<WebServiceEnumValue>\n");
+        sb.append("<XmlSchemaEnumValue>\n");
         sb.append("<javaName>");
         sb.append(javaName);
         sb.append("</javaName>\n");
         sb.append("<value>");
         sb.append(value);
         sb.append("</value>\n");
-        sb.append("</WebServiceEnumValue>\n");
+        sb.append("</XmlSchemaEnumValue>\n");
 
         return sb.toString();
     }

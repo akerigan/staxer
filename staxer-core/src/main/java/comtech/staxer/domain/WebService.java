@@ -1,13 +1,18 @@
 package comtech.staxer.domain;
 
+import comtech.staxer.StaxerUtils;
+import comtech.util.ResourceUtils;
 import comtech.util.StringUtils;
 import comtech.util.props.XmlNameMapProperties;
 import comtech.util.xml.*;
 
+import java.net.URI;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static comtech.util.StringUtils.*;
+import static comtech.util.StringUtils.capitalize3;
+import static comtech.util.StringUtils.decapitalize;
 import static comtech.util.xml.XmlConstants.*;
 
 /**
@@ -17,32 +22,22 @@ import static comtech.util.xml.XmlConstants.*;
 public class WebService implements StaxerReadXml, StaxerWriteXml {
 
     private static final XmlName XML_NAME_TARGET_NAMESPACE = new XmlName("targetNamespace");
-    private static final XmlName XML_NAME_ELEMENT_FORM_DEFAULT = new XmlName("elementFormDefault");
-    private static final XmlName XML_NAME_ATTRIBUTE_FORM_DEFAULT = new XmlName("attributeFormDefault");
-    private static final XmlName XML_NAME_TYPE = new XmlName("type");
     private static final XmlName XML_NAME_NAME = new XmlName("name");
-    private static final XmlName XML_NAME_BASE = new XmlName("base");
-    private static final XmlName XML_NAME_VALUE = new XmlName("value");
     private static final XmlName XML_NAME_ELEMENT = new XmlName("element");
     private static final XmlName XML_NAME_MESSAGE = new XmlName("message");
     private static final XmlName XML_NAME_STYLE = new XmlName("style");
     private static final XmlName XML_NAME_TRANSPORT = new XmlName("transport");
     private static final XmlName XML_NAME_SOAP_ACTION = new XmlName("soapAction");
     private static final XmlName XML_NAME_USE = new XmlName("use");
-    private static final XmlName XML_NAME_NILLABLE = new XmlName("nillable");
-    private static final XmlName XML_NAME_MIN_OCCURS = new XmlName("minOccurs");
-    private static final XmlName XML_NAME_MAX_OCCURS = new XmlName("maxOccurs");
+    private static final XmlName XML_NAME_LOCATION = new XmlName("location");
+    private static final XmlName XML_NAME_NAMESPACE = new XmlName("namespace");
 
     private String wsdlTargetNamespace;
-    private String xsdTargetNamespace;
-    private boolean xsdElementsQualified;
-    private boolean xsdAttributesQualified;
 
     private Map<String, String> namespacesMap = new LinkedHashMap<String, String>();
-    private Map<XmlName, WebServiceType> typesMap = new LinkedHashMap<XmlName, WebServiceType>();
-    private Map<XmlName, WebServiceEnum> enumsMap = new LinkedHashMap<XmlName, WebServiceEnum>();
-    private Map<XmlName, XmlName> globalTypeElementMap = new LinkedHashMap<XmlName, XmlName>();
-    private Map<XmlName, XmlName> globalElementTypeMap = new LinkedHashMap<XmlName, XmlName>();
+
+    private XmlSchema xmlSchema;
+
     private Map<XmlName, WebServiceMessage> messagesMap = new LinkedHashMap<XmlName, WebServiceMessage>();
     private Map<XmlName, WebServiceOperation> operationsMap = new LinkedHashMap<XmlName, WebServiceOperation>();
     private XmlName portTypeName;
@@ -50,20 +45,51 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
     private String soapStyle;
     private String soapTransport;
 
+    private URI baseUri;
+    private String httpUser;
+    private String httpPassword;
+    private String wsdlCharset;
+
+    public WebService() {
+    }
+
+    public WebService(URI baseUri, String httpUser, String httpPassword, String wsdlCharset) {
+        this.baseUri = baseUri;
+        this.httpUser = httpUser;
+        this.httpPassword = httpPassword;
+        this.wsdlCharset = wsdlCharset;
+    }
+
     public Map<XmlName, XmlName> getGlobalTypeElementMap() {
-        return globalTypeElementMap;
+        if (xmlSchema != null) {
+            return xmlSchema.getGlobalTypeElementMap();
+        } else {
+            return Collections.emptyMap();
+        }
     }
 
     public Map<XmlName, XmlName> getGlobalElementTypeMap() {
-        return globalElementTypeMap;
+        if (xmlSchema != null) {
+            return xmlSchema.getGlobalElementTypeMap();
+        } else {
+            return Collections.emptyMap();
+        }
     }
 
-    public Map<XmlName, WebServiceType> getTypesMap() {
-        return typesMap;
+    public Map<XmlName, XmlSchemaType> getTypesMap() {
+        if (xmlSchema != null) {
+            return xmlSchema.getTypesMap();
+        } else {
+            return Collections.emptyMap();
+        }
     }
 
-    public Map<XmlName, WebServiceEnum> getEnumsMap() {
-        return enumsMap;
+    public Map<XmlName, XmlSchemaEnum> getEnumsMap() {
+        if (xmlSchema != null) {
+            return xmlSchema.getEnumsMap();
+        } else {
+            return Collections.emptyMap();
+        }
     }
 
     public Map<XmlName, WebServiceMessage> getMessagesMap() {
@@ -78,16 +104,17 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
         return bindingName;
     }
 
-    public void readXmlAttributes(XmlNameMapProperties attributes) throws StaxerXmlStreamException {
+    public void readXmlAttributes(
+            XmlNameMapProperties attributes
+    ) throws StaxerXmlStreamException {
         wsdlTargetNamespace = attributes.get(XML_NAME_TARGET_NAMESPACE);
-        if (wsdlTargetNamespace == null) {
-            wsdlTargetNamespace = "";
-        }
     }
 
-    public void readXmlContent(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
-        XmlName currentElementName = xmlReader.getLastStartedElement();
+    public void readXmlContent(
+            StaxerXmlStreamReader xmlReader
+    ) throws StaxerXmlStreamException {
         xmlReader.updateNamespacesMap(namespacesMap);
+        XmlName currentElementName = xmlReader.getLastStartedElement();
         while (xmlReader.readNext() && !xmlReader.elementEnded(currentElementName)) {
             if (xmlReader.elementStarted(XML_NAME_WSDL_TYPES)) {
                 readWsdlTypes(xmlReader);
@@ -97,165 +124,61 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
                 readWsdlPortType(xmlReader);
             } else if (xmlReader.elementStarted(XML_NAME_WSDL_BINDING)) {
                 readWsdlBinding(xmlReader);
+            } else if (xmlReader.elementStarted(XML_NAME_WSDL_IMPORT)) {
+                XmlNameMapProperties attributes = xmlReader.getAttributes();
+                URI location = URI.create(attributes.get(XML_NAME_LOCATION));
+                if (baseUri != null) {
+                    location = baseUri.resolve(location);
+                }
+                try {
+                    String xml = ResourceUtils.getUrlContentAsString(location, httpUser, httpPassword, wsdlCharset);
+                    if (xml != null) {
+                        WebService webService = StaxerUtils.readWebService(location, httpUser, httpPassword, wsdlCharset);
+                        if (webService != null) {
+                            namespacesMap.putAll(webService.namespacesMap);
+                            XmlSchema otherXmlSchema = webService.xmlSchema;
+                            if (xmlSchema != null && otherXmlSchema != null) {
+                                xmlSchema.getTypesMap().putAll(otherXmlSchema.getTypesMap());
+                                xmlSchema.getEnumsMap().putAll(otherXmlSchema.getEnumsMap());
+                                xmlSchema.getGlobalElementTypeMap().putAll(otherXmlSchema.getGlobalElementTypeMap());
+                                xmlSchema.getGlobalTypeElementMap().putAll(otherXmlSchema.getGlobalTypeElementMap());
+                            } else if (otherXmlSchema != null) {
+                                xmlSchema = otherXmlSchema;
+                            }
+                            messagesMap.putAll(webService.getMessagesMap());
+                            operationsMap.putAll(webService.getOperationsMap());
+                            if (portTypeName != null) {
+                                portTypeName = webService.portTypeName;
+                            }
+                            if (bindingName != null) {
+                                bindingName = webService.bindingName;
+                            }
+                            if (soapStyle != null) {
+                                soapStyle = webService.soapStyle;
+                            }
+                            if (soapTransport != null) {
+                                soapTransport = webService.soapTransport;
+                            }
+                        }
+                    }
+                } catch (StaxerXmlStreamException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new StaxerXmlStreamException(e);
+                }
             }
         }
     }
 
-    private void readWsdlTypes(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
+    private void readWsdlTypes(
+            StaxerXmlStreamReader xmlReader
+    ) throws StaxerXmlStreamException {
         while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_WSDL_TYPES)) {
             if (xmlReader.elementStarted(XML_NAME_XSD_SCHEMA)) {
-                readXsdSchema(xmlReader);
-            }
-        }
-    }
-
-    private void readXsdSchema(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
-        xmlReader.updateNamespacesMap(namespacesMap);
-        XmlNameMapProperties attributes = xmlReader.getAttributes();
-        xsdTargetNamespace = attributes.get(XML_NAME_TARGET_NAMESPACE);
-        if (xsdTargetNamespace == null) {
-            xsdTargetNamespace = wsdlTargetNamespace;
-        }
-        xsdElementsQualified = "qualified".equalsIgnoreCase(
-                attributes.get(XML_NAME_ELEMENT_FORM_DEFAULT)
-        );
-        xsdAttributesQualified = "qualified".equalsIgnoreCase(
-                attributes.get(XML_NAME_ATTRIBUTE_FORM_DEFAULT)
-        );
-        while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_SCHEMA)) {
-            if (xmlReader.elementStarted(XML_NAME_XSD_COMPLEX_TYPE)) {
-                readXsdComplexType(xmlReader);
-            } else if (xmlReader.elementStarted(XML_NAME_XSD_SIMPLE_TYPE)) {
-                readXsdSimpleType(xmlReader);
-            } else if (xmlReader.elementStarted(XML_NAME_XSD_ELEMENT)) {
-                attributes = xmlReader.getAttributes();
-                XmlName typeName = unpackXmlName(attributes.get(XML_NAME_TYPE), namespacesMap);
-                XmlName elementName = new XmlName(xsdTargetNamespace, attributes.get(XML_NAME_NAME));
-                globalTypeElementMap.put(typeName, elementName);
-                globalElementTypeMap.put(elementName, typeName);
-            }
-        }
-    }
-
-    private void readXsdComplexType(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
-        WebServiceType type = new WebServiceType();
-        XmlNameMapProperties attributes = xmlReader.getAttributes();
-        String localName = attributes.get(XML_NAME_NAME);
-        XmlName xmlName = new XmlName(xsdTargetNamespace, localName);
-        type.setXmlName(xmlName);
-        type.setJavaName(capitalize3(localName));
-
-        typesMap.put(type.getXmlName(), type);
-
-        while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_COMPLEX_TYPE)) {
-            if (xmlReader.elementStarted(XML_NAME_XSD_SIMPLE_CONTENT)) {
-                while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_SIMPLE_CONTENT)) {
-                    if (xmlReader.elementStarted(XML_NAME_XSD_EXTENSION)) {
-                        attributes = xmlReader.getAttributes();
-                        WebServiceTypeField field = new WebServiceTypeField();
-                        field.setJavaName("value");
-                        field.setValueField(true);
-                        field.setXmlType(unpackXmlName(attributes.get(XML_NAME_BASE), namespacesMap));
-                        type.getFields().add(field);
-                    } else if (xmlReader.elementStarted(XML_NAME_XSD_ATTRIBUTE)) {
-                        type.getFields().add(createField(
-                                xmlReader.getAttributes(), false,
-                                xsdElementsQualified,
-                                xsdAttributesQualified,
-                                xsdTargetNamespace,
-                                namespacesMap
-                        ));
-                    }
-                }
-            } else if (xmlReader.elementStarted(XML_NAME_XSD_COMPLEX_CONTENT)) {
-                while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_COMPLEX_CONTENT)) {
-                    if (xmlReader.elementStarted(XML_NAME_XSD_EXTENSION)) {
-                        attributes = xmlReader.getAttributes();
-                        type.setSuperTypeXmlName(unpackXmlName(attributes.get(XML_NAME_BASE), namespacesMap));
-                    } else {
-                        if (xmlReader.elementStarted(XML_NAME_XSD_SEQUENCE)) {
-                            readXsdSequence(
-                                    xmlReader, type,
-                                    xsdElementsQualified,
-                                    xsdAttributesQualified,
-                                    xsdTargetNamespace,
-                                    namespacesMap
-                            );
-                        } else if (xmlReader.elementStarted(XML_NAME_XSD_ATTRIBUTE)) {
-                            type.getFields().add(createField(
-                                    xmlReader.getAttributes(), false,
-                                    xsdElementsQualified,
-                                    xsdAttributesQualified,
-                                    xsdTargetNamespace,
-                                    namespacesMap
-                            ));
-                        }
-                    }
-                }
-            } else {
-                if (xmlReader.elementStarted(XML_NAME_XSD_SEQUENCE)) {
-                    readXsdSequence(
-                            xmlReader, type,
-                            xsdElementsQualified,
-                            xsdAttributesQualified,
-                            xsdTargetNamespace,
-                            namespacesMap
-                    );
-                } else if (xmlReader.elementStarted(XML_NAME_XSD_ATTRIBUTE)) {
-                    type.getFields().add(createField(
-                            xmlReader.getAttributes(), false,
-                            xsdElementsQualified,
-                            xsdAttributesQualified,
-                            xsdTargetNamespace,
-                            namespacesMap
-                    ));
-                }
-            }
-        }
-    }
-
-    private void readXsdSimpleType(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
-        WebServiceEnum enumType = new WebServiceEnum();
-        XmlNameMapProperties attributes = xmlReader.getAttributes();
-        String localName = attributes.get(XML_NAME_NAME);
-        XmlName xmlName = new XmlName(xsdTargetNamespace, localName);
-        enumType.setXmlName(xmlName);
-        enumType.setJavaName(capitalize3(localName));
-        enumsMap.put(enumType.getXmlName(), enumType);
-        while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_SIMPLE_TYPE)) {
-            if (xmlReader.elementStarted(XML_NAME_XSD_RESTRICTION)) {
-                attributes = xmlReader.getAttributes();
-                enumType.setXmlType(unpackXmlName(attributes.get(XML_NAME_BASE), namespacesMap));
-                while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_RESTRICTION)) {
-                    if (xmlReader.elementStarted(XML_NAME_XSD_ENUMERATION)) {
-                        attributes = xmlReader.getAttributes();
-                        String value = attributes.get(XML_NAME_VALUE);
-                        WebServiceEnumValue enumValue = new WebServiceEnumValue();
-                        enumValue.setValue(value);
-                        char first = value.charAt(0);
-                        if (first >= '0' && first <= '9') {
-                            enumValue.setJavaName(toEnumName("value_" + value));
-                        } else {
-                            enumValue.setJavaName(toEnumName(value));
-                        }
-                        enumType.getValues().add(enumValue);
-                    }
-                }
-            }
-        }
-    }
-
-    private void readXsdSequence(
-            StaxerXmlStreamReader xmlReader, WebServiceType type,
-            boolean xsdElementsQualified, boolean xsdAttributesQualified,
-            String xsdTargetNamespace, Map<String, String> namespacesMap
-    ) throws StaxerXmlStreamException {
-        while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_SEQUENCE)) {
-            if (xmlReader.elementStarted(XML_NAME_XSD_ELEMENT)) {
-                type.getFields().add(createField(
-                        xmlReader.getAttributes(), true, xsdElementsQualified,
-                        xsdAttributesQualified, xsdTargetNamespace, namespacesMap
-                ));
+                xmlSchema = new XmlSchema(wsdlTargetNamespace, baseUri, httpUser, httpPassword, wsdlCharset);
+                xmlSchema.readXmlAttributes(xmlReader.getAttributes());
+                xmlSchema.readXmlContent(xmlReader);
+                namespacesMap.putAll(xmlSchema.getNamespacesMap());
             }
         }
     }
@@ -347,38 +270,6 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
         }
     }
 
-    private WebServiceTypeField createField(
-            XmlNameMapProperties attributes, boolean elementField,
-            boolean xsdElementsQualified, boolean xsdAttributesQualified,
-            String xsdTargetNamespace, Map<String, String> namespacesMap
-    ) {
-        WebServiceTypeField result = new WebServiceTypeField();
-        String localName = attributes.get(XML_NAME_NAME);
-        if (elementField && xsdElementsQualified || !elementField && xsdAttributesQualified) {
-            result.setXmlName(new XmlName(xsdTargetNamespace, localName));
-        } else {
-            result.setXmlName(new XmlName(localName));
-        }
-        if ("return".equals(localName)) {
-            localName = "result";
-        } else if ("class".equals(localName)) {
-            localName = "cls";
-        } else if ("package".equals(localName)) {
-            localName = "pkg";
-        }
-        result.setJavaName(decapitalize(capitalize3(localName)));
-        result.setXmlType(unpackXmlName(attributes.get(XML_NAME_TYPE), namespacesMap));
-        result.setNillable(attributes.getBoolean(XML_NAME_NILLABLE));
-        result.setRequired(attributes.getInteger(XML_NAME_MIN_OCCURS) > 0
-                           || "required".equals(attributes.get(XML_NAME_USE)));
-        result.setArray(
-                "unbounded".equals(attributes.get(XML_NAME_MAX_OCCURS))
-                || attributes.getInteger(XML_NAME_MAX_OCCURS) > 1
-        );
-        result.setElementField(elementField);
-        return result;
-    }
-
     private XmlName unpackXmlName(
             String packedName, Map<String, String> namespacesMap
     ) {
@@ -408,15 +299,6 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
         sb.append("<wsdlTargetNamespace>");
         sb.append(wsdlTargetNamespace);
         sb.append("</wsdlTargetNamespace>\n");
-        sb.append("<xsdTargetNamespace>");
-        sb.append(xsdTargetNamespace);
-        sb.append("</xsdTargetNamespace>\n");
-        sb.append("<xsdElementsQualified>");
-        sb.append(xsdElementsQualified);
-        sb.append("</xsdElementsQualified>\n");
-        sb.append("<xsdAttributesQualified>");
-        sb.append(xsdAttributesQualified);
-        sb.append("</xsdAttributesQualified>\n");
         if (namespacesMap != null) {
             sb.append("<namespacesMap>");
             for (Object key : namespacesMap.keySet()) {
@@ -430,58 +312,9 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
         } else {
             sb.append("<namespacesMap/>\n");
         }
-        if (typesMap != null) {
-            sb.append("<typesMap>");
-            for (Object key : typesMap.keySet()) {
-                sb.append("<entry key=\"");
-                sb.append(key);
-                sb.append("\">");
-                sb.append(typesMap.get(key));
-                sb.append("</entry>\n");
-            }
-            sb.append("</typesMap>\n");
-        } else {
-            sb.append("<typesMap/>\n");
-        }
-        if (enumsMap != null) {
-            sb.append("<enumsMap>");
-            for (Object key : enumsMap.keySet()) {
-                sb.append("<entry key=\"");
-                sb.append(key);
-                sb.append("\">");
-                sb.append(enumsMap.get(key));
-                sb.append("</entry>\n");
-            }
-            sb.append("</enumsMap>\n");
-        } else {
-            sb.append("<enumsMap/>\n");
-        }
-        if (globalTypeElementMap != null) {
-            sb.append("<globalTypeElementMap>");
-            for (Object key : globalTypeElementMap.keySet()) {
-                sb.append("<entry key=\"");
-                sb.append(key);
-                sb.append("\">");
-                sb.append(globalTypeElementMap.get(key));
-                sb.append("</entry>\n");
-            }
-            sb.append("</globalTypeElementMap>\n");
-        } else {
-            sb.append("<globalTypeElementMap/>\n");
-        }
-        if (globalElementTypeMap != null) {
-            sb.append("<globalElementTypeMap>");
-            for (Object key : globalElementTypeMap.keySet()) {
-                sb.append("<entry key=\"");
-                sb.append(key);
-                sb.append("\">");
-                sb.append(globalElementTypeMap.get(key));
-                sb.append("</entry>\n");
-            }
-            sb.append("</globalElementTypeMap>\n");
-        } else {
-            sb.append("<globalElementTypeMap/>\n");
-        }
+        sb.append("<xmlSchema>");
+        sb.append(xmlSchema);
+        sb.append("</xmlSchema>\n");
         if (messagesMap != null) {
             sb.append("<messagesMap>");
             for (Object key : messagesMap.keySet()) {

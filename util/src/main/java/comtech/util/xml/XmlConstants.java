@@ -32,6 +32,7 @@ public class XmlConstants {
     public static final XmlName XML_NAME_WSDL_INPUT = new XmlName(NAMESPACE_URI_WSDL, "input");
     public static final XmlName XML_NAME_WSDL_OUTPUT = new XmlName(NAMESPACE_URI_WSDL, "output");
     public static final XmlName XML_NAME_WSDL_BINDING = new XmlName(NAMESPACE_URI_WSDL, "binding");
+    public static final XmlName XML_NAME_WSDL_IMPORT = new XmlName(NAMESPACE_URI_WSDL, "import");
 
     public static final XmlName XML_NAME_XSD_SCHEMA = new XmlName(NAMESPACE_URI_XSD, "schema");
     public static final XmlName XML_NAME_XSD_COMPLEX_TYPE = new XmlName(NAMESPACE_URI_XSD, "complexType");
@@ -46,6 +47,8 @@ public class XmlConstants {
     public static final XmlName XML_NAME_XSD_COMPLEX_CONTENT = new XmlName(NAMESPACE_URI_XSD, "complexContent");
     public static final XmlName XML_NAME_XSD_EXTENSION = new XmlName(NAMESPACE_URI_XSD, "extension");
     public static final XmlName XML_NAME_XSD_SIMPLE_CONTENT = new XmlName(NAMESPACE_URI_XSD, "simpleContent");
+    public static final XmlName XML_NAME_XSD_IMPORT = new XmlName(NAMESPACE_URI_XSD, "import");
+    public static final XmlName XML_NAME_XSD_INCLUDE = new XmlName(NAMESPACE_URI_XSD, "include");
 
     public static final XmlName XML_NAME_XSI_NIL = new XmlName(NAMESPACE_URI_XSI, "nil");
 

@@ -9,14 +9,14 @@ import java.util.List;
  * @author Vlad Vinichenko (akerigan@gmail.com)
  * @since 2011-10-14 18:32 (Europe/Moscow)
  */
-public class WebServiceType {
+public class XmlSchemaType {
 
     private XmlName xmlName;
     private XmlName superTypeXmlName;
     private String javaPackage;
     private String jaxbXmlScheme;
     private String javaName;
-    private List<WebServiceTypeField> fields = new ArrayList<WebServiceTypeField>();
+    private List<XmlSchemaTypeField> fields = new ArrayList<XmlSchemaTypeField>();
 
     public XmlName getXmlName() {
         return xmlName;
@@ -50,14 +50,14 @@ public class WebServiceType {
         this.javaName = javaName;
     }
 
-    public List<WebServiceTypeField> getFields() {
+    public List<XmlSchemaTypeField> getFields() {
         return fields;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("<WebServiceType>\n");
+        sb.append("<XmlSchemaType>\n");
         sb.append("<xmlName>");
         sb.append(xmlName);
         sb.append("</xmlName>\n");
@@ -81,7 +81,7 @@ public class WebServiceType {
         } else {
             sb.append("<fields/>\n");
         }
-        sb.append("</WebServiceType>\n");
+        sb.append("</XmlSchemaType>\n");
 
         return sb.toString();
     }

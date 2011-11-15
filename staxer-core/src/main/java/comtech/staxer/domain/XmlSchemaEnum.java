@@ -9,12 +9,12 @@ import java.util.List;
  * @author Vlad Vinichenko (akerigan@gmail.com)
  * @since 2011-10-21 14:46 (Europe/Moscow)
  */
-public class WebServiceEnum {
+public class XmlSchemaEnum {
 
     private XmlName xmlName;
     private XmlName xmlType;
     private String javaName;
-    private List<WebServiceEnumValue> values = new ArrayList<WebServiceEnumValue>();
+    private List<XmlSchemaEnumValue> values = new ArrayList<XmlSchemaEnumValue>();
 
     public XmlName getXmlName() {
         return xmlName;
@@ -40,14 +40,14 @@ public class WebServiceEnum {
         this.javaName = javaName;
     }
 
-    public List<WebServiceEnumValue> getValues() {
+    public List<XmlSchemaEnumValue> getValues() {
         return values;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("<WebServiceEnum>\n");
+        sb.append("<XmlSchemaEnum>\n");
         sb.append("<xmlName>");
         sb.append(xmlName);
         sb.append("</xmlName>\n");
@@ -68,7 +68,7 @@ public class WebServiceEnum {
         } else {
             sb.append("<values/>\n");
         }
-        sb.append("</WebServiceEnum>\n");
+        sb.append("</XmlSchemaEnum>\n");
 
         return sb.toString();
     }
