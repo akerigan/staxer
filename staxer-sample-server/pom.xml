@@ -1,0 +1,49 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>staxer</groupId>
+        <artifactId>staxer</artifactId>
+        <version>1.1</version>
+    </parent>
+    <artifactId>staxer-sample-server</artifactId>
+    <packaging>war</packaging>
+    <version>${staxer.version}</version>
+    <name>Staxer sample server</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>staxer</groupId>
+            <artifactId>staxer-core</artifactId>
+            <version>${staxer.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>staxer</groupId>
+            <artifactId>staxer-sample-common</artifactId>
+            <version>${staxer.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>ST4</artifactId>
+            <version>4.0.4</version>
+            <type>jar</type>
+        </dependency>
+
+    </dependencies>
+
+</project>
+

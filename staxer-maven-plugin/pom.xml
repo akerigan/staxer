@@ -9,7 +9,7 @@
         <version>1.1</version>
     </parent>
     <artifactId>staxer-maven-plugin</artifactId>
-    <version>1.1</version>
+    <version>${staxer.version}</version>
     <packaging>maven-plugin</packaging>
     <name>Staxer Mojo for Maven</name>
 
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>staxer</groupId>
             <artifactId>staxer-core</artifactId>
-            <version>1.1</version>
+            <version>${staxer.version}</version>
         </dependency>
 
         <dependency>

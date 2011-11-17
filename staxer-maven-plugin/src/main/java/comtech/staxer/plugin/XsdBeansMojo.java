@@ -1,7 +1,7 @@
 package comtech.staxer.plugin;
 
 import comtech.staxer.StaxerUtils;
-import comtech.staxer.domain.WebService;
+import comtech.staxer.domain.XmlSchema;
 import comtech.util.ResourceUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -10,13 +10,13 @@ import java.io.File;
 import java.net.URI;
 
 /**
- * Ws beans generator goal
+ * Xsd beans generator goal
  *
  * @author Vlad Vinichenko (akerigan@gmail.com)
- * @goal ws-beans
+ * @goal xsd-beans
  * @phase generate-sources
  */
-public class WsBeansMojo extends AbstractMojo {
+public class XsdBeansMojo extends AbstractMojo {
 
     /**
      * Location base dir
@@ -27,22 +27,22 @@ public class WsBeansMojo extends AbstractMojo {
     private File baseDir;
 
     /**
-     * URL of wsdl file or relative (based on module path) path to wsdl file
+     * URL of xsd file or relative (based on module path) path to xsd file
      *
      * @parameter
      * @required
      */
-    private String wsdlUrl;
+    private String xsdUrl;
 
     /**
-     * Charset of wsdl file
+     * Charset of xsd file
      *
      * @parameter default-value="UTF-8"
      */
-    private String wsdlCharset;
+    private String xsdCharset;
 
     /**
-     * Relative path for stub saving
+     * Relative path for beans saving
      *
      * @parameter
      * @required
@@ -71,44 +71,29 @@ public class WsBeansMojo extends AbstractMojo {
      */
     private String httpPassword;
 
-    /**
-     * Generate ws client service
-     *
-     * @parameter
-     */
-    private boolean createClientService;
-
-    /**
-     * Generate server operations
-     *
-     * @parameter
-     */
-    private boolean createServerService;
-
     public void execute() throws MojoExecutionException {
         try {
             URI uri;
-            if (wsdlUrl.startsWith("http")) {
-                uri = URI.create(wsdlUrl);
+            if (xsdUrl.startsWith("http")) {
+                uri = URI.create(xsdUrl);
             } else {
-                File wsdlFile = new File(baseDir, wsdlUrl);
+                File wsdlFile = new File(baseDir, xsdUrl);
                 uri = wsdlFile.toURI();
             }
-            String xml = ResourceUtils.getUrlContentAsString(uri, httpUser, httpPassword, wsdlCharset);
+            String xml = ResourceUtils.getUrlContentAsString(uri, httpUser, httpPassword, xsdCharset);
             if (xml == null) {
                 throw new MojoExecutionException("Url content is empty");
             }
-            WebService webService = StaxerUtils.readWebService(uri, httpUser, httpPassword, wsdlCharset);
-            if (webService != null) {
-                StaxerUtils.createJavaWebService(
-                        webService, new File(baseDir, sourceDir), packageName,
-                        true, createServerService, createClientService
+            XmlSchema xmlSchema = StaxerUtils.readXmlSchema("", uri, httpUser, httpPassword, xsdCharset);
+            if (xmlSchema != null) {
+                StaxerUtils.createXsdBeans(
+                        xmlSchema, new File(baseDir, sourceDir), packageName, true
                 );
             } else {
-                throw new MojoExecutionException("Web service is empty");
+                throw new MojoExecutionException("Xml schema is empty");
             }
         } catch (Exception e) {
-            throw new MojoExecutionException("Cant generate java ws beans", e);
+            throw new MojoExecutionException("Cant generate java xsd beans", e);
         }
     }
 }

@@ -7,7 +7,6 @@ import comtech.util.props.XmlNameMapProperties;
 import comtech.util.xml.*;
 
 import java.net.URI;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -60,36 +59,8 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
         this.wsdlCharset = wsdlCharset;
     }
 
-    public Map<XmlName, XmlName> getGlobalTypeElementMap() {
-        if (xmlSchema != null) {
-            return xmlSchema.getGlobalTypeElementMap();
-        } else {
-            return Collections.emptyMap();
-        }
-    }
-
-    public Map<XmlName, XmlName> getGlobalElementTypeMap() {
-        if (xmlSchema != null) {
-            return xmlSchema.getGlobalElementTypeMap();
-        } else {
-            return Collections.emptyMap();
-        }
-    }
-
-    public Map<XmlName, XmlSchemaType> getTypesMap() {
-        if (xmlSchema != null) {
-            return xmlSchema.getTypesMap();
-        } else {
-            return Collections.emptyMap();
-        }
-    }
-
-    public Map<XmlName, XmlSchemaEnum> getEnumsMap() {
-        if (xmlSchema != null) {
-            return xmlSchema.getEnumsMap();
-        } else {
-            return Collections.emptyMap();
-        }
+    public XmlSchema getXmlSchema() {
+        return xmlSchema;
     }
 
     public Map<XmlName, WebServiceMessage> getMessagesMap() {

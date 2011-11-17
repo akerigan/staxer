@@ -86,13 +86,15 @@ public class StaxerUtils {
         File beansDir = new File(destDir, "bean");
         FileUtils.createOrCleanupDir(beansDir, log);
 
-        Map<XmlName, XmlName> globalTypeElementMap = webService.getGlobalTypeElementMap();
-        Map<XmlName, XmlName> globalElementTypeMap = webService.getGlobalElementTypeMap();
+        String beanPackageName = packageName + ".bean";
+
+        XmlSchema xmlSchema = webService.getXmlSchema();
+        Map<XmlName, XmlName> globalElementTypeMap = xmlSchema.getGlobalElementTypeMap();
         Map<XmlName, WebServiceMessage> webServiceMessagesMap = webService.getMessagesMap();
         Map<XmlName, WebServiceOperation> webServiceOperationsMap = webService.getOperationsMap();
         Map<XmlName, WebServiceMessage> messagesMap = webService.getMessagesMap();
-        Map<XmlName, XmlSchemaEnum> webServiceEnumsMap = webService.getEnumsMap();
-        Map<XmlName, XmlSchemaType> webServiceTypesMap = webService.getTypesMap();
+        Map<XmlName, XmlSchemaType> webServiceTypesMap = xmlSchema.getTypesMap();
+
         for (WebServiceOperation operation : webServiceOperationsMap.values()) {
             XmlName messageXmlName = operation.getInputMessage();
             if (messageXmlName == null) {
@@ -125,6 +127,202 @@ public class StaxerUtils {
             }
         }
 
+        createXsdBeansPrivate(xmlSchema, beansDir, beanPackageName, writeJaxbAnnotations);
+
+        if (createClientService || createServerService) {
+            String webServiceName = capitalize2(webService.getBindingName().getLocalPart(), false);
+            if (!webServiceName.toUpperCase().endsWith("WS")) {
+                webServiceName += "Ws";
+            }
+            StringBuilder serviceXmlNames = new StringBuilder();
+            StringBuilder clientServiceMethods = new StringBuilder();
+            StringBuilder serverServiceStaticConstrustor = new StringBuilder();
+            StringBuilder serverServiceMethods = new StringBuilder();
+
+            for (WebServiceOperation method : webServiceOperationsMap.values()) {
+                XmlName outputMessageName = method.getOutputMessage();
+                WebServiceMessage outputMessage = webServiceMessagesMap.get(outputMessageName);
+                List<WebServiceMessagePart> outputParts = outputMessage.getParts();
+                if (outputParts.isEmpty()) {
+                    continue;
+                }
+                WebServiceMessagePart firstOutputPart = outputParts.get(0);
+                XmlName outputElement = firstOutputPart.getElement();
+                XmlName outputTypeName = globalElementTypeMap.get(outputElement);
+                XmlSchemaType outputType = webServiceTypesMap.get(outputTypeName);
+                if (outputType == null) {
+                    continue;
+                }
+                XmlName inputMessageName = method.getInputMessage();
+                WebServiceMessage inputMessage = webServiceMessagesMap.get(inputMessageName);
+                List<WebServiceMessagePart> inputParts = inputMessage.getParts();
+                if (inputParts.isEmpty()) {
+                    continue;
+                }
+                WebServiceMessagePart firstInputPart = inputParts.get(0);
+                XmlName inputElement = firstInputPart.getElement();
+                XmlName inputTypeName = globalElementTypeMap.get(inputElement);
+                XmlSchemaType inputType = webServiceTypesMap.get(inputTypeName);
+                if (inputType == null) {
+                    continue;
+                }
+                String outputTypeJavaName = outputType.getJavaName();
+                String inputTypeJavaName = inputType.getJavaName();
+                String methodJavaName = method.getJavaName();
+
+                String inputElementLocalPart = inputElement.getLocalPart();
+                String inputTypeConstantName = "XML_NAME_" + StringUtils.toEnumName(inputElementLocalPart);
+                serviceXmlNames.append("    public static final XmlName ");
+                serviceXmlNames.append(inputTypeConstantName);
+                serviceXmlNames.append(" = new XmlName(\"");
+                serviceXmlNames.append(inputElement.getNamespaceURI());
+                serviceXmlNames.append("\", \"");
+                serviceXmlNames.append(inputElementLocalPart);
+                serviceXmlNames.append("\");\n");
+
+                if (createClientService) {
+                    clientServiceMethods.append("    public ");
+                    clientServiceMethods.append(outputTypeJavaName);
+                    clientServiceMethods.append(" ");
+                    clientServiceMethods.append(methodJavaName);
+                    clientServiceMethods.append("(\n");
+                    clientServiceMethods.append("            WsRequest wsRequest, ");
+                    clientServiceMethods.append(inputTypeJavaName);
+                    clientServiceMethods.append(" parameters\n");
+                    clientServiceMethods.append("    ) throws WsClientException {\n");
+                    clientServiceMethods.append("        return httpWsClient.processSoapQuery(\n");
+                    clientServiceMethods.append("                wsRequest, parameters, ");
+                    clientServiceMethods.append(inputTypeConstantName);
+                    clientServiceMethods.append(", ");
+                    clientServiceMethods.append(outputTypeJavaName);
+                    clientServiceMethods.append(".class\n");
+                    clientServiceMethods.append("        );\n");
+                    clientServiceMethods.append("    }\n\n");
+                }
+                if (createServerService) {
+                    serverServiceStaticConstrustor.append("\n        CLASSES.put(");
+                    serverServiceStaticConstrustor.append(inputTypeConstantName);
+                    serverServiceStaticConstrustor.append(", ");
+                    serverServiceStaticConstrustor.append(inputTypeJavaName);
+                    serverServiceStaticConstrustor.append(".class);\n");
+                    serverServiceStaticConstrustor.append("        METHOD_NAMES.put(");
+                    serverServiceStaticConstrustor.append(inputTypeConstantName);
+                    serverServiceStaticConstrustor.append(", \"");
+                    serverServiceStaticConstrustor.append(methodJavaName);
+                    serverServiceStaticConstrustor.append("\");\n");
+
+                    serverServiceMethods.append("    public abstract ");
+                    serverServiceMethods.append(outputTypeJavaName);
+                    serverServiceMethods.append(" ");
+                    serverServiceMethods.append(methodJavaName);
+                    serverServiceMethods.append("(\n");
+                    serverServiceMethods.append("            WsMessage<");
+                    serverServiceMethods.append(inputTypeJavaName);
+                    serverServiceMethods.append("> wsMessage\n");
+                    serverServiceMethods.append("    );\n");
+                    serverServiceMethods.append("\n");
+
+                }
+            }
+
+            if (createClientService) {
+                String serviceName = "Client" + webServiceName;
+                File file = new File(destDir, serviceName + ".java");
+                Writer writer = new FileWriter(file);
+                writer.append("package ");
+                writer.append(packageName);
+                writer.append(";\n\n");
+                writer.append("import comtech.staxer.client.HttpWsClient;\n");
+                writer.append("import comtech.staxer.client.WsClientException;\n");
+                writer.append("import comtech.staxer.client.WsRequest;\n");
+                writer.append("import comtech.util.xml.XmlName;\n");
+                writer.append("import ");
+                writer.append(packageName);
+                writer.append(".bean.*;\n\n");
+                writer.append("\n");
+                writer.append("public class ");
+                writer.append(serviceName);
+                writer.append(" {\n\n");
+                writer.append(serviceXmlNames.toString());
+                writer.append("\n");
+                writer.append("    private HttpWsClient httpWsClient;\n");
+                writer.append("\n");
+                writer.append("    public HttpWsClient getHttpWsClient() {\n");
+                writer.append("        return httpWsClient;\n");
+                writer.append("    }\n");
+                writer.append("\n");
+                writer.append("    public void setHttpWsClient(HttpWsClient httpWsClient) {\n");
+                writer.append("        this.httpWsClient = httpWsClient;\n");
+                writer.append("    }\n");
+                writer.append("\n");
+                writer.append("    // service related methods\n");
+                writer.append("\n");
+                writer.append(clientServiceMethods.toString());
+                writer.append("}\n");
+                writer.close();
+            }
+            if (createServerService) {
+                String serviceName = "Server" + webServiceName;
+                File file = new File(destDir, serviceName + ".java");
+                Writer writer = new FileWriter(file);
+                writer.append("package ");
+                writer.append(packageName);
+                writer.append(";\n");
+                writer.append("\n");
+                writer.append("import comtech.staxer.server.ServerServiceWs;\n");
+                writer.append("import comtech.staxer.server.WsMessage;\n");
+                writer.append("import comtech.util.xml.XmlName;\n");
+                writer.append("import ");
+                writer.append(beanPackageName);
+                writer.append(".*;\n");
+                writer.append("\n");
+                writer.append("import java.util.HashMap;\n");
+                writer.append("import java.util.Map;\n");
+                writer.append("\n");
+                writer.append("public abstract class ");
+                writer.append(serviceName);
+                writer.append(" implements ServerServiceWs {\n\n");
+                writer.append(serviceXmlNames.toString());
+                writer.append("\n");
+                writer.append("    public static final Map<XmlName, Class> CLASSES;\n");
+                writer.append("    public static final Map<XmlName, String> METHOD_NAMES;\n\n");
+                writer.append("    static {\n");
+                writer.append("        CLASSES = new HashMap<XmlName, Class>();\n");
+                writer.append("        METHOD_NAMES = new HashMap<XmlName, String>();\n");
+                writer.append(serverServiceStaticConstrustor.toString());
+                writer.append("    }\n\n");
+                writer.append("    public Class getClass(XmlName xmlName) {\n");
+                writer.append("        return CLASSES.get(xmlName);\n");
+                writer.append("    }\n\n");
+                writer.append("    public String getMethodName(XmlName xmlName) {\n");
+                writer.append("        return METHOD_NAMES.get(xmlName);\n");
+                writer.append("    }\n\n");
+                writer.append(serverServiceMethods.toString());
+                writer.append("}\n");
+                writer.close();
+            }
+        }
+    }
+
+    public static void createXsdBeans(
+            XmlSchema xmlSchema, File sourceDir,
+            String packageName, boolean writeJaxbAnnotations
+    ) throws IOException {
+        if (xmlSchema != null) {
+            File destDir = new File(sourceDir, packageName.replaceAll("\\.", "/"));
+            FileUtils.createOrCleanupDir(destDir, log);
+            createXsdBeansPrivate(xmlSchema, destDir, packageName, writeJaxbAnnotations);
+        }
+    }
+
+    private static void createXsdBeansPrivate(
+            XmlSchema xmlSchema, File beansDir,
+            String packageName, boolean writeJaxbAnnotations
+    ) throws IOException {
+        Map<XmlName, XmlName> globalTypeElementMap = xmlSchema.getGlobalTypeElementMap();
+        Map<XmlName, XmlSchemaEnum> webServiceEnumsMap = xmlSchema.getEnumsMap();
+        Map<XmlName, XmlSchemaType> webServiceTypesMap = xmlSchema.getTypesMap();
+
         for (XmlSchemaEnum enumType : webServiceEnumsMap.values()) {
             String enumTypeJavaName = enumType.getJavaName();
 
@@ -133,7 +331,7 @@ public class StaxerUtils {
 
             writer.append("package ");
             writer.append(packageName);
-            writer.append(".bean;");
+            writer.append(";");
             writer.append("\n\n");
             writer.append(
                     "import javax.xml.bind.annotation.XmlEnum;\n" +
@@ -228,7 +426,7 @@ public class StaxerUtils {
 
             writer.append("package ");
             writer.append(packageName);
-            writer.append(".bean;");
+            writer.append(";");
             writer.append("\n\n");
 
             TreeSet<String> imports = new TreeSet<String>();
@@ -932,181 +1130,6 @@ public class StaxerUtils {
             writer.flush();
             writer.close();
         }
-
-        if (createClientService || createServerService) {
-            String webServiceName = capitalize2(webService.getBindingName().getLocalPart(), false);
-            if (!webServiceName.toUpperCase().endsWith("WS")) {
-                webServiceName += "Ws";
-            }
-            String beanPackageName = packageName + ".bean";
-            StringBuilder serviceXmlNames = new StringBuilder();
-            StringBuilder clientServiceMethods = new StringBuilder();
-            StringBuilder serverServiceStaticConstrustor = new StringBuilder();
-            StringBuilder serverServiceMethods = new StringBuilder();
-
-            for (WebServiceOperation method : webServiceOperationsMap.values()) {
-                XmlName outputMessageName = method.getOutputMessage();
-                WebServiceMessage outputMessage = webServiceMessagesMap.get(outputMessageName);
-                List<WebServiceMessagePart> outputParts = outputMessage.getParts();
-                if (outputParts.isEmpty()) {
-                    continue;
-                }
-                WebServiceMessagePart firstOutputPart = outputParts.get(0);
-                XmlName outputElement = firstOutputPart.getElement();
-                XmlName outputTypeName = globalElementTypeMap.get(outputElement);
-                XmlSchemaType outputType = webServiceTypesMap.get(outputTypeName);
-                if (outputType == null) {
-                    continue;
-                }
-                XmlName inputMessageName = method.getInputMessage();
-                WebServiceMessage inputMessage = webServiceMessagesMap.get(inputMessageName);
-                List<WebServiceMessagePart> inputParts = inputMessage.getParts();
-                if (inputParts.isEmpty()) {
-                    continue;
-                }
-                WebServiceMessagePart firstInputPart = inputParts.get(0);
-                XmlName inputElement = firstInputPart.getElement();
-                XmlName inputTypeName = globalElementTypeMap.get(inputElement);
-                XmlSchemaType inputType = webServiceTypesMap.get(inputTypeName);
-                if (inputType == null) {
-                    continue;
-                }
-                String outputTypeJavaName = outputType.getJavaName();
-                String inputTypeJavaName = inputType.getJavaName();
-                String methodJavaName = method.getJavaName();
-
-                String inputElementLocalPart = inputElement.getLocalPart();
-                String inputTypeConstantName = "XML_NAME_" + StringUtils.toEnumName(inputElementLocalPart);
-                serviceXmlNames.append("    public static final XmlName ");
-                serviceXmlNames.append(inputTypeConstantName);
-                serviceXmlNames.append(" = new XmlName(\"");
-                serviceXmlNames.append(inputElement.getNamespaceURI());
-                serviceXmlNames.append("\", \"");
-                serviceXmlNames.append(inputElementLocalPart);
-                serviceXmlNames.append("\");\n");
-
-                if (createClientService) {
-                    clientServiceMethods.append("    public ");
-                    clientServiceMethods.append(outputTypeJavaName);
-                    clientServiceMethods.append(" ");
-                    clientServiceMethods.append(methodJavaName);
-                    clientServiceMethods.append("(\n");
-                    clientServiceMethods.append("            WsRequest wsRequest, ");
-                    clientServiceMethods.append(inputTypeJavaName);
-                    clientServiceMethods.append(" parameters\n");
-                    clientServiceMethods.append("    ) throws WsClientException {\n");
-                    clientServiceMethods.append("        return httpWsClient.processSoapQuery(\n");
-                    clientServiceMethods.append("                wsRequest, parameters, ");
-                    clientServiceMethods.append(inputTypeConstantName);
-                    clientServiceMethods.append(", ");
-                    clientServiceMethods.append(outputTypeJavaName);
-                    clientServiceMethods.append(".class\n");
-                    clientServiceMethods.append("        );\n");
-                    clientServiceMethods.append("    }\n\n");
-                }
-                if (createServerService) {
-                    serverServiceStaticConstrustor.append("\n        CLASSES.put(");
-                    serverServiceStaticConstrustor.append(inputTypeConstantName);
-                    serverServiceStaticConstrustor.append(", ");
-                    serverServiceStaticConstrustor.append(inputTypeJavaName);
-                    serverServiceStaticConstrustor.append(".class);\n");
-                    serverServiceStaticConstrustor.append("        METHOD_NAMES.put(");
-                    serverServiceStaticConstrustor.append(inputTypeConstantName);
-                    serverServiceStaticConstrustor.append(", \"");
-                    serverServiceStaticConstrustor.append(methodJavaName);
-                    serverServiceStaticConstrustor.append("\");\n");
-
-                    serverServiceMethods.append("    public abstract ");
-                    serverServiceMethods.append(outputTypeJavaName);
-                    serverServiceMethods.append(" ");
-                    serverServiceMethods.append(methodJavaName);
-                    serverServiceMethods.append("(\n");
-                    serverServiceMethods.append("            WsMessage<");
-                    serverServiceMethods.append(inputTypeJavaName);
-                    serverServiceMethods.append("> wsMessage\n");
-                    serverServiceMethods.append("    );\n");
-                    serverServiceMethods.append("\n");
-
-                }
-            }
-
-            if (createClientService) {
-                String serviceName = "Client" + webServiceName;
-                File file = new File(destDir, serviceName + ".java");
-                Writer writer = new FileWriter(file);
-                writer.append("package ");
-                writer.append(packageName);
-                writer.append(";\n\n");
-                writer.append("import comtech.staxer.client.HttpWsClient;\n");
-                writer.append("import comtech.staxer.client.WsClientException;\n");
-                writer.append("import comtech.staxer.client.WsRequest;\n");
-                writer.append("import comtech.util.xml.XmlName;\n");
-                writer.append("import ");
-                writer.append(packageName);
-                writer.append(".bean.*;\n\n");
-                writer.append("\n");
-                writer.append("public class ");
-                writer.append(serviceName);
-                writer.append(" {\n\n");
-                writer.append(serviceXmlNames.toString());
-                writer.append("\n");
-                writer.append("    private HttpWsClient httpWsClient;\n");
-                writer.append("\n");
-                writer.append("    public HttpWsClient getHttpWsClient() {\n");
-                writer.append("        return httpWsClient;\n");
-                writer.append("    }\n");
-                writer.append("\n");
-                writer.append("    public void setHttpWsClient(HttpWsClient httpWsClient) {\n");
-                writer.append("        this.httpWsClient = httpWsClient;\n");
-                writer.append("    }\n");
-                writer.append("\n");
-                writer.append("    // service related methods\n");
-                writer.append("\n");
-                writer.append(clientServiceMethods.toString());
-                writer.append("}\n");
-                writer.close();
-            }
-            if (createServerService) {
-                String serviceName = "Server" + webServiceName;
-                File file = new File(destDir, serviceName + ".java");
-                Writer writer = new FileWriter(file);
-                writer.append("package ");
-                writer.append(packageName);
-                writer.append(";\n");
-                writer.append("\n");
-                writer.append("import comtech.staxer.server.ServerServiceWs;\n");
-                writer.append("import comtech.staxer.server.WsMessage;\n");
-                writer.append("import comtech.util.xml.XmlName;\n");
-                writer.append("import ");
-                writer.append(beanPackageName);
-                writer.append(".*;\n");
-                writer.append("\n");
-                writer.append("import java.util.HashMap;\n");
-                writer.append("import java.util.Map;\n");
-                writer.append("\n");
-                writer.append("public abstract class ");
-                writer.append(serviceName);
-                writer.append(" implements ServerServiceWs {\n\n");
-                writer.append(serviceXmlNames.toString());
-                writer.append("\n");
-                writer.append("    public static final Map<XmlName, Class> CLASSES;\n");
-                writer.append("    public static final Map<XmlName, String> METHOD_NAMES;\n\n");
-                writer.append("    static {\n");
-                writer.append("        CLASSES = new HashMap<XmlName, Class>();\n");
-                writer.append("        METHOD_NAMES = new HashMap<XmlName, String>();\n");
-                writer.append(serverServiceStaticConstrustor.toString());
-                writer.append("    }\n\n");
-                writer.append("    public Class getClass(XmlName xmlName) {\n");
-                writer.append("        return CLASSES.get(xmlName);\n");
-                writer.append("    }\n\n");
-                writer.append("    public String getMethodName(XmlName xmlName) {\n");
-                writer.append("        return METHOD_NAMES.get(xmlName);\n");
-                writer.append("    }\n\n");
-                writer.append(serverServiceMethods.toString());
-                writer.append("}\n");
-                writer.close();
-            }
-        }
     }
 
     public static WebService readWebService(
@@ -1125,7 +1148,7 @@ public class StaxerUtils {
         return null;
     }
 
-    public static XmlSchema readXsdSchema(
+    public static XmlSchema readXmlSchema(
             String xsdTargetNamespace, URI uri, String httpUser, String httpPassword, String xmlCharset
     ) throws Exception {
         String xml = ResourceUtils.getUrlContentAsString(uri, httpUser, httpPassword, xmlCharset);

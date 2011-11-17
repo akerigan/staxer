@@ -138,7 +138,7 @@ public class XmlSchema implements StaxerReadXml, StaxerWriteXml {
                 try {
                     String xml = ResourceUtils.getUrlContentAsString(location, httpUser, httpPassword, xmlCharset);
                     if (xml != null) {
-                        XmlSchema xmlSchema = StaxerUtils.readXsdSchema(
+                        XmlSchema xmlSchema = StaxerUtils.readXmlSchema(
                                 namespace, location, httpUser, httpPassword, xmlCharset
                         );
                         if (xmlSchema != null) {

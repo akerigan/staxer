@@ -8,9 +8,9 @@
     </parent>
     <artifactId>staxer-core</artifactId>
     <packaging>jar</packaging>
-    <version>1.1</version>
+    <version>${staxer.version}</version>
     <name>Staxer core</name>
-    <description>Staxer is a module thats provide interaction with ws servers</description>
+    <description>Staxer is a module thats provide ws interaction</description>
     <url>http://sirena2000.ru</url>
 
     <properties>

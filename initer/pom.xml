@@ -6,10 +6,10 @@
         <groupId>staxer</groupId>
         <version>1.1</version>
     </parent>
-    <artifactId>staxer-sample-common</artifactId>
+    <artifactId>initer</artifactId>
     <packaging>jar</packaging>
-    <version>${staxer.version}</version>
-    <name>Staxer sample common</name>
+    <version>1.0</version>
+    <name>App initialization helper module</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -21,10 +21,17 @@
         <dependency>
             <groupId>staxer</groupId>
             <artifactId>staxer-core</artifactId>
-            <version>1.1</version>
+            <version>${staxer.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>staxer</groupId>
+            <artifactId>util</artifactId>
+            <version>1.0</version>
         </dependency>
 
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -41,7 +48,7 @@
 
     <profiles>
         <profile>
-            <id>staxerSampleWsBeans</id>
+            <id>log4jXsdBeans</id>
             <build>
                 <plugins>
                     <plugin>
@@ -50,17 +57,15 @@
                         <version>1.1</version>
                         <executions>
                             <execution>
-                                <id>staxerTestWsBeans</id>
+                                <id>log4jXsdBeans</id>
                                 <goals>
-                                    <goal>ws-beans</goal>
+                                    <goal>xsd-beans</goal>
                                 </goals>
                                 <phase>generate-sources</phase>
                                 <configuration>
-                                    <wsdlUrl>src/main/resources/staxerSample.wsdl</wsdlUrl>
-                                    <packageName>staxer.sample</packageName>
+                                    <xsdUrl>src/main/resources/log4jConfigurer.xsd</xsdUrl>
+                                    <packageName>comtech.initer.log.beans</packageName>
                                     <sourceDir>/src/main/java</sourceDir>
-                                    <createClientService>true</createClientService>
-                                    <createServerService>true</createServerService>
                                 </configuration>
                             </execution>
                         </executions>

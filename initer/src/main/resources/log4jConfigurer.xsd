@@ -1,0 +1,59 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <xsd:complexType name="Log4jConfigurationXml">
+        <xsd:sequence>
+            <xsd:element minOccurs="0" maxOccurs="unbounded" name="patternLayout" type="PatternLayoutXml"/>
+            <xsd:element minOccurs="0" maxOccurs="unbounded" name="consoleAppender" type="ConsoleAppenderXml"/>
+            <xsd:element minOccurs="0" maxOccurs="unbounded" name="dailyRollingFileAppender"
+                         type="DailyRollingFileAppenderXml"/>
+            <xsd:element minOccurs="0" maxOccurs="unbounded" name="logger" type="LoggerXml"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="LoggerXml">
+        <xsd:sequence>
+            <xsd:element minOccurs="0" maxOccurs="unbounded" name="appender" type="xsd:string"/>
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string"/>
+        <xsd:attribute name="level" type="LogLevelXml"/>
+    </xsd:complexType>
+
+    <xsd:simpleType name="LogLevelXml">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="FATAL"/>
+            <xsd:enumeration value="ERROR"/>
+            <xsd:enumeration value="WARN"/>
+            <xsd:enumeration value="INFO"/>
+            <xsd:enumeration value="DEBUG"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="PatternLayoutXml">
+        <xsd:attribute name="name" type="xsd:string"/>
+        <xsd:attribute name="conversionPattern" type="xsd:string"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="AppenderXml">
+        <xsd:sequence/>
+        <xsd:attribute name="name" type="xsd:string"/>
+        <xsd:attribute name="layout" type="xsd:string"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="ConsoleAppenderXml">
+        <xsd:complexContent>
+            <xsd:extension base="AppenderXml">
+                <xsd:attribute name="target" type="xsd:string"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="DailyRollingFileAppenderXml">
+        <xsd:complexContent>
+            <xsd:extension base="AppenderXml">
+                <xsd:attribute name="file" type="xsd:string"/>
+                <xsd:attribute name="datePattern" type="xsd:string"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+</xsd:schema>
