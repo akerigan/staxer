@@ -1,6 +1,6 @@
-package comtech.initer.util;
+package comtech.igniter.util;
 
-import comtech.initer.log.beans.*;
+import comtech.igniter.log.beans.*;
 import comtech.util.xml.StaxerXmlStreamException;
 import comtech.util.xml.XmlName;
 import comtech.util.xml.XmlUtils;

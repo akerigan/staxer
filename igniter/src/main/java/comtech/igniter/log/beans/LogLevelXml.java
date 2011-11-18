@@ -1,4 +1,4 @@
-package comtech.initer.log.beans;
+package comtech.igniter.log.beans;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;

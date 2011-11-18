@@ -1,4 +1,4 @@
-package comtech.initer.log.beans;
+package comtech.igniter.log.beans;
 
 import comtech.util.props.XmlNameMapProperties;
 import comtech.util.xml.*;

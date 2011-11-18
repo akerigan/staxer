@@ -20,7 +20,7 @@
         <module>staxer-core</module>
         <module>staxer-maven-plugin</module>
         <module>staxer-sample-common</module>
-        <module>initer</module>
+        <module>igniter</module>
         <module>staxer-sample-server</module>
     </modules>
 

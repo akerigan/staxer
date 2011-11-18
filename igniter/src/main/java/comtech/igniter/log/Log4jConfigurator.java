@@ -1,6 +1,6 @@
-package comtech.initer.log;
+package comtech.igniter.log;
 
-import comtech.initer.log.beans.*;
+import comtech.igniter.log.beans.*;
 import comtech.util.StringUtils;
 import org.apache.log4j.*;
 import org.apache.log4j.spi.LoggerRepository;

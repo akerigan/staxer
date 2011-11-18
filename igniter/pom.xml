@@ -6,7 +6,7 @@
         <groupId>staxer</groupId>
         <version>1.1</version>
     </parent>
-    <artifactId>initer</artifactId>
+    <artifactId>igniter</artifactId>
     <packaging>jar</packaging>
     <version>1.0</version>
     <name>App initialization helper module</name>
@@ -64,7 +64,7 @@
                                 <phase>generate-sources</phase>
                                 <configuration>
                                     <xsdUrl>src/main/resources/log4jConfigurer.xsd</xsdUrl>
-                                    <packageName>comtech.initer.log.beans</packageName>
+                                    <packageName>comtech.igniter.log.beans</packageName>
                                     <sourceDir>/src/main/java</sourceDir>
                                 </configuration>
                             </execution>

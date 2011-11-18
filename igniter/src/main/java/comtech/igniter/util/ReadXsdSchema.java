@@ -1,4 +1,4 @@
-package comtech.initer.util;
+package comtech.igniter.util;
 
 import comtech.staxer.StaxerUtils;
 import comtech.staxer.domain.XmlSchema;
