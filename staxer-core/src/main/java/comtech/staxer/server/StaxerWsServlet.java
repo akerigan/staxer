@@ -1,15 +1,15 @@
 package comtech.staxer.server;
 
 import comtech.staxer.StaxerException;
+import comtech.util.StringUtils;
 import comtech.util.http.helper.HttpHelper;
 import comtech.util.xml.XmlConstants;
 import comtech.util.xml.XmlUtils;
 import comtech.util.xml.soap.SoapFault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -17,8 +17,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Vlad Vinichenko (akerigan@gmail.com)
@@ -26,23 +24,23 @@ import java.util.Map;
  */
 public class StaxerWsServlet extends HttpServlet {
 
+    public static final String CONTEXT_CONTAINER_NAME = "wsProcessorContainerName";
+
     protected ServletContext servletContext;
-    protected WebApplicationContext applicationContext;
-    protected Map<String, WsMessageProcessor> processors;
+    protected WsMessageProcessorsContainer wsMessageProcessorsContainer;
 
     private static Logger log = LoggerFactory.getLogger(StaxerWsServlet.class);
 
     @Override
-    public void init() throws ServletException {
-        servletContext = getServletContext();
-        applicationContext = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
-        Map<String, WsMessageProcessor> messageProcessorMap = applicationContext.getBeansOfType(WsMessageProcessor.class);
-        if (messageProcessorMap.size() == 0) {
-            throw new IllegalStateException("Ws message processor not found in application context");
+    public void init(ServletConfig config) throws ServletException {
+        servletContext = config.getServletContext();
+        String containerName = servletContext.getInitParameter(CONTEXT_CONTAINER_NAME);
+        if (StringUtils.isEmpty(containerName)) {
+            throw new IllegalStateException("'" + CONTEXT_CONTAINER_NAME + "' servlet init param not set");
         }
-        processors = new HashMap<String, WsMessageProcessor>();
-        for (WsMessageProcessor wsMessageProcessor : messageProcessorMap.values()) {
-            processors.put(wsMessageProcessor.getServletPath(), wsMessageProcessor);
+        wsMessageProcessorsContainer = (WsMessageProcessorsContainer) servletContext.getAttribute(containerName);
+        if (wsMessageProcessorsContainer == null) {
+            throw new IllegalStateException(containerName + ": ws message processors container not found in servlet context");
         }
     }
 
@@ -52,7 +50,7 @@ public class StaxerWsServlet extends HttpServlet {
     ) throws ServletException, IOException {
         HttpHelper httpHelper = new HttpHelper(servletContext, request, response);
         String servletPath = httpHelper.getServletPath().substring(1);
-        WsMessageProcessor processor = processors.get(servletPath);
+        WsMessageProcessor processor = wsMessageProcessorsContainer.getWsMessageProcessor(servletPath);
         ServletOutputStream responseOutputStream = httpHelper.getResponseOutputStream();
         if (processor != null) {
             try {

@@ -1,0 +1,19 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <xsd:complexType name="BasicDataSourcesXml">
+        <xsd:sequence>
+            <xsd:element minOccurs="0" maxOccurs="unbounded" name="datasource" type="BasicDataSourceXml"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="BasicDataSourceXml">
+        <xsd:attribute name="name" type="xsd:string"/>
+        <xsd:attribute name="dbDriverClassName" type="xsd:string"/>
+        <xsd:attribute name="dbUrl" type="xsd:string"/>
+        <xsd:attribute name="username" type="xsd:string"/>
+        <xsd:attribute name="password" type="xsd:string"/>
+        <xsd:attribute name="minIdle" type="xsd:int"/>
+        <xsd:attribute name="maxActive" type="xsd:int"/>
+    </xsd:complexType>
+
+</xsd:schema>

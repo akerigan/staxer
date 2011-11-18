@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <log4j>
+        <patternLayout name="patternLayout" conversionPattern="%d{yyyy-MM-dd HH:mm:ss,SSS} [%-5p] %l%n%m%n"/>
+        <consoleAppender name="stdout" layout="patternLayout" target="System.out"/>
+        <dailyRollingFileAppender name="R" layout="patternLayout" file="${catalina.home}/logs/swc.log"
+                                  datePattern="'.'yyyy-MM-dd"/>
+        <logger level="INFO">
+            <appender>stdout</appender>
+            <appender>R</appender>
+        </logger>
+        <logger name="comtech.util" level="INFO">
+            <appender>stdout</appender>
+            <appender>R</appender>
+        </logger>
+    </log4j>
+</config>

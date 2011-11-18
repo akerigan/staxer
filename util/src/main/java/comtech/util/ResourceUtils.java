@@ -31,7 +31,12 @@ public class ResourceUtils {
     }
 
     public static Reader getResourceReader(Class cls, String resourceName) throws IOException {
-        return new InputStreamReader(getResourceInputStream(cls, resourceName), "UTF-8");
+        InputStream inputStream = getResourceInputStream(cls, resourceName);
+        if (inputStream != null) {
+            return new InputStreamReader(inputStream, "UTF-8");
+        } else {
+            return null;
+        }
     }
 
     public static InputStream getResourceInputStream(Class cls, String resourceName) throws IOException {

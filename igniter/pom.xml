@@ -30,6 +30,25 @@
             <version>1.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>3.0.5.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -63,8 +82,34 @@
                                 </goals>
                                 <phase>generate-sources</phase>
                                 <configuration>
-                                    <xsdUrl>src/main/resources/log4jConfigurer.xsd</xsdUrl>
+                                    <xsdUrl>src/main/resources/log4jConfiguration.xsd</xsdUrl>
                                     <packageName>comtech.igniter.log.beans</packageName>
+                                    <sourceDir>/src/main/java</sourceDir>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>jdbcTemplateXsdBeans</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>staxer</groupId>
+                        <artifactId>staxer-maven-plugin</artifactId>
+                        <version>1.1</version>
+                        <executions>
+                            <execution>
+                                <id>jdbcTemplateXsdBeans</id>
+                                <goals>
+                                    <goal>xsd-beans</goal>
+                                </goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <xsdUrl>src/main/resources/jdbcTemplateConfiguration.xsd</xsdUrl>
+                                    <packageName>comtech.igniter.db.beans</packageName>
                                     <sourceDir>/src/main/java</sourceDir>
                                 </configuration>
                             </execution>

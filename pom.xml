@@ -102,6 +102,18 @@
             <id>ibiblio</id>
             <url>http://mirrors.ibiblio.org/pub/mirrors/maven2</url>
         </repository>
+        <repository>
+            <id>dist-codehaus</id>
+            <url>http://dist.codehaus.org/mule/dependencies/maven2</url>
+        </repository>
+        <repository>
+            <id>mvnsearch</id>
+            <url>http://www.mvnsearch.org/maven2</url>
+        </repository>
+        <repository>
+            <id>atlassian</id>
+            <url>https://repository.atlassian.com/maven2</url>
+        </repository>
     </repositories>
 
 </project>

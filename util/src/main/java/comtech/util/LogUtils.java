@@ -52,7 +52,9 @@ public class LogUtils {
         StringBuilder sb = new StringBuilder();
         sb.append("----- Request ------\n");
 
-        sb.append("ID: ").append(requestId).append("\n");
+        if (requestId > 0) {
+            sb.append("ID: ").append(requestId).append("\n");
+        }
 
         sb.append("Client IP: ").append(httpHelper.getRemoteHost()).append("\n");
         sb.append("Method: ").append(httpHelper.getMethod()).append("\n");

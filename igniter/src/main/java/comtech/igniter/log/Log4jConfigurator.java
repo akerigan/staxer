@@ -5,6 +5,7 @@ import comtech.util.StringUtils;
 import org.apache.log4j.*;
 import org.apache.log4j.spi.LoggerRepository;
 
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +17,10 @@ public class Log4jConfigurator {
 
     public static void configure(Log4jConfigurationXml configuration) {
         Layout defaultLayout = new PatternLayout("%d{yyyy-MM-dd HH:mm:ss,SSS} [%-5p] %l%n%m%n");
-        Appender defaultAppender = new ConsoleAppender(defaultLayout, "System.out");
+        ConsoleAppender defaultAppender = new ConsoleAppender(defaultLayout, ConsoleAppender.SYSTEM_OUT);
+//        defaultAppender.setFollow(true);
+//        defaultAppender.activateOptions();
+        defaultAppender.setWriter(new OutputStreamWriter(System.out));
         LoggerRepository repository = LogManager.getLoggerRepository();
         Logger rootLogger = null;
         if (configuration != null) {
@@ -34,11 +38,14 @@ public class Log4jConfigurator {
                 String name = appenderXml.getName();
                 if (!StringUtils.isEmpty(name)) {
                     ConsoleAppender appender = new ConsoleAppender();
+                    appender.setName(name);
                     String target = appenderXml.getTarget();
-                    if (StringUtils.isEmpty(target)) {
-                        appender.setTarget("System.out");
+                    if (ConsoleAppender.SYSTEM_OUT.equals(target)) {
+                        appender.setWriter(new OutputStreamWriter(System.out));
+                    } else if (ConsoleAppender.SYSTEM_ERR.equals(target)) {
+                        appender.setWriter(new OutputStreamWriter(System.err));
                     } else {
-                        appender.setTarget(target);
+                        appender.setWriter(new OutputStreamWriter(System.out));
                     }
                     Layout layout = layoutMap.get(appenderXml.getLayout());
                     if (layout == null) {
@@ -53,6 +60,7 @@ public class Log4jConfigurator {
                 String file = appenderXml.getFile();
                 if (!StringUtils.isEmpty(name) && !StringUtils.isEmpty(file)) {
                     DailyRollingFileAppender appender = new DailyRollingFileAppender();
+                    appender.setName(name);
                     appender.setFile(file);
                     String datePattern = appenderXml.getDatePattern();
                     if (StringUtils.isEmpty(datePattern)) {
@@ -65,6 +73,7 @@ public class Log4jConfigurator {
                         layout = defaultLayout;
                     }
                     appender.setLayout(layout);
+                    appender.activateOptions();
                     appenderMap.put(name, appender);
                 }
             }
@@ -103,11 +112,10 @@ public class Log4jConfigurator {
                             break;
                     }
                 }
-                logger.removeAllAppenders();
                 int appendersAdded = 0;
                 for (String appenderName : loggerXml.getAppender()) {
                     Appender appender = appenderMap.get(appenderName);
-                    if (appender != null) {
+                    if (appender != null && logger.getAppender(appender.getName()) == null) {
                         logger.addAppender(appender);
                         appendersAdded += 1;
                     }

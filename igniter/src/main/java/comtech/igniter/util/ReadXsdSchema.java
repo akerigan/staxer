@@ -20,7 +20,7 @@ public class ReadXsdSchema {
     ) throws Exception {
         File baseDirectory = new File(".");
         log.info("baseDirectory = " + baseDirectory.getAbsolutePath());
-        File xsdFile = new File(baseDirectory, "staxer-sample-common/src/main/resources/log4jConfigurer.xsd");
+        File xsdFile = new File(baseDirectory, "staxer-sample-common/src/main/resources/log4jConfiguration.xsd");
         System.out.println("xsdFile exists = " + xsdFile.exists());
         XmlSchema xmlSchema = StaxerUtils.readXmlSchema("", xsdFile.toURI(), null, null, "UTF-8");
         if (xmlSchema != null) {

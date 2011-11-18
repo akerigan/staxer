@@ -30,7 +30,7 @@
 
     <wsdl:service name="staxerSampleService">
         <wsdl:port binding="tns:staxerSampleService" name="staxerSampleService">
-            <soap:address location="http://localhost:8080/webapp/servlet"/>
+            <soap:address location=""/>
         </wsdl:port>
     </wsdl:service>
 

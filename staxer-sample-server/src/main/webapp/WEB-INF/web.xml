@@ -5,15 +5,19 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          id="WebApp_ID" version="2.5">
 
-    <display-name>swc-server</display-name>
+    <display-name>staxer-sample-server</display-name>
 
     <context-param>
-        <param-name>log4jConfigLocation</param-name>
-        <param-value>/WEB-INF/log4j.properties</param-value>
+        <param-name>configLocation</param-name>
+        <param-value>/WEB-INF/config.xml</param-value>
+    </context-param>
+    <context-param>
+        <param-name>wsProcessorContainerName</param-name>
+        <param-value>staxerSampleServerServices</param-value>
     </context-param>
 
     <listener>
-        <listener-class>comtech.util.http.WebappLog4jConfigListener</listener-class>
+        <listener-class>staxer.sample.server.ignite.http.StaxerSampleServerListener</listener-class>
     </listener>
 
     <!-- Staxer ws servlet -->
@@ -25,7 +29,15 @@
 
     <servlet-mapping>
         <servlet-name>staxerWsServlet</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/sample</url-pattern>
     </servlet-mapping>
+
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+    <session-config>
+        <session-timeout>35</session-timeout>
+    </session-config>
 
 </web-app>

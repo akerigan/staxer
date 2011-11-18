@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static comtech.util.xml.XmlConstants.*;
@@ -70,15 +71,28 @@ public abstract class WsMessageProcessor {
         try {
             httpHelper.setResponseContentType(HttpResponseContentType.XML);
             httpHelper.setResponseCharacterEncoding("UTF-8");
-            if (httpHelper.getRequestParametersNames().contains("wsdl")) {
-                Reader resourceReader = ResourceUtils.getResourceReader(serviceWs.getClass(), wsdlPath);
-                StringWriter stringWriter = new StringWriter();
-                IOUtils.copy(resourceReader, stringWriter);
-                String wsdl = stringWriter.toString().replaceFirst(
-                        "location=\"[^\"]+\"",
-                        "location=\"" + httpHelper.getWebappURL() + "/" + servletPath + "\""
-                );
-                responseOutputStream.write(wsdl.getBytes("UTF-8"));
+            Set<String> requestParametersNames = httpHelper.getRequestParametersNames();
+            Logger log = getLog();
+            if (requestParametersNames.contains("wsdl") || requestParametersNames.contains("def")) {
+                log.info(LogUtils.getRequestDetails(httpHelper, 0));
+                Reader resourceReader = null;
+                String def = httpHelper.getRequestParameter("def");
+                if (def == null) {
+                    resourceReader = ResourceUtils.getResourceReader(serviceWs.getClass(), wsdlPath);
+                } else if (def.endsWith(".wsdl") || def.endsWith(".xsd")) {
+                    resourceReader = ResourceUtils.getResourceReader(serviceWs.getClass(), "/" + def);
+                }
+                if (resourceReader != null) {
+                    StringWriter stringWriter = new StringWriter();
+                    IOUtils.copy(resourceReader, stringWriter);
+                    String wsdl = stringWriter.toString().replaceAll(
+                            "ocation=\"",
+                            "ocation=\"" + httpHelper.getWebappURL() + "/" + servletPath + "?def="
+                    ).replaceAll("\\?def\\=\"", "\"");
+                    responseOutputStream.write(wsdl.getBytes("UTF-8"));
+                } else {
+                    httpHelper.setResponseStatus(404);
+                }
             } else {
                 int wsRequestId = wsRequestIdGenerator.addAndGet(1);
 
@@ -87,7 +101,6 @@ public abstract class WsMessageProcessor {
                 IOUtils.copy(reader, requestBody);
                 reader.close();
 
-                Logger log = getLog();
                 log.info(LogUtils.getRequestDetails(httpHelper, wsRequestId, requestBody.toString()));
 
                 WsMessage wsMessage = null;
@@ -118,7 +131,7 @@ public abstract class WsMessageProcessor {
                             new StaxerXmlStreamReader(new StringReader(requestBody.toString()));
                     if (document.readStartElement(XML_NAME_SOAP_ENVELOPE)) {
                         if (!document.elementStarted(XML_NAME_SOAP_ENVELOPE_BODY)
-                                && !document.readStartElement(XML_NAME_SOAP_ENVELOPE_BODY)) {
+                            && !document.readStartElement(XML_NAME_SOAP_ENVELOPE_BODY)) {
                             response = new SoapFault("env:Sender", "Invalid SOAP message");
                         } else {
                             requestXmlName = document.readStartElement();
@@ -152,13 +165,13 @@ public abstract class WsMessageProcessor {
                         preProcess(wsMessage, httpHelper, requestXmlName);
                         response = (StaxerWriteXml) method.invoke(serviceWs, wsMessage);
                     } catch (Exception e) {
-                        getLog().error("", e);
+                        log.error("", e);
                         response = faultProcess(e, wsMessage, requestXmlName);
                     }
                     try {
                         postProcess(wsMessage, requestXmlName);
                     } catch (Exception e) {
-                        getLog().error("", e);
+                        log.error("", e);
                     }
                 } else {
                     log.error("Java method missing");
@@ -169,7 +182,7 @@ public abstract class WsMessageProcessor {
                 byte[] soapResponseBytes = soapResponse.toByteArray();
                 if (log.isInfoEnabled()) {
                     log.info("----- Response -----\nID: " + wsRequestId + "\n"
-                            + new String(soapResponseBytes, "UTF-8") + "\n--------------------\n"
+                             + new String(soapResponseBytes, "UTF-8") + "\n--------------------\n"
                     );
                 }
                 responseOutputStream.write(soapResponseBytes);
@@ -274,7 +287,7 @@ public abstract class WsMessageProcessor {
                 }
                 log.warn(
                         "wsreq " + wsRequestId + " - digests not match: "
-                                + digest + "!=" + usernameToken.getPassword().getValue().trim()
+                        + digest + "!=" + usernameToken.getPassword().getValue().trim()
                 );
             } catch (NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);
