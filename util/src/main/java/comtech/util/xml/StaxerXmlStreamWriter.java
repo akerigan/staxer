@@ -3,7 +3,9 @@ package comtech.util.xml;
 import comtech.util.StringUtils;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static comtech.util.xml.XmlConstants.XML_NAME_XSI_NIL;
 
@@ -27,19 +29,10 @@ public class StaxerXmlStreamWriter {
     private String charset;
     private int indentSize;
 
-    private int level = 0;
+    private int level = -1;
     private int state = STATE_DOCUMENT_START;
 
-    private Stack<XmlName> startedElements = new Stack<XmlName>();
-
-    private Map<String, String> namespacesPrefixes =
-            new HashMap<String, String>(XmlConstants.DEFAULT_NAMESPACES_PREFIXES);
-    private Stack<String> namespacesNested = new Stack<String>();
-    private String namespacesCurrent;
-
-    private int namespacePrefixIdx = 1;
-
-    private Set<String> namespacesToDeclare = new HashSet<String>();
+    private ArrayList<XmlElementContext> allContexts = new ArrayList<XmlElementContext>();
 
     public StaxerXmlStreamWriter(
             OutputStream outputStream
@@ -65,23 +58,6 @@ public class StaxerXmlStreamWriter {
         }
     }
 
-    private String getPrefix(String namespaceURI) {
-        if (namespaceURI != null) {
-            String result = namespacesPrefixes.get(namespaceURI);
-            if (result == null) {
-                result = "ns" + namespacePrefixIdx;
-                namespacePrefixIdx += 1;
-                namespacesPrefixes.put(namespaceURI, result);
-            }
-            if (StringUtils.indexOf(namespacesCurrent, result) == -1) {
-                namespacesToDeclare.add(namespaceURI);
-            }
-            return result;
-        } else {
-            return null;
-        }
-    }
-
     public void startDocument() throws StaxerXmlStreamException {
         try {
             writer.write("<?xml version=\"1.0\" encoding=\"");
@@ -94,39 +70,40 @@ public class StaxerXmlStreamWriter {
     }
 
     public void declareNamespace(String namespaceURI) {
-        String prefix = namespacesPrefixes.get(namespaceURI);
-        if (StringUtils.indexOf(namespacesCurrent, prefix) == -1) {
-            namespacesToDeclare.add(namespaceURI);
+        if (!allContexts.isEmpty()) {
+            XmlElementContext currentContext = allContexts.get(level);
+            currentContext.prefix(namespaceURI);
         }
     }
 
     public void startElement(XmlName elementName) throws StaxerXmlStreamException {
         try {
             if (state != STATE_DOCUMENT_ENDED) {
-                String namespacePrefix = null;
-                String namespaceURI = elementName.getNamespaceURI();
-                if (namespaceURI != null) {
-                    namespacePrefix = getPrefix(namespaceURI);
-                    elementName.setPrefix(namespacePrefix);
+                XmlElementContext previousContext = null;
+                XmlElementContext currentContext;
+                if (!allContexts.isEmpty()) {
+                    previousContext = allContexts.get(level);
+                    currentContext = previousContext.createChild(elementName);
+                } else {
+                    currentContext = new XmlElementContext(
+                            elementName, 0, null
+                    );
                 }
-                startedElements.add(elementName);
-                if (level > 1) {
-                    namespacesNested.add(namespacesCurrent);
-                }
+                allContexts.add(currentContext);
                 if (state == STATE_ELEMENT_START) {
-                    if (!namespacesToDeclare.isEmpty()) {
-                        writeNamespaces();
-                    }
+                    writeNamespaces(previousContext);
                     writer.write(START_ELEMENT_END_NORMAL);
                     state = STATE_ELEMENT_STARTED;
                 }
                 writeIndents();
                 writer.write('<');
-                if (namespacePrefix != null) {
-                    writer.write(namespacePrefix);
+                XmlName xmlName = currentContext.getXmlName();
+                String prefix = xmlName.getPrefix();
+                if (prefix != null) {
+                    writer.write(prefix);
                     writer.write(':');
                 }
-                writer.write(elementName.getLocalPart());
+                writer.write(xmlName.getLocalPart());
                 state = STATE_ELEMENT_START;
                 level += 1;
             }
@@ -135,17 +112,20 @@ public class StaxerXmlStreamWriter {
         }
     }
 
-    private void writeNamespaces() throws IOException {
-        for (String namespaceToDeclare : namespacesToDeclare) {
-            String namespacePrefixToDeclare = getPrefix(namespaceToDeclare);
-            writer.write(" xmlns:");
-            writer.write(namespacePrefixToDeclare);
-            writer.write("=\"");
-            writer.write(namespaceToDeclare);
-            writer.write('"');
-            namespacesCurrent = StringUtils.join("-", namespacesCurrent, namespacePrefixToDeclare);
+    private void writeNamespaces(XmlElementContext context) throws IOException {
+        if (context != null) {
+            ArrayList<String> namespacesToDeclare = context.getNamespacesToDeclare();
+            if (namespacesToDeclare != null && !namespacesToDeclare.isEmpty()) {
+                for (String namespaceToDeclare : namespacesToDeclare) {
+                    String namespacePrefixToDeclare = context.prefix(namespaceToDeclare);
+                    writer.write(" xmlns:");
+                    writer.write(namespacePrefixToDeclare);
+                    writer.write("=\"");
+                    writer.write(namespaceToDeclare);
+                    writer.write('"');
+                }
+            }
         }
-        namespacesToDeclare.clear();
     }
 
     private void writeIndents() throws StaxerXmlStreamException {
@@ -153,7 +133,7 @@ public class StaxerXmlStreamWriter {
             if (indentSize > 0
                     && (state == STATE_ELEMENT_STARTED || state == STATE_DOCUMENT_STARTED)) {
                 writer.write("\n");
-                for (int i = 0; i < level; ++i) {
+                for (int i = 0; i <= level; ++i) {
                     for (int j = 0; j < indentSize; ++j) {
                         writer.write(' ');
                     }
@@ -166,29 +146,25 @@ public class StaxerXmlStreamWriter {
 
     public void endElement() throws StaxerXmlStreamException {
         try {
-            if (!startedElements.isEmpty()) {
-                XmlName elementName = startedElements.pop();
+            if (!allContexts.isEmpty()) {
+                XmlElementContext currentContext = allContexts.remove(level);
                 level -= 1;
                 if (state == STATE_ELEMENT_START) {
-                    if (!namespacesToDeclare.isEmpty()) {
-                        writeNamespaces();
-                    }
+                    writeNamespaces(currentContext);
                     writer.write(START_ELEMENT_END_EMPTY);
                 } else {
                     writeIndents();
                     writer.write("</");
-                    String prefix = elementName.getPrefix();
+                    XmlName xmlName = currentContext.getXmlName();
+                    String prefix = xmlName.getPrefix();
                     if (prefix != null) {
                         writer.write(prefix);
                         writer.write(':');
                     }
-                    writer.write(elementName.getLocalPart());
+                    writer.write(xmlName.getLocalPart());
                     writer.write('>');
                 }
-                if (level > 1) {
-                    namespacesCurrent = namespacesNested.pop();
-                }
-                if (level > 0) {
+                if (level > -1) {
                     state = STATE_ELEMENT_STARTED;
                 } else {
                     state = STATE_DOCUMENT_ENDED;
@@ -205,9 +181,7 @@ public class StaxerXmlStreamWriter {
                     || state == STATE_ELEMENT_STARTED
                     || state == STATE_TEXT_WRITED) {
                 if (state == STATE_ELEMENT_START) {
-                    if (!namespacesToDeclare.isEmpty()) {
-                        writeNamespaces();
-                    }
+                    writeNamespaces(allContexts.get(level));
                     writer.write(START_ELEMENT_END_NORMAL);
                 }
                 String s = StringUtils.toString(value);
@@ -222,7 +196,7 @@ public class StaxerXmlStreamWriter {
     }
 
     public void endDocument() throws StaxerXmlStreamException {
-        while (!startedElements.isEmpty()) {
+        while (!allContexts.isEmpty()) {
             endElement();
         }
         try {
@@ -240,17 +214,11 @@ public class StaxerXmlStreamWriter {
             if (state == STATE_ELEMENT_START) {
                 String s = StringUtils.notEmptyElseNull(StringUtils.toString(value));
                 if (s != null) {
-                    String namespacePrefix = null;
+                    writer.write(' ');
+                    XmlElementContext currentContext = allContexts.get(level);
                     String namespaceURI = attributeName.getNamespaceURI();
                     if (namespaceURI != null) {
-                        namespacePrefix = getPrefix(namespaceURI);
-                    }
-                    if (!namespacesToDeclare.isEmpty()) {
-                        writeNamespaces();
-                    }
-                    writer.write(' ');
-                    if (namespacePrefix != null) {
-                        writer.write(namespacePrefix);
+                        writer.write(currentContext.prefix(namespaceURI));
                         writer.write(':');
                     }
                     writer.write(attributeName.getLocalPart());
@@ -303,4 +271,69 @@ public class StaxerXmlStreamWriter {
         endElement();
     }
 
+    static class XmlElementContext {
+        private XmlName xmlName;
+        private Map<String, String> prefixes;
+        private int currentPrefixIdx;
+        private ArrayList<String> namespacesToDeclare;
+
+        XmlElementContext(
+                XmlName xmlName, int currentPrefixIdx,
+                Map<String, String> declaredPrefixes
+        ) {
+            this.xmlName = xmlName;
+            this.currentPrefixIdx = currentPrefixIdx;
+            if (declaredPrefixes != null) {
+                prefixes = new HashMap<String, String>();
+                prefixes.putAll(declaredPrefixes);
+            }
+            String namespaceURI = xmlName.getNamespaceURI();
+            if (namespaceURI != null) {
+                xmlName.setPrefix(prefix(namespaceURI));
+            }
+        }
+
+        public XmlName getXmlName() {
+            return xmlName;
+        }
+
+        public String prefix(String namespaceURI) {
+            if (namespaceURI != null) {
+                String result = null;
+                if (prefixes != null) {
+                    result = prefixes.get(namespaceURI);
+                } else {
+                    prefixes = new HashMap<String, String>();
+                }
+                if (result == null) {
+                    result = XmlConstants.DEFAULT_NAMESPACES_PREFIXES.get(namespaceURI);
+                    if (result == null) {
+                        currentPrefixIdx += 1;
+                        result = "ns" + currentPrefixIdx;
+                    }
+                    if (namespacesToDeclare == null) {
+                        namespacesToDeclare = new ArrayList<String>();
+                    }
+                    namespacesToDeclare.add(namespaceURI);
+                    prefixes.put(namespaceURI, result);
+                }
+                return result;
+            } else {
+                return null;
+            }
+        }
+
+        public ArrayList<String> getNamespacesToDeclare() {
+            return namespacesToDeclare;
+        }
+
+        public XmlElementContext createChild(XmlName childElementName) {
+            return new XmlElementContext(
+                    childElementName, currentPrefixIdx, prefixes
+            );
+        }
+
+    }
+
 }
+
