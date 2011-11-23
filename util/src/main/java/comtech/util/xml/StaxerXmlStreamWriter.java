@@ -72,9 +72,9 @@ public class StaxerXmlStreamWriter {
                 result = "ns" + namespacePrefixIdx;
                 namespacePrefixIdx += 1;
                 namespacesPrefixes.put(namespaceURI, result);
-                if (StringUtils.indexOf(namespacesCurrent, result) == -1) {
-                    namespacesToDeclare.add(namespaceURI);
-                }
+            }
+            if (StringUtils.indexOf(namespacesCurrent, result) == -1) {
+                namespacesToDeclare.add(namespaceURI);
             }
             return result;
         } else {
@@ -110,10 +110,13 @@ public class StaxerXmlStreamWriter {
                     elementName.setPrefix(namespacePrefix);
                 }
                 startedElements.add(elementName);
-                if (level > 0) {
+                if (level > 1) {
                     namespacesNested.add(namespacesCurrent);
                 }
                 if (state == STATE_ELEMENT_START) {
+                    if (!namespacesToDeclare.isEmpty()) {
+                        writeNamespaces();
+                    }
                     writer.write(START_ELEMENT_END_NORMAL);
                     state = STATE_ELEMENT_STARTED;
                 }
@@ -124,24 +127,25 @@ public class StaxerXmlStreamWriter {
                     writer.write(':');
                 }
                 writer.write(elementName.getLocalPart());
-                if (!namespacesToDeclare.isEmpty()) {
-                    for (String namespaceToDeclare : namespacesToDeclare) {
-                        namespacePrefix = getPrefix(namespaceToDeclare);
-                        writer.write(" xmlns:");
-                        writer.write(namespacePrefix);
-                        writer.write("=\"");
-                        writer.write(namespaceToDeclare);
-                        writer.write('"');
-                        namespacesCurrent = StringUtils.join("-", namespacesCurrent, namespaceToDeclare);
-                    }
-                    namespacesToDeclare.clear();
-                }
                 state = STATE_ELEMENT_START;
                 level += 1;
             }
         } catch (IOException e) {
             throw new StaxerXmlStreamException(e);
         }
+    }
+
+    private void writeNamespaces() throws IOException {
+        for (String namespaceToDeclare : namespacesToDeclare) {
+            String namespacePrefixToDeclare = getPrefix(namespaceToDeclare);
+            writer.write(" xmlns:");
+            writer.write(namespacePrefixToDeclare);
+            writer.write("=\"");
+            writer.write(namespaceToDeclare);
+            writer.write('"');
+            namespacesCurrent = StringUtils.join("-", namespacesCurrent, namespacePrefixToDeclare);
+        }
+        namespacesToDeclare.clear();
     }
 
     private void writeIndents() throws StaxerXmlStreamException {
@@ -166,6 +170,9 @@ public class StaxerXmlStreamWriter {
                 XmlName elementName = startedElements.pop();
                 level -= 1;
                 if (state == STATE_ELEMENT_START) {
+                    if (!namespacesToDeclare.isEmpty()) {
+                        writeNamespaces();
+                    }
                     writer.write(START_ELEMENT_END_EMPTY);
                 } else {
                     writeIndents();
@@ -178,8 +185,10 @@ public class StaxerXmlStreamWriter {
                     writer.write(elementName.getLocalPart());
                     writer.write('>');
                 }
-                if (level > 0) {
+                if (level > 1) {
                     namespacesCurrent = namespacesNested.pop();
+                }
+                if (level > 0) {
                     state = STATE_ELEMENT_STARTED;
                 } else {
                     state = STATE_DOCUMENT_ENDED;
@@ -196,6 +205,9 @@ public class StaxerXmlStreamWriter {
                     || state == STATE_ELEMENT_STARTED
                     || state == STATE_TEXT_WRITED) {
                 if (state == STATE_ELEMENT_START) {
+                    if (!namespacesToDeclare.isEmpty()) {
+                        writeNamespaces();
+                    }
                     writer.write(START_ELEMENT_END_NORMAL);
                 }
                 String s = StringUtils.toString(value);
@@ -234,16 +246,7 @@ public class StaxerXmlStreamWriter {
                         namespacePrefix = getPrefix(namespaceURI);
                     }
                     if (!namespacesToDeclare.isEmpty()) {
-                        for (String namespaceToDeclare : namespacesToDeclare) {
-                            String namespacePrefixToDeclare = getPrefix(namespaceToDeclare);
-                            writer.write(" xmlns:");
-                            writer.write(namespacePrefixToDeclare);
-                            writer.write("=\"");
-                            writer.write(namespaceToDeclare);
-                            writer.write('"');
-                            namespacesCurrent = StringUtils.join("-", namespacesCurrent, namespaceToDeclare);
-                        }
-                        namespacesToDeclare.clear();
+                        writeNamespaces();
                     }
                     writer.write(' ');
                     if (namespacePrefix != null) {

@@ -25,7 +25,7 @@ public class ServerStaxerSampleServiceWsImpl extends ServerStaxerSampleServiceWs
         Map<Integer, Object> params = wsMessage.getParams();
         Integer wsMessageId = (Integer) params.get(WsMessageProcessor.PARAM_WS_REQUEST_ID);
         String userLogin = (String) params.get(WsMessageProcessor.PARAM_USER_LOGIN);
-        log(wsMessageId, userLogin, "echoXsdTypes");
+        checkPermissions(wsMessageId, userLogin, "echoXsdTypes");
 
         EchoXsdTypesRequest request = wsMessage.getBody();
         EchoXsdTypesResponse response = new EchoXsdTypesResponse();
@@ -69,7 +69,10 @@ public class ServerStaxerSampleServiceWsImpl extends ServerStaxerSampleServiceWs
         return response;
     }
 
-    private void log(Integer wsMessageId, String userLogin, String method) {
+    private void checkPermissions(Integer wsMessageId, String userLogin, String method) {
+        if (userLogin == null) {
+            throw new RuntimeException("Not authorized");
+        }
         logger.info(wsMessageId + ": " + userLogin + "/" + method + " - access granted");
     }
 
@@ -78,7 +81,7 @@ public class ServerStaxerSampleServiceWsImpl extends ServerStaxerSampleServiceWs
         Map<Integer, Object> params = wsMessage.getParams();
         Integer wsMessageId = (Integer) params.get(WsMessageProcessor.PARAM_WS_REQUEST_ID);
         String userLogin = (String) params.get(WsMessageProcessor.PARAM_USER_LOGIN);
-        log(wsMessageId, userLogin, "echoCustomTypes");
+        checkPermissions(wsMessageId, userLogin, "echoCustomTypes");
 
         EchoCustomTypesRequest request = wsMessage.getBody();
         EchoCustomTypesResponse response = new EchoCustomTypesResponse();

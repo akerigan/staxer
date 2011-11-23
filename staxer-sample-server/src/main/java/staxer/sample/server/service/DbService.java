@@ -14,9 +14,7 @@ public class DbService {
 
     private static Logger logger = LoggerFactory.getLogger(DbService.class);
 
-    public String getUserPassword(
-            String login
-    ) {
+    public String getUserPassword(String login) {
         if ("user".equals(login)) {
             try {
                 return SecurityUtils.getMD5_EncodedBase64("user");

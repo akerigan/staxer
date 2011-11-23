@@ -22,6 +22,7 @@
         <module>staxer-sample-common</module>
         <module>igniter</module>
         <module>staxer-sample-server</module>
+        <module>staxer-sample-client</module>
     </modules>
 
     <build>

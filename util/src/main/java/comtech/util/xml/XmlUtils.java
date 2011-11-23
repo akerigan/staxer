@@ -116,7 +116,7 @@ public class XmlUtils {
                 if (payloadElementName != null) {
                     xmlWriter.startElement(payloadElementName);
                     staxerWriteXml.writeXmlAttributes(xmlWriter);
-                    staxerWriteXml.writeXmlAttributes(xmlWriter);
+                    staxerWriteXml.writeXmlContent(xmlWriter);
                     xmlWriter.endElement();
                 }
             }

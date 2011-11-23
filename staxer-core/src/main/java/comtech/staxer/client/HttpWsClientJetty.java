@@ -44,10 +44,13 @@ public class HttpWsClientJetty implements HttpWsClient {
 
     private String name;
 
-    public HttpWsClientJetty() {
+    public HttpWsClientJetty(boolean userNioConnector) {
         httpClient = new HttpClient();
-        httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
-//        httpClient.setConnectorType(HttpClient.CONNECTOR_SOCKET);
+        if (userNioConnector) {
+            httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
+        } else {
+            httpClient.setConnectorType(HttpClient.CONNECTOR_SOCKET);
+        }
         httpClient.setConnectTimeout(DEFAULT_CONNECTION_TIMEOUT);
         httpClient.setIdleTimeout(DEFAULT_IDLE_TIMEOUT);
     }
@@ -124,7 +127,7 @@ public class HttpWsClientJetty implements HttpWsClient {
                 if (bodyChildElement == null) {
                     throw new WsClientException(
                             name + ", rid=" + requestId +
-                                    ", invalid XML: cant locate payload element"
+                            ", invalid XML: cant locate payload element"
                     );
                 } else if (XML_NAME_SOAP_ENVELOPE_FAULT.equals(bodyChildElement)) {
                     SoapFault soapFault = XmlUtils.readXml(document, SoapFault.class, XML_NAME_SOAP_ENVELOPE_FAULT);
@@ -134,7 +137,7 @@ public class HttpWsClientJetty implements HttpWsClient {
             } else {
                 throw new WsClientException(
                         name + ", rid=" + requestId + ", invalid XML: cant locate '" +
-                                XML_NAME_SOAP_ENVELOPE_BODY + "' element"
+                        XML_NAME_SOAP_ENVELOPE_BODY + "' element"
                 );
             }
         } catch (StaxerXmlStreamException e) {
@@ -214,7 +217,7 @@ public class HttpWsClientJetty implements HttpWsClient {
                 log.warn(name + ", rid=" + requestId + ", method failed: " + responseContent);
                 throw new WsClientException(
                         name + ", rid=" + requestId + ", http status code: " +
-                                statusCode + ", response: " + responseContent);
+                        statusCode + ", response: " + responseContent);
             }
 
             headers.clear();
@@ -228,7 +231,6 @@ public class HttpWsClientJetty implements HttpWsClient {
                 String encodingHeader = responseFields.getStringField("Content-Encoding");
                 if (encodingHeader != null) {
                     InputStream inputStream;
-                    StringWriter writer = new StringWriter();
                     if ("deflate".equalsIgnoreCase(encodingHeader)) {
                         inputStream = new DeflaterInputStream(
                                 new ByteArrayInputStream(contentExchange.getResponseContentBytes())
@@ -240,10 +242,13 @@ public class HttpWsClientJetty implements HttpWsClient {
                     } else {
                         throw new WsClientException("Invalid encoding in response: " + encodingHeader);
                     }
+                    StringWriter writer = new StringWriter();
                     InputStreamReader reader = new InputStreamReader(inputStream, "UTF-8");
                     IOUtils.copy(reader, writer);
                     reader.close();
                     return writer.toString();
+                } else {
+                    responseContent = contentExchange.getResponseContent();
                 }
             }
             return responseContent;
