@@ -134,7 +134,8 @@ public class StaxerUtils {
             if (!webServiceName.toUpperCase().endsWith("WS")) {
                 webServiceName += "Ws";
             }
-            StringBuilder serviceXmlNames = new StringBuilder();
+            StringBuilder clientXmlNames = new StringBuilder();
+            StringBuilder serverXmlNames = new StringBuilder();
             StringBuilder clientServiceMethods = new StringBuilder();
             StringBuilder serverServiceStaticConstrustor = new StringBuilder();
             StringBuilder serverServiceMethods = new StringBuilder();
@@ -172,13 +173,29 @@ public class StaxerUtils {
 
                 String inputElementLocalPart = inputElement.getLocalPart();
                 String inputTypeConstantName = "XML_NAME_" + StringUtils.toEnumName(inputElementLocalPart);
-                serviceXmlNames.append("    public static final XmlName ");
-                serviceXmlNames.append(inputTypeConstantName);
-                serviceXmlNames.append(" = new XmlName(\"");
-                serviceXmlNames.append(inputElement.getNamespaceURI());
-                serviceXmlNames.append("\", \"");
-                serviceXmlNames.append(inputElementLocalPart);
-                serviceXmlNames.append("\");\n");
+                String outputElementLocalPart = outputElement.getLocalPart();
+                String outputTypeConstantName = "XML_NAME_" + StringUtils.toEnumName(outputElementLocalPart);
+                clientXmlNames.append("    public static final XmlName ");
+                clientXmlNames.append(inputTypeConstantName);
+                clientXmlNames.append(" = new XmlName(\"");
+                clientXmlNames.append(inputElement.getNamespaceURI());
+                clientXmlNames.append("\", \"");
+                clientXmlNames.append(inputElementLocalPart);
+                clientXmlNames.append("\");\n");
+                serverXmlNames.append("    public static final XmlName ");
+                serverXmlNames.append(inputTypeConstantName);
+                serverXmlNames.append(" = new XmlName(\"");
+                serverXmlNames.append(inputElement.getNamespaceURI());
+                serverXmlNames.append("\", \"");
+                serverXmlNames.append(inputElementLocalPart);
+                serverXmlNames.append("\");\n");
+                serverXmlNames.append("    public static final XmlName ");
+                serverXmlNames.append(outputTypeConstantName);
+                serverXmlNames.append(" = new XmlName(\"");
+                serverXmlNames.append(outputElement.getNamespaceURI());
+                serverXmlNames.append("\", \"");
+                serverXmlNames.append(outputElementLocalPart);
+                serverXmlNames.append("\");\n");
 
                 if (createClientService) {
                     clientServiceMethods.append("    public ");
@@ -186,12 +203,12 @@ public class StaxerUtils {
                     clientServiceMethods.append(" ");
                     clientServiceMethods.append(methodJavaName);
                     clientServiceMethods.append("(\n");
-                    clientServiceMethods.append("            WsRequestHeader wsRequest, ");
+                    clientServiceMethods.append("            WsRequestHeader wsRequestHeader, ");
                     clientServiceMethods.append(inputTypeJavaName);
                     clientServiceMethods.append(" parameters\n");
                     clientServiceMethods.append("    ) throws WsClientException {\n");
                     clientServiceMethods.append("        return httpWsClient.processSoapQuery(\n");
-                    clientServiceMethods.append("                wsRequest, parameters, ");
+                    clientServiceMethods.append("                wsRequestHeader, parameters, ");
                     clientServiceMethods.append(inputTypeConstantName);
                     clientServiceMethods.append(", ");
                     clientServiceMethods.append(outputTypeJavaName);
@@ -200,7 +217,7 @@ public class StaxerUtils {
                     clientServiceMethods.append("    }\n\n");
                 }
                 if (createServerService) {
-                    serverServiceStaticConstrustor.append("\n        CLASSES.put(");
+                    serverServiceStaticConstrustor.append("\n        STAXER_READ_XML_CLASSES.put(");
                     serverServiceStaticConstrustor.append(inputTypeConstantName);
                     serverServiceStaticConstrustor.append(", ");
                     serverServiceStaticConstrustor.append(inputTypeJavaName);
@@ -210,6 +227,11 @@ public class StaxerUtils {
                     serverServiceStaticConstrustor.append(", \"");
                     serverServiceStaticConstrustor.append(methodJavaName);
                     serverServiceStaticConstrustor.append("\");\n");
+                    serverServiceStaticConstrustor.append("        RESPONSE_XML_NAMES.put(");
+                    serverServiceStaticConstrustor.append(inputTypeConstantName);
+                    serverServiceStaticConstrustor.append(", ");
+                    serverServiceStaticConstrustor.append(outputTypeConstantName);
+                    serverServiceStaticConstrustor.append(");\n");
 
                     serverServiceMethods.append("    public abstract ");
                     serverServiceMethods.append(outputTypeJavaName);
@@ -243,7 +265,7 @@ public class StaxerUtils {
                 writer.append("public class ");
                 writer.append(serviceName);
                 writer.append(" {\n\n");
-                writer.append(serviceXmlNames.toString());
+                writer.append(clientXmlNames.toString());
                 writer.append("\n");
                 writer.append("    private HttpWsClient httpWsClient;\n");
                 writer.append("\n");
@@ -271,6 +293,8 @@ public class StaxerUtils {
                 writer.append("\n");
                 writer.append("import comtech.staxer.server.ServerServiceWs;\n");
                 writer.append("import comtech.staxer.server.WsMessage;\n");
+                writer.append("import comtech.util.http.helper.ReadHttpParameters;\n");
+                writer.append("import comtech.util.xml.StaxerReadXml;\n");
                 writer.append("import comtech.util.xml.XmlName;\n");
                 writer.append("import ");
                 writer.append(beanPackageName);
@@ -282,20 +306,30 @@ public class StaxerUtils {
                 writer.append("public abstract class ");
                 writer.append(serviceName);
                 writer.append(" implements ServerServiceWs {\n\n");
-                writer.append(serviceXmlNames.toString());
+                writer.append(serverXmlNames.toString());
                 writer.append("\n");
-                writer.append("    public static final Map<XmlName, Class> CLASSES;\n");
-                writer.append("    public static final Map<XmlName, String> METHOD_NAMES;\n\n");
+                writer.append("    public static final Map<XmlName, Class<? extends StaxerReadXml>> STAXER_READ_XML_CLASSES;\n");
+                writer.append("    public static final Map<XmlName, Class<? extends ReadHttpParameters>> READ_HTTP_PARAMETERS_CLASSES;\n");
+                writer.append("    public static final Map<XmlName, String> METHOD_NAMES;\n");
+                writer.append("    public static final Map<XmlName, XmlName> RESPONSE_XML_NAMES;\n\n");
                 writer.append("    static {\n");
-                writer.append("        CLASSES = new HashMap<XmlName, Class>();\n");
+                writer.append("        STAXER_READ_XML_CLASSES = new HashMap<XmlName, Class<? extends StaxerReadXml>>();\n");
+                writer.append("        READ_HTTP_PARAMETERS_CLASSES = new HashMap<XmlName, Class<? extends ReadHttpParameters>>();\n");
                 writer.append("        METHOD_NAMES = new HashMap<XmlName, String>();\n");
+                writer.append("        RESPONSE_XML_NAMES = new HashMap<XmlName, XmlName>();\n");
                 writer.append(serverServiceStaticConstrustor.toString());
                 writer.append("    }\n\n");
-                writer.append("    public Class getClass(XmlName xmlName) {\n");
-                writer.append("        return CLASSES.get(xmlName);\n");
+                writer.append("    public Class<? extends StaxerReadXml> getReadXmlClass(XmlName requestXmlName) {\n");
+                writer.append("        return STAXER_READ_XML_CLASSES.get(requestXmlName);\n");
+                writer.append("    }\n\n");
+                writer.append("    public Class<? extends ReadHttpParameters> getReadHttpParametersClass(XmlName requestXmlName) {\n");
+                writer.append("        return READ_HTTP_PARAMETERS_CLASSES.get(requestXmlName);\n");
                 writer.append("    }\n\n");
                 writer.append("    public String getMethodName(XmlName xmlName) {\n");
                 writer.append("        return METHOD_NAMES.get(xmlName);\n");
+                writer.append("    }\n\n");
+                writer.append("    public XmlName getResponseXmlName(XmlName requestXmlName) {\n");
+                writer.append("        return RESPONSE_XML_NAMES.get(requestXmlName);\n");
                 writer.append("    }\n\n");
                 writer.append(serverServiceMethods.toString());
                 writer.append("}\n");
