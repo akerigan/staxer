@@ -1,11 +1,14 @@
 package staxer.sample.client;
 
 import comtech.staxer.client.*;
+import comtech.util.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import staxer.sample.ClientStaxerSampleServiceWs;
 import staxer.sample.bean.EchoXsdTypesRequest;
 import staxer.sample.bean.EchoXsdTypesResponse;
+
+import java.security.NoSuchAlgorithmException;
 
 /**
  * @author Vlad Vinichenko (akerigan@gmail.com)
@@ -15,13 +18,16 @@ public class EchoXsdTypesWsClient {
 
     private static Logger logger = LoggerFactory.getLogger(EchoXsdTypesWsClient.class);
 
-    public static void main(String[] args) throws WsClientException {
+    public static void main(String[] args) throws WsClientException, NoSuchAlgorithmException {
 
         ClientStaxerSampleServiceWs serviceWs = new ClientStaxerSampleServiceWs();
         serviceWs.setHttpWsClient(getWsClient(true));
 
-        BasicHttpAuthWsRequest wsRequest = new BasicHttpAuthWsRequest();
+        WssWsRequestHeader wsRequest = new WssWsRequestHeader();
+//        BasicHttpAuthWsRequestHeader wsRequest = new BasicHttpAuthWsRequestHeader();
         wsRequest.setEndpoint("http://localhost:8080/sample/sample");
+        wsRequest.setLogin("user");
+        wsRequest.setPassword(SecurityUtils.getMD5_EncodedBase64("user"));
 
         EchoXsdTypesResponse response = serviceWs.echoXsdTypes(wsRequest, new EchoXsdTypesRequest());
 
@@ -35,7 +41,7 @@ public class EchoXsdTypesWsClient {
         } else {
             httpWsClient = new HttpWsClientCommons();
         }
-        httpWsClient.setName("STAXER_SERVER");
+        httpWsClient.setName("SERVER");
         httpWsClient.setConnectionTimeout(10);
         httpWsClient.setProcessTimeout(30);
         return httpWsClient;

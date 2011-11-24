@@ -131,7 +131,7 @@ public class StaxerXmlStreamWriter {
     private void writeIndents() throws StaxerXmlStreamException {
         try {
             if (indentSize > 0
-                    && (state == STATE_ELEMENT_STARTED || state == STATE_DOCUMENT_STARTED)) {
+                && (state == STATE_ELEMENT_STARTED || state == STATE_DOCUMENT_STARTED)) {
                 writer.write("\n");
                 for (int i = 0; i <= level; ++i) {
                     for (int j = 0; j < indentSize; ++j) {
@@ -178,14 +178,14 @@ public class StaxerXmlStreamWriter {
     public void text(Object value) throws StaxerXmlStreamException {
         try {
             if (state == STATE_ELEMENT_START
-                    || state == STATE_ELEMENT_STARTED
-                    || state == STATE_TEXT_WRITED) {
-                if (state == STATE_ELEMENT_START) {
-                    writeNamespaces(allContexts.get(level));
-                    writer.write(START_ELEMENT_END_NORMAL);
-                }
+                || state == STATE_ELEMENT_STARTED
+                || state == STATE_TEXT_WRITED) {
                 String s = StringUtils.toString(value);
                 if (s != null) {
+                    if (state == STATE_ELEMENT_START) {
+                        writeNamespaces(allContexts.get(level));
+                        writer.write(START_ELEMENT_END_NORMAL);
+                    }
                     writer.write(s);
                     state = STATE_TEXT_WRITED;
                 }

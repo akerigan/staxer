@@ -2,6 +2,7 @@ package comtech.staxer.client;
 
 import comtech.util.SecurityUtils;
 import comtech.util.StringUtils;
+import comtech.util.xml.StaxerXmlStreamException;
 import comtech.util.xml.StaxerXmlStreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +15,9 @@ import java.util.List;
  * @author Vlad Vinichenko (akerigan@gmail.com)
  * @since 2011-03-30 12:33 (Europe/Moscow)
  */
-public class BasicHttpAuthWsRequest implements WsRequest {
+public class BasicHttpAuthWsRequestHeader implements WsRequestHeader {
 
-    private static Logger log = LoggerFactory.getLogger(BasicHttpAuthWsRequest.class);
+    private static Logger log = LoggerFactory.getLogger(BasicHttpAuthWsRequestHeader.class);
 
     private String endpoint;
     private String login;
@@ -46,7 +47,11 @@ public class BasicHttpAuthWsRequest implements WsRequest {
         this.password = password;
     }
 
-    public void writeSoapHeader(StaxerXmlStreamWriter xmlWriter) {
+    public void writeXmlAttributes(StaxerXmlStreamWriter xmlWriter) throws StaxerXmlStreamException {
+        // do nothing
+    }
+
+    public void writeXmlContent(StaxerXmlStreamWriter xmlWriter) throws StaxerXmlStreamException {
         // do nothing
     }
 
@@ -68,7 +73,7 @@ public class BasicHttpAuthWsRequest implements WsRequest {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("<BasicHttpAuthWsRequest>\n");
+        sb.append("<BasicHttpAuthWsRequestHeader>\n");
         sb.append("<endpoint>");
         sb.append(endpoint);
         sb.append("</endpoint>\n");
@@ -78,7 +83,7 @@ public class BasicHttpAuthWsRequest implements WsRequest {
         sb.append("<password>");
         sb.append(password);
         sb.append("</password>\n");
-        sb.append("</BasicHttpAuthWsRequest>\n");
+        sb.append("</BasicHttpAuthWsRequestHeader>\n");
 
         return sb.toString();
     }

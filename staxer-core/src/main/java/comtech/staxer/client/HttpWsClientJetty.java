@@ -12,10 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.DeflaterInputStream;
 import java.util.zip.GZIPInputStream;
@@ -98,27 +95,30 @@ public class HttpWsClientJetty implements HttpWsClient {
     }
 
     public <Q extends StaxerWriteXml, A extends StaxerReadXml> A processSoapQuery(
-            WsRequest wsRequest, Q requestObject,
+            WsRequestHeader wsRequestHeader, Q requestObject,
             XmlName requestXmlName, Class<A> responseClass
     ) throws WsClientException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            XmlUtils.writeSoapEnvelopedElement(baos, "UTF-8", 2, requestObject, requestXmlName);
+            XmlUtils.writeSoapEnvelopedElement(
+                    baos, "UTF-8", 2, requestObject, requestXmlName,
+                    Arrays.asList(wsRequestHeader)
+            );
         } catch (StaxerXmlStreamException e) {
             throw new WsClientException("Error while serializing soap request", e);
         }
         try {
-            return processSoapQuery(wsRequest, new String(baos.toByteArray(), "UTF-8"), responseClass);
+            return processSoapQuery(wsRequestHeader, new String(baos.toByteArray(), "UTF-8"), responseClass);
         } catch (UnsupportedEncodingException e) {
             throw new WsClientException("Error while serializing soap request", e);
         }
     }
 
     public <A extends StaxerReadXml> A processSoapQuery(
-            WsRequest wsRequest, String soapRequestXml, Class<A> responseClass
+            WsRequestHeader wsRequestHeader, String soapRequestXml, Class<A> responseClass
     ) throws WsClientException {
         int requestId = requestIdHolder.addAndGet(1);
-        String soapResponseXml = sendSoapQuery(wsRequest, soapRequestXml, requestId);
+        String soapResponseXml = sendSoapQuery(wsRequestHeader, soapRequestXml, requestId);
         try {
             StaxerXmlStreamReader document = new StaxerXmlStreamReader(new StringReader(soapResponseXml));
             boolean envelopBodyRead = document.readStartElement(XML_NAME_SOAP_ENVELOPE_BODY);
@@ -146,16 +146,16 @@ public class HttpWsClientJetty implements HttpWsClient {
     }
 
     public String sendSoapQuery(
-            WsRequest wsRequest, String soapRequestXml, int requestId
+            WsRequestHeader wsRequestHeader, String soapRequestXml, int requestId
     ) throws WsClientException {
-        log.info(name + ", rid=" + requestId + ", wsRequest: " + wsRequest);
-        if (wsRequest == null) {
+        log.info(name + ", rid=" + requestId + ", wsRequestHeader: " + wsRequestHeader);
+        if (wsRequestHeader == null) {
             throw new IllegalStateException("Ws request header is null");
         }
         log.info(name + ", rid=" + requestId + ", soap request: " + soapRequestXml);
         try {
             String soapResponseXml = postQuery(
-                    wsRequest, soapRequestXml.getBytes("UTF-8"), requestId
+                    wsRequestHeader, soapRequestXml.getBytes("UTF-8"), requestId
             );
             log.info(name + ", rid=" + requestId + ", soap response: " + soapResponseXml);
             return soapResponseXml;
@@ -165,12 +165,12 @@ public class HttpWsClientJetty implements HttpWsClient {
     }
 
     private String postQuery(
-            WsRequest wsRequest, byte[] data, int requestId
+            WsRequestHeader wsRequestHeader, byte[] data, int requestId
     ) throws WsClientException {
         ContentExchange contentExchange = new ContentExchange(true);
 /*
         try {
-            URI uri = new URI(wsRequest.getEndpoint());
+            URI uri = new URI(wsRequestHeader.getEndpoint());
             log.info("uri=" + uri);
             log.info("host=" + uri.getHost());
             log.info("port=" + uri.getPort());
@@ -180,7 +180,7 @@ public class HttpWsClientJetty implements HttpWsClient {
             throw new WsClientException("Error while serializing soap request", e);
         }
 */
-        contentExchange.setURL(wsRequest.getEndpoint());
+        contentExchange.setURL(wsRequestHeader.getEndpoint());
         contentExchange.setMethod("POST");
         contentExchange.setRequestContentSource(new ByteArrayInputStream(data));
 
@@ -193,7 +193,7 @@ public class HttpWsClientJetty implements HttpWsClient {
         requestHeaders.add(new HttpRequestHeader("Accept-Encoding", "deflate,gzip"));
         requestHeaders.add(new HttpRequestHeader("Content-Length", Integer.toString(data.length)));
 
-        List<HttpRequestHeader> wsRequestHeaders = wsRequest.getRequestHeaders();
+        List<HttpRequestHeader> wsRequestHeaders = wsRequestHeader.getRequestHeaders();
         if (wsRequestHeaders != null && !wsRequestHeaders.isEmpty()) {
             requestHeaders.addAll(wsRequestHeaders);
         }

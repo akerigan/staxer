@@ -1,6 +1,6 @@
 package comtech.staxer.client;
 
-import comtech.util.xml.StaxerXmlStreamWriter;
+import comtech.util.xml.StaxerWriteXml;
 
 import java.util.List;
 
@@ -9,11 +9,9 @@ import java.util.List;
  * Date: 17.03.2010
  * Time: 14:52:57
  */
-public interface WsRequest {
+public interface WsRequestHeader extends StaxerWriteXml {
 
     public String getEndpoint();
-
-    public void writeSoapHeader(StaxerXmlStreamWriter xmlWriter);
 
     public List<HttpRequestHeader> getRequestHeaders();
 

@@ -1,5 +1,6 @@
 package comtech.staxer.client;
 
+import comtech.util.xml.StaxerXmlStreamException;
 import comtech.util.xml.StaxerXmlStreamWriter;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
  * @author Vlad Vinichenko (akerigan@gmail.com)
  * @since 2011-03-30 12:42 (Europe/Moscow)
  */
-public class SimpleWsRequest implements WsRequest {
+public class SimpleWsRequestHeader implements WsRequestHeader {
 
     private String endpoint;
 
@@ -20,7 +21,11 @@ public class SimpleWsRequest implements WsRequest {
         this.endpoint = endpoint;
     }
 
-    public void writeSoapHeader(StaxerXmlStreamWriter xmlWriter) {
+    public void writeXmlAttributes(StaxerXmlStreamWriter xmlWriter) throws StaxerXmlStreamException {
+        // do nothing
+    }
+
+    public void writeXmlContent(StaxerXmlStreamWriter xmlWriter) throws StaxerXmlStreamException {
         // do nothing
     }
 
@@ -31,11 +36,11 @@ public class SimpleWsRequest implements WsRequest {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("<SimpleWsRequest>\n");
+        sb.append("<SimpleWsRequestHeader>\n");
         sb.append("<endpoint>");
         sb.append(endpoint);
         sb.append("</endpoint>\n");
-        sb.append("</SimpleWsRequest>\n");
+        sb.append("</SimpleWsRequestHeader>\n");
 
         return sb.toString();
     }

@@ -186,7 +186,7 @@ public class StaxerUtils {
                     clientServiceMethods.append(" ");
                     clientServiceMethods.append(methodJavaName);
                     clientServiceMethods.append("(\n");
-                    clientServiceMethods.append("            WsRequest wsRequest, ");
+                    clientServiceMethods.append("            WsRequestHeader wsRequest, ");
                     clientServiceMethods.append(inputTypeJavaName);
                     clientServiceMethods.append(" parameters\n");
                     clientServiceMethods.append("    ) throws WsClientException {\n");
@@ -234,7 +234,7 @@ public class StaxerUtils {
                 writer.append(";\n\n");
                 writer.append("import comtech.staxer.client.HttpWsClient;\n");
                 writer.append("import comtech.staxer.client.WsClientException;\n");
-                writer.append("import comtech.staxer.client.WsRequest;\n");
+                writer.append("import comtech.staxer.client.WsRequestHeader;\n");
                 writer.append("import comtech.util.xml.XmlName;\n");
                 writer.append("import ");
                 writer.append(packageName);

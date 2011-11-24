@@ -2,7 +2,7 @@ package staxer.sample;
 
 import comtech.staxer.client.HttpWsClient;
 import comtech.staxer.client.WsClientException;
-import comtech.staxer.client.WsRequest;
+import comtech.staxer.client.WsRequestHeader;
 import comtech.util.xml.XmlName;
 import staxer.sample.bean.EchoCustomTypesRequest;
 import staxer.sample.bean.EchoCustomTypesResponse;
@@ -28,18 +28,18 @@ public class ClientStaxerSampleServiceWs {
     // service related methods
 
     public EchoXsdTypesResponse echoXsdTypes(
-            WsRequest wsRequest, EchoXsdTypesRequest parameters
+            WsRequestHeader wsRequestHeader, EchoXsdTypesRequest parameters
     ) throws WsClientException {
         return httpWsClient.processSoapQuery(
-                wsRequest, parameters, XML_NAME_ECHO_XSD_TYPES, EchoXsdTypesResponse.class
+                wsRequestHeader, parameters, XML_NAME_ECHO_XSD_TYPES, EchoXsdTypesResponse.class
         );
     }
 
     public EchoCustomTypesResponse echoCustomTypes(
-            WsRequest wsRequest, EchoCustomTypesRequest parameters
+            WsRequestHeader wsRequestHeader, EchoCustomTypesRequest parameters
     ) throws WsClientException {
         return httpWsClient.processSoapQuery(
-                wsRequest, parameters, XML_NAME_ECHO_CUSTOM_TYPES, EchoCustomTypesResponse.class
+                wsRequestHeader, parameters, XML_NAME_ECHO_CUSTOM_TYPES, EchoCustomTypesResponse.class
         );
     }
 

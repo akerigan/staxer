@@ -82,9 +82,7 @@ public class WssSoapHeader implements StaxerWriteXml {
         sha.update(clientPassword.getBytes());
         wssPassword.setValue(Base64.encodeBase64String(sha.digest()).trim());
 
-        xmlWriter.startElement(XmlConstants.XML_NAME_SOAP_ENVELOPE_HEADER);
         XmlUtils.writeXmlElement(xmlWriter, wssSecurity, XmlConstants.XML_NAME_WSS_SECURITY);
-        xmlWriter.endElement();
     }
 
 }

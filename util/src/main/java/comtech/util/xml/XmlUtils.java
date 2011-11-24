@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.util.List;
 
 import static comtech.util.xml.XmlConstants.XML_NAME_SOAP_ENVELOPE_FAULT;
 import static comtech.util.xml.XmlConstants.XML_NAME_XSI_NIL;
@@ -102,12 +103,31 @@ public class XmlUtils {
             OutputStream outputStream, String charset, int indentSize,
             StaxerWriteXml staxerWriteXml, XmlName payloadElementName
     ) throws StaxerXmlStreamException {
+        writeSoapEnvelopedElement(
+                outputStream, charset, indentSize,
+                staxerWriteXml, payloadElementName, null
+        );
+    }
+
+    public static void writeSoapEnvelopedElement(
+            OutputStream outputStream, String charset, int indentSize,
+            StaxerWriteXml staxerWriteXml, XmlName payloadElementName,
+            List<? extends StaxerWriteXml> headerWriters
+    ) throws StaxerXmlStreamException {
         try {
             StaxerXmlStreamWriter xmlWriter = new StaxerXmlStreamWriter(
                     outputStream, charset, indentSize
             );
             xmlWriter.startDocument();
             xmlWriter.startElement(XmlConstants.XML_NAME_SOAP_ENVELOPE);
+            if (headerWriters != null && !headerWriters.isEmpty()) {
+                xmlWriter.startElement(XmlConstants.XML_NAME_SOAP_ENVELOPE_HEADER);
+                for (StaxerWriteXml headerWriter : headerWriters) {
+                    headerWriter.writeXmlAttributes(xmlWriter);
+                    headerWriter.writeXmlContent(xmlWriter);
+                }
+                xmlWriter.endElement();
+            }
             xmlWriter.startElement(XmlConstants.XML_NAME_SOAP_ENVELOPE_BODY);
             if (staxerWriteXml != null) {
                 if (staxerWriteXml instanceof SoapFault) {

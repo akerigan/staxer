@@ -99,7 +99,7 @@ public class HttpWsClientCommons implements HttpWsClient {
     }
 
     public <Q extends StaxerWriteXml, A extends StaxerReadXml> A processSoapQuery(
-            WsRequest wsRequest, Q requestObject,
+            WsRequestHeader wsRequestHeader, Q requestObject,
             XmlName requestXmlName, Class<A> responseClass
     ) throws WsClientException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -110,7 +110,10 @@ public class HttpWsClientCommons implements HttpWsClient {
             xmlWriter.startDocument();
             xmlWriter.startElement(XML_NAME_SOAP_ENVELOPE);
 
-            wsRequest.writeSoapHeader(xmlWriter);
+            xmlWriter.startElement(XmlConstants.XML_NAME_SOAP_ENVELOPE_HEADER);
+            wsRequestHeader.writeXmlAttributes(xmlWriter);
+            wsRequestHeader.writeXmlContent(xmlWriter);
+            xmlWriter.endElement();
 
             xmlWriter.startElement(XML_NAME_SOAP_ENVELOPE_BODY);
 
@@ -128,17 +131,17 @@ public class HttpWsClientCommons implements HttpWsClient {
             throw new WsClientException("Error while serializing soap request", e);
         }
         try {
-            return processSoapQuery(wsRequest, new String(baos.toByteArray(), "UTF-8"), responseClass);
+            return processSoapQuery(wsRequestHeader, new String(baos.toByteArray(), "UTF-8"), responseClass);
         } catch (UnsupportedEncodingException e) {
             throw new WsClientException("Error while serializing soap request", e);
         }
     }
 
     public <A extends StaxerReadXml> A processSoapQuery(
-            WsRequest wsRequest, String soapRequestXml, Class<A> responseClass
+            WsRequestHeader wsRequestHeader, String soapRequestXml, Class<A> responseClass
     ) throws WsClientException {
         int requestId = requestIdHolder.addAndGet(1);
-        String soapResponseXml = sendSoapQuery(wsRequest, soapRequestXml, requestId);
+        String soapResponseXml = sendSoapQuery(wsRequestHeader, soapRequestXml, requestId);
         try {
             StaxerXmlStreamReader document = new StaxerXmlStreamReader(new StringReader(soapResponseXml));
             boolean envelopBodyRead = document.readStartElement(XML_NAME_SOAP_ENVELOPE_BODY);
@@ -147,7 +150,7 @@ public class HttpWsClientCommons implements HttpWsClient {
                 if (bodyChildElement == null) {
                     throw new WsClientException(
                             name + ", rid=" + requestId +
-                                    ", invalid XML: cant locate payload element"
+                            ", invalid XML: cant locate payload element"
                     );
                 } else if (XML_NAME_SOAP_ENVELOPE_FAULT.equals(bodyChildElement)) {
                     SoapFault soapFault = XmlUtils.readXml(document, SoapFault.class, XML_NAME_SOAP_ENVELOPE_FAULT);
@@ -157,7 +160,7 @@ public class HttpWsClientCommons implements HttpWsClient {
             } else {
                 throw new WsClientException(
                         name + ", rid=" + requestId + ", invalid XML: cant locate '" +
-                                XML_NAME_SOAP_ENVELOPE_BODY + "' element"
+                        XML_NAME_SOAP_ENVELOPE_BODY + "' element"
                 );
             }
         } catch (StaxerXmlStreamException e) {
@@ -166,16 +169,16 @@ public class HttpWsClientCommons implements HttpWsClient {
     }
 
     public String sendSoapQuery(
-            WsRequest wsRequest, String soapRequestXml, int requestId
+            WsRequestHeader wsRequestHeader, String soapRequestXml, int requestId
     ) throws WsClientException {
-        log.info(name + ", rid=" + requestId + ", wsRequest: " + wsRequest);
-        if (wsRequest == null) {
+        log.info(name + ", rid=" + requestId + ", wsRequestHeader: " + wsRequestHeader);
+        if (wsRequestHeader == null) {
             throw new IllegalStateException("Ws request header is null");
         }
         log.info(name + ", rid=" + requestId + ", soap request: " + soapRequestXml);
         try {
             String soapResponseXml = postQuery(
-                    wsRequest, soapRequestXml.getBytes("UTF-8"), requestId
+                    wsRequestHeader, soapRequestXml.getBytes("UTF-8"), requestId
             );
             log.info(name + ", rid=" + requestId + ", soap response: " + soapResponseXml);
             return soapResponseXml;
@@ -185,9 +188,9 @@ public class HttpWsClientCommons implements HttpWsClient {
     }
 
     private String postQuery(
-            WsRequest wsRequest, byte[] data, int requestId
+            WsRequestHeader wsRequestHeader, byte[] data, int requestId
     ) throws WsClientException {
-        PostMethod postMethod = new PostMethod(wsRequest.getEndpoint());
+        PostMethod postMethod = new PostMethod(wsRequestHeader.getEndpoint());
         postMethod.setRequestEntity(new ByteArrayRequestEntity(data, XML_CONTENT_TYPE));
 
         List<HttpRequestHeader> requestHeaders = new ArrayList<HttpRequestHeader>();
@@ -198,7 +201,7 @@ public class HttpWsClientCommons implements HttpWsClient {
         requestHeaders.add(new HttpRequestHeader("Pragma", "no-cache"));
         requestHeaders.add(new HttpRequestHeader("Accept-Encoding", "deflate,gzip"));
 
-        List<HttpRequestHeader> wsRequestHeaders = wsRequest.getRequestHeaders();
+        List<HttpRequestHeader> wsRequestHeaders = wsRequestHeader.getRequestHeaders();
         if (wsRequestHeaders != null && !wsRequestHeaders.isEmpty()) {
             requestHeaders.addAll(wsRequestHeaders);
         }

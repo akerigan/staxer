@@ -127,14 +127,15 @@ public abstract class WsMessageProcessor {
                         responseXmlName = serviceWs.getResponseXmlName(requestXmlName);
                     }
                 } else if (HttpMethod.POST == httpHelper.getMethod()) {
-                    StaxerXmlStreamReader document =
+                    StaxerXmlStreamReader xmlReader =
                             new StaxerXmlStreamReader(new StringReader(requestBody.toString()));
-                    if (document.readStartElement(XML_NAME_SOAP_ENVELOPE)) {
-                        if (!document.elementStarted(XML_NAME_SOAP_ENVELOPE_BODY)
-                            && !document.readStartElement(XML_NAME_SOAP_ENVELOPE_BODY)) {
+                    if (xmlReader.readStartElement(XML_NAME_SOAP_ENVELOPE)) {
+                        wsMessage = buildMessage(wsRequestId, httpHelper, xmlReader);
+                        if (!xmlReader.elementStarted(XML_NAME_SOAP_ENVELOPE_BODY)
+                            && !xmlReader.readStartElement(XML_NAME_SOAP_ENVELOPE_BODY)) {
                             response = new SoapFault("env:Sender", "Invalid SOAP message");
                         } else {
-                            requestXmlName = document.readStartElement();
+                            requestXmlName = xmlReader.readStartElement();
                             if (requestXmlName == null) {
                                 response = new SoapFault("env:Sender", "Invalid SOAP message");
                             } else {
@@ -145,9 +146,8 @@ public abstract class WsMessageProcessor {
                                     response = new SoapFault("env:Server", "Cant handle element: " + requestXmlName);
                                 } else {
                                     StaxerReadXml readXmlInstance = payloadClass.newInstance();
-                                    readXmlInstance.readXmlAttributes(document.getAttributes());
-                                    readXmlInstance.readXmlContent(document);
-                                    wsMessage = buildMessage(wsRequestId, httpHelper, document);
+                                    readXmlInstance.readXmlAttributes(xmlReader.getAttributes());
+                                    readXmlInstance.readXmlContent(xmlReader);
                                     wsMessage.setBody(readXmlInstance);
                                     String methodName = serviceWs.getMethodName(requestXmlName);
                                     method = serviceWs.getClass().getMethod(methodName, WsMessage.class);

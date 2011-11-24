@@ -21,16 +21,16 @@ public interface HttpWsClient {
     public void setProcessTimeout(int timeout);
 
     public <Q extends StaxerWriteXml, A extends StaxerReadXml> A processSoapQuery(
-            WsRequest wsRequest, Q requestObject,
+            WsRequestHeader wsRequestHeader, Q requestObject,
             XmlName requestXmlName, Class<A> responseClass
     ) throws WsClientException;
 
     public <A extends StaxerReadXml> A processSoapQuery(
-            WsRequest wsRequest, String soapRequestXml, Class<A> responseClass
+            WsRequestHeader wsRequestHeader, String soapRequestXml, Class<A> responseClass
     ) throws WsClientException;
 
     public String sendSoapQuery(
-            WsRequest wsRequest, String soapRequestXml, int requestId
+            WsRequestHeader wsRequestHeader, String soapRequestXml, int requestId
     ) throws WsClientException;
 
 }

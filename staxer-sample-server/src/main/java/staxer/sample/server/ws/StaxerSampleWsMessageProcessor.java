@@ -12,8 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import staxer.sample.server.service.DbService;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Vlad Vinichenko (akerigan@gmail.com)
@@ -56,7 +58,22 @@ public class StaxerSampleWsMessageProcessor extends WsMessageProcessor {
         String userLogin = (String) params.get(PARAM_USER_LOGIN);
         result.setCode("env:Server");
         if (e != null) {
-            result.setString(e.getMessage());
+            String message = e.getMessage();
+            if (message == null) {
+                Set<Throwable> exceptions = new HashSet<Throwable>();
+                exceptions.add(e);
+                Throwable cause = e.getCause();
+                while (cause != null && message == null) {
+                    message = cause.getMessage();
+                    cause = cause.getCause();
+                    if (exceptions.contains(cause)) {
+                        cause = null;
+                    } else {
+                        exceptions.add(cause);
+                    }
+                }
+            }
+            result.setString(message);
         } else {
             result.setString("Internal error occured");
         }
