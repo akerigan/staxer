@@ -96,6 +96,8 @@ public class StaxerUtils {
         Map<XmlName, XmlSchemaType> webServiceTypesMap = xmlSchema.getTypesMap();
 
         for (WebServiceOperation operation : webServiceOperationsMap.values()) {
+            XmlName operationXmlName = operation.getName();
+            log.info("Processing ws-operation:" + operationXmlName);
             XmlName messageXmlName = operation.getInputMessage();
             if (messageXmlName == null) {
                 continue;
@@ -140,8 +142,10 @@ public class StaxerUtils {
             StringBuilder serverServiceStaticConstrustor = new StringBuilder();
             StringBuilder serverServiceMethods = new StringBuilder();
 
-            for (WebServiceOperation method : webServiceOperationsMap.values()) {
-                XmlName outputMessageName = method.getOutputMessage();
+            for (WebServiceOperation operation : webServiceOperationsMap.values()) {
+                XmlName operationXmlName = operation.getName();
+                log.info("Processing ws-operation:" + operationXmlName);
+                XmlName outputMessageName = operation.getOutputMessage();
                 WebServiceMessage outputMessage = webServiceMessagesMap.get(outputMessageName);
                 List<WebServiceMessagePart> outputParts = outputMessage.getParts();
                 if (outputParts.isEmpty()) {
@@ -154,7 +158,7 @@ public class StaxerUtils {
                 if (outputType == null) {
                     continue;
                 }
-                XmlName inputMessageName = method.getInputMessage();
+                XmlName inputMessageName = operation.getInputMessage();
                 WebServiceMessage inputMessage = webServiceMessagesMap.get(inputMessageName);
                 List<WebServiceMessagePart> inputParts = inputMessage.getParts();
                 if (inputParts.isEmpty()) {
@@ -169,7 +173,7 @@ public class StaxerUtils {
                 }
                 String outputTypeJavaName = outputType.getJavaName();
                 String inputTypeJavaName = inputType.getJavaName();
-                String methodJavaName = method.getJavaName();
+                String methodJavaName = operation.getJavaName();
 
                 String inputElementLocalPart = inputElement.getLocalPart();
                 String inputTypeConstantName = "XML_NAME_" + StringUtils.toEnumName(inputElementLocalPart);
@@ -358,6 +362,8 @@ public class StaxerUtils {
         Map<XmlName, XmlSchemaType> webServiceTypesMap = xmlSchema.getTypesMap();
 
         for (XmlSchemaEnum enumType : webServiceEnumsMap.values()) {
+            XmlName enumXmlName = enumType.getXmlName();
+            log.info("Processing ws-enum:" + enumXmlName);
             String enumTypeJavaName = enumType.getJavaName();
 
             File file = new File(beansDir, enumTypeJavaName + ".java");
@@ -452,8 +458,9 @@ public class StaxerUtils {
         }
 
         for (XmlSchemaType type : webServiceTypesMap.values()) {
-            String typeJavaName = type.getJavaName();
             XmlName typeXmlName = type.getXmlName();
+            log.info("Processing ws-type:" + typeXmlName);
+            String typeJavaName = type.getJavaName();
 
             File file = new File(beansDir, typeJavaName + ".java");
             Writer writer = new FileWriter(file);
@@ -1183,11 +1190,22 @@ public class StaxerUtils {
     }
 
     public static XmlSchema readXmlSchema(
-            String xsdTargetNamespace, URI uri, String httpUser, String httpPassword, String xmlCharset
+            String xsdTargetNamespace, URI uri, String httpUser,
+            String httpPassword, String xmlCharset
+    ) throws Exception {
+        return readXmlSchema(xsdTargetNamespace, uri, httpUser, httpPassword, xmlCharset, null);
+    }
+
+    public static XmlSchema readXmlSchema(
+            String xsdTargetNamespace, URI uri, String httpUser,
+            String httpPassword, String xmlCharset, Map<String, String> namespacesMap
     ) throws Exception {
         String xml = ResourceUtils.getUrlContentAsString(uri, httpUser, httpPassword, xmlCharset);
         if (xml != null) {
             XmlSchema xmlSchema = new XmlSchema(xsdTargetNamespace, uri, httpUser, httpPassword, xmlCharset);
+            if (namespacesMap != null && !namespacesMap.isEmpty()) {
+                xmlSchema.getNamespacesMap().putAll(namespacesMap);
+            }
             StaxerXmlStreamReader xmlReader = new StaxerXmlStreamReader(new StringReader(xml));
             if (xmlReader.readStartElement(XmlConstants.XML_NAME_XSD_SCHEMA)) {
                 xmlSchema.readXmlAttributes(xmlReader.getAttributes());

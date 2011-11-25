@@ -169,7 +169,7 @@ public class ResourceUtils {
     ) throws Exception {
         if (uri != null) {
             String scheme = uri.getScheme();
-            if ("http".equals(scheme)) {
+            if ("http".equals(scheme) || "https".equals(scheme)) {
                 ContentExchange contentExchange = getUrlContentExchange(uri.toString(), httpUser, httpPassword);
                 if (contentExchange != null) {
                     return contentExchange.getResponseContent();
@@ -206,7 +206,7 @@ public class ResourceUtils {
         httpClient.setConnectTimeout(10000);
         httpClient.setIdleTimeout(30000);
         ContentExchange contentExchange = new ContentExchange(true);
-        contentExchange.setURL(url);
+        contentExchange.setURL(StringUtils.notEmptyTrimmedElseNull(url));
         contentExchange.setMethod("GET");
         if (!StringUtils.isEmpty(httpUser) && !StringUtils.isEmpty(httpPassword)) {
             contentExchange.addRequestHeader("Authorization", SecurityUtils.getBasicHttpAuth(
@@ -218,7 +218,7 @@ public class ResourceUtils {
         contentExchange.waitForDone();
         httpClient.stop();
         int statusCode = contentExchange.getResponseStatus();
-        if (statusCode != HttpStatus.OK_200) {
+        if (statusCode == HttpStatus.OK_200) {
             return contentExchange;
         } else {
             return null;

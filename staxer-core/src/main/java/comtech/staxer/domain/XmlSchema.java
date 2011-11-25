@@ -96,15 +96,15 @@ public class XmlSchema implements StaxerReadXml, StaxerWriteXml {
     public void readXmlAttributes(
             XmlNameMapProperties attributes
     ) throws StaxerXmlStreamException {
-        String namespace = attributes.get(XML_NAME_TARGET_NAMESPACE);
+        String namespace = StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_TARGET_NAMESPACE));
         if (namespace != null) {
             xsdTargetNamespace = namespace;
         }
         xsdElementsQualified = "qualified".equalsIgnoreCase(
-                attributes.get(XML_NAME_ELEMENT_FORM_DEFAULT)
+                StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_ELEMENT_FORM_DEFAULT))
         );
         xsdAttributesQualified = "qualified".equalsIgnoreCase(
-                attributes.get(XML_NAME_ATTRIBUTE_FORM_DEFAULT)
+                StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_ATTRIBUTE_FORM_DEFAULT))
         );
     }
 
@@ -114,24 +114,34 @@ public class XmlSchema implements StaxerReadXml, StaxerWriteXml {
         xmlReader.updateNamespacesMap(namespacesMap);
         while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_SCHEMA)) {
             if (xmlReader.elementStarted(XML_NAME_XSD_COMPLEX_TYPE)) {
-                readXsdComplexType(xmlReader);
+                readXsdComplexType(xmlReader, null, null);
             } else if (xmlReader.elementStarted(XML_NAME_XSD_SIMPLE_TYPE)) {
-                readXsdSimpleType(xmlReader);
+                readXsdSimpleType(xmlReader, null, null);
             } else if (xmlReader.elementStarted(XML_NAME_XSD_ELEMENT)) {
                 XmlNameMapProperties attributes = xmlReader.getAttributes();
-                XmlName typeName = unpackXmlName(attributes.get(XML_NAME_TYPE), namespacesMap);
-                XmlName elementName = new XmlName(xsdTargetNamespace, attributes.get(XML_NAME_NAME));
+                String elementLocalPart = StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_NAME));
+                XmlName elementName = new XmlName(xsdTargetNamespace, elementLocalPart);
+                XmlName typeName = unpackXmlName(StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_TYPE)), namespacesMap);
+                if (typeName == null) {
+                    while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_ELEMENT)) {
+                        if (xmlReader.elementStarted(XML_NAME_XSD_COMPLEX_TYPE)) {
+                            typeName = readXsdComplexType(xmlReader, elementLocalPart, null);
+                        } else if (xmlReader.elementStarted(XML_NAME_XSD_SIMPLE_TYPE)) {
+                            typeName = readXsdSimpleType(xmlReader, elementLocalPart, null);
+                        }
+                    }
+                }
                 globalTypeElementMap.put(typeName, elementName);
                 globalElementTypeMap.put(elementName, typeName);
             } else if (xmlReader.elementStarted(XML_NAME_XSD_IMPORT) || xmlReader.elementStarted(XML_NAME_XSD_INCLUDE)) {
                 XmlNameMapProperties attributes = xmlReader.getAttributes();
                 String namespace;
                 if (xmlReader.elementStarted(XML_NAME_XSD_IMPORT)) {
-                    namespace = attributes.get(XML_NAME_NAMESPACE);
+                    namespace = StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_NAMESPACE));
                 } else {
                     namespace = xsdTargetNamespace;
                 }
-                URI location = URI.create(attributes.get(XML_NAME_SCHEMA_LOCATION));
+                URI location = URI.create(StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_SCHEMA_LOCATION)));
                 if (baseUri != null) {
                     location = baseUri.resolve(location);
                 }
@@ -155,15 +165,34 @@ public class XmlSchema implements StaxerReadXml, StaxerWriteXml {
                 }
             }
         }
+        for (XmlSchemaType xmlSchemaType : typesMap.values()) {
+            XmlName superTypeXmlName = xmlSchemaType.getSuperTypeXmlName();
+            if (enumsMap.get(superTypeXmlName) != null) {
+                XmlSchemaTypeField field = new XmlSchemaTypeField();
+                field.setJavaName("value");
+                field.setValueField(true);
+                field.setXmlType(superTypeXmlName);
+                xmlSchemaType.getFields().add(field);
+                xmlSchemaType.setSuperTypeXmlName(null);
+            }
+        }
     }
 
-    private void readXsdComplexType(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
+    private XmlName readXsdComplexType(
+            StaxerXmlStreamReader xmlReader, String containerElementName, String containerTypeName
+    ) throws StaxerXmlStreamException {
         XmlSchemaType type = new XmlSchemaType();
         XmlNameMapProperties attributes = xmlReader.getAttributes();
-        String localName = attributes.get(XML_NAME_NAME);
-        XmlName xmlName = new XmlName(xsdTargetNamespace, localName);
+        String typeLocalName = StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_NAME));
+        if (typeLocalName == null) {
+            typeLocalName = StringUtils.join(
+                    "", StringUtils.capitalize(containerTypeName),
+                    StringUtils.capitalize(containerElementName)
+            );
+        }
+        XmlName xmlName = new XmlName(xsdTargetNamespace, typeLocalName);
         type.setXmlName(xmlName);
-        type.setJavaName(capitalize3(localName));
+        type.setJavaName(capitalize3(typeLocalName));
 
         typesMap.put(type.getXmlName(), type);
 
@@ -173,71 +202,101 @@ public class XmlSchema implements StaxerReadXml, StaxerWriteXml {
                     if (xmlReader.elementStarted(XML_NAME_XSD_EXTENSION)) {
                         attributes = xmlReader.getAttributes();
                         XmlSchemaTypeField field = new XmlSchemaTypeField();
-                        field.setJavaName("value");
-                        field.setValueField(true);
-                        field.setXmlType(unpackXmlName(attributes.get(XML_NAME_BASE), namespacesMap));
-                        type.getFields().add(field);
+                        XmlName xmlType = unpackXmlName(StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_BASE)), namespacesMap);
+                        if (NAMESPACE_URI_XSD.equals(xmlType.getNamespaceURI())) {
+                            field.setJavaName("value");
+                            field.setValueField(true);
+                            field.setXmlType(xmlType);
+                            type.getFields().add(field);
+                        } else {
+                            type.setSuperTypeXmlName(xmlType);
+                        }
                     } else if (xmlReader.elementStarted(XML_NAME_XSD_ATTRIBUTE)) {
-                        type.getFields().add(createField(
-                                xmlReader.getAttributes(), false,
-                                xsdElementsQualified,
-                                xsdAttributesQualified,
-                                xsdTargetNamespace,
-                                namespacesMap
-                        ));
+                        attributes = xmlReader.getAttributes();
+                        String localName = StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_NAME));
+                        String typeName = attributes.get(XML_NAME_TYPE);
+                        XmlName xmlTypeName = null;
+                        if (typeName == null) {
+                            while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_ELEMENT)) {
+                                if (xmlReader.elementStarted(XML_NAME_XSD_COMPLEX_TYPE)) {
+                                    xmlTypeName = readXsdComplexType(xmlReader, localName, type.getXmlName().getLocalPart());
+                                } else if (xmlReader.elementStarted(XML_NAME_XSD_SIMPLE_TYPE)) {
+                                    xmlTypeName = readXsdSimpleType(xmlReader, localName, type.getXmlName().getLocalPart());
+                                }
+                            }
+                        } else {
+                            xmlTypeName = unpackXmlName(StringUtils.notEmptyTrimmedElseNull(typeName), namespacesMap);
+                        }
+                        type.getFields().add(createField(attributes, localName, xmlTypeName, false));
                     }
                 }
             } else if (xmlReader.elementStarted(XML_NAME_XSD_COMPLEX_CONTENT)) {
                 while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_COMPLEX_CONTENT)) {
                     if (xmlReader.elementStarted(XML_NAME_XSD_EXTENSION)) {
                         attributes = xmlReader.getAttributes();
-                        type.setSuperTypeXmlName(unpackXmlName(attributes.get(XML_NAME_BASE), namespacesMap));
+                        type.setSuperTypeXmlName(unpackXmlName(StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_BASE)), namespacesMap));
                     } else {
                         if (xmlReader.elementStarted(XML_NAME_XSD_SEQUENCE)) {
-                            readXsdSequence(
-                                    xmlReader, type,
-                                    xsdElementsQualified,
-                                    xsdAttributesQualified,
-                                    xsdTargetNamespace,
-                                    namespacesMap
-                            );
+                            readXsdSequence(xmlReader, type);
                         } else if (xmlReader.elementStarted(XML_NAME_XSD_ATTRIBUTE)) {
-                            type.getFields().add(createField(
-                                    xmlReader.getAttributes(), false,
-                                    xsdElementsQualified,
-                                    xsdAttributesQualified,
-                                    xsdTargetNamespace,
-                                    namespacesMap
-                            ));
+                            attributes = xmlReader.getAttributes();
+                            String localName = StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_NAME));
+                            String typeName = attributes.get(XML_NAME_TYPE);
+                            XmlName xmlTypeName = null;
+                            if (typeName == null) {
+                                while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_ELEMENT)) {
+                                    if (xmlReader.elementStarted(XML_NAME_XSD_COMPLEX_TYPE)) {
+                                        xmlTypeName = readXsdComplexType(xmlReader, localName, type.getXmlName().getLocalPart());
+                                    } else if (xmlReader.elementStarted(XML_NAME_XSD_SIMPLE_TYPE)) {
+                                        xmlTypeName = readXsdSimpleType(xmlReader, localName, type.getXmlName().getLocalPart());
+                                    }
+                                }
+                            } else {
+                                xmlTypeName = unpackXmlName(StringUtils.notEmptyTrimmedElseNull(typeName), namespacesMap);
+                            }
+                            type.getFields().add(createField(attributes, localName, xmlTypeName, false));
                         }
                     }
                 }
             } else {
                 if (xmlReader.elementStarted(XML_NAME_XSD_SEQUENCE)) {
-                    readXsdSequence(
-                            xmlReader, type,
-                            xsdElementsQualified,
-                            xsdAttributesQualified,
-                            xsdTargetNamespace,
-                            namespacesMap
-                    );
+                    readXsdSequence(xmlReader, type);
                 } else if (xmlReader.elementStarted(XML_NAME_XSD_ATTRIBUTE)) {
-                    type.getFields().add(createField(
-                            xmlReader.getAttributes(), false,
-                            xsdElementsQualified,
-                            xsdAttributesQualified,
-                            xsdTargetNamespace,
-                            namespacesMap
-                    ));
+                    attributes = xmlReader.getAttributes();
+                    String localName = StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_NAME));
+                    String typeName = attributes.get(XML_NAME_TYPE);
+                    XmlName xmlTypeName = null;
+                    if (typeName == null) {
+                        while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_ELEMENT)) {
+                            if (xmlReader.elementStarted(XML_NAME_XSD_COMPLEX_TYPE)) {
+                                xmlTypeName = readXsdComplexType(xmlReader, localName, type.getXmlName().getLocalPart());
+                            } else if (xmlReader.elementStarted(XML_NAME_XSD_SIMPLE_TYPE)) {
+                                xmlTypeName = readXsdSimpleType(xmlReader, localName, type.getXmlName().getLocalPart());
+                            }
+                        }
+                    } else {
+                        xmlTypeName = unpackXmlName(StringUtils.notEmptyTrimmedElseNull(typeName), namespacesMap);
+                    }
+                    type.getFields().add(createField(attributes, localName, xmlTypeName, false));
                 }
             }
         }
+
+        return xmlName;
     }
 
-    private void readXsdSimpleType(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
+    private XmlName readXsdSimpleType(
+            StaxerXmlStreamReader xmlReader, String containerElementName, String containerTypeName
+    ) throws StaxerXmlStreamException {
         XmlSchemaEnum enumType = new XmlSchemaEnum();
         XmlNameMapProperties attributes = xmlReader.getAttributes();
-        String localName = attributes.get(XML_NAME_NAME);
+        String localName = StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_NAME));
+        if (localName == null) {
+            localName = StringUtils.join(
+                    "", StringUtils.capitalize(containerTypeName),
+                    StringUtils.capitalize(containerElementName)
+            );
+        }
         XmlName xmlName = new XmlName(xsdTargetNamespace, localName);
         enumType.setXmlName(xmlName);
         enumType.setJavaName(capitalize3(localName));
@@ -245,11 +304,11 @@ public class XmlSchema implements StaxerReadXml, StaxerWriteXml {
         while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_SIMPLE_TYPE)) {
             if (xmlReader.elementStarted(XML_NAME_XSD_RESTRICTION)) {
                 attributes = xmlReader.getAttributes();
-                enumType.setXmlType(unpackXmlName(attributes.get(XML_NAME_BASE), namespacesMap));
+                enumType.setXmlType(unpackXmlName(StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_BASE)), namespacesMap));
                 while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_RESTRICTION)) {
                     if (xmlReader.elementStarted(XML_NAME_XSD_ENUMERATION)) {
                         attributes = xmlReader.getAttributes();
-                        String value = attributes.get(XML_NAME_VALUE);
+                        String value = StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_VALUE));
                         XmlSchemaEnumValue enumValue = new XmlSchemaEnumValue();
                         enumValue.setValue(value);
                         char first = value.charAt(0);
@@ -263,30 +322,39 @@ public class XmlSchema implements StaxerReadXml, StaxerWriteXml {
                 }
             }
         }
+        return xmlName;
     }
 
     private void readXsdSequence(
-            StaxerXmlStreamReader xmlReader, XmlSchemaType type,
-            boolean xsdElementsQualified, boolean xsdAttributesQualified,
-            String xsdTargetNamespace, Map<String, String> namespacesMap
+            StaxerXmlStreamReader xmlReader, XmlSchemaType type
     ) throws StaxerXmlStreamException {
         while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_SEQUENCE)) {
             if (xmlReader.elementStarted(XML_NAME_XSD_ELEMENT)) {
-                type.getFields().add(createField(
-                        xmlReader.getAttributes(), true, xsdElementsQualified,
-                        xsdAttributesQualified, xsdTargetNamespace, namespacesMap
-                ));
+                XmlNameMapProperties attributes = xmlReader.getAttributes();
+                String localName = StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_NAME));
+                String typeName = attributes.get(XML_NAME_TYPE);
+                XmlName xmlTypeName = null;
+                if (typeName == null) {
+                    while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_XSD_ELEMENT)) {
+                        if (xmlReader.elementStarted(XML_NAME_XSD_COMPLEX_TYPE)) {
+                            xmlTypeName = readXsdComplexType(xmlReader, localName, type.getXmlName().getLocalPart());
+                        } else if (xmlReader.elementStarted(XML_NAME_XSD_SIMPLE_TYPE)) {
+                            xmlTypeName = readXsdSimpleType(xmlReader, localName, type.getXmlName().getLocalPart());
+                        }
+                    }
+                } else {
+                    xmlTypeName = unpackXmlName(StringUtils.notEmptyTrimmedElseNull(typeName), namespacesMap);
+                }
+                type.getFields().add(createField(attributes, localName, xmlTypeName, true));
             }
         }
     }
 
     private XmlSchemaTypeField createField(
-            XmlNameMapProperties attributes, boolean elementField,
-            boolean xsdElementsQualified, boolean xsdAttributesQualified,
-            String xsdTargetNamespace, Map<String, String> namespacesMap
+            XmlNameMapProperties attributes, String localName,
+            XmlName xmlTypeName, boolean elementField
     ) {
         XmlSchemaTypeField result = new XmlSchemaTypeField();
-        String localName = attributes.get(XML_NAME_NAME);
         if (elementField && xsdElementsQualified || !elementField && xsdAttributesQualified) {
             result.setXmlName(new XmlName(xsdTargetNamespace, localName));
         } else {
@@ -300,7 +368,7 @@ public class XmlSchema implements StaxerReadXml, StaxerWriteXml {
             localName = "pkg";
         }
         result.setJavaName(decapitalize(capitalize3(localName)));
-        result.setXmlType(unpackXmlName(attributes.get(XML_NAME_TYPE), namespacesMap));
+        result.setXmlType(xmlTypeName);
         result.setNillable(attributes.getBoolean(XML_NAME_NILLABLE));
         result.setRequired(attributes.getInteger(XML_NAME_MIN_OCCURS) > 0
                            || "required".equals(attributes.get(XML_NAME_USE)));
