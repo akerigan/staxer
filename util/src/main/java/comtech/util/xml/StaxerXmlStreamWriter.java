@@ -58,11 +58,46 @@ public class StaxerXmlStreamWriter {
         }
     }
 
+    public StaxerXmlStreamWriter(
+            Writer writer
+    ) {
+        this(writer, "UTF-8", 0);
+    }
+
+    public StaxerXmlStreamWriter(
+            Writer writer, String charset
+    ) {
+        this(writer, charset, 0);
+    }
+
+    public StaxerXmlStreamWriter(
+            Writer writer, String charset, int indentSize
+    ) {
+        this.writer = writer;
+        this.charset = charset;
+        this.indentSize = indentSize;
+    }
+
     public void startDocument() throws StaxerXmlStreamException {
+        startDocument(null, null);
+    }
+
+    public void startDocument(
+            String piName, String piData
+    ) throws StaxerXmlStreamException {
         try {
             writer.write("<?xml version=\"1.0\" encoding=\"");
             writer.write(charset);
             writer.write("\"?>");
+            if (!StringUtils.isEmpty(piName)) {
+                writer.write("<?");
+                writer.write(piName);
+                if (!StringUtils.isEmpty(piName)) {
+                    writer.write(" ");
+                    writer.write(piData);
+                }
+                writer.write("?>");
+            }
             state = STATE_DOCUMENT_STARTED;
         } catch (IOException e) {
             throw new StaxerXmlStreamException(e);
@@ -74,6 +109,10 @@ public class StaxerXmlStreamWriter {
             XmlElementContext currentContext = allContexts.get(level);
             currentContext.prefix(namespaceURI);
         }
+    }
+
+    public void startElement(String elementName) throws StaxerXmlStreamException {
+        startElement(new XmlName(elementName));
     }
 
     public void startElement(XmlName elementName) throws StaxerXmlStreamException {
@@ -186,7 +225,23 @@ public class StaxerXmlStreamWriter {
                         writeNamespaces(allContexts.get(level));
                         writer.write(START_ELEMENT_END_NORMAL);
                     }
-                    writer.write(s);
+                    char[] chars = s.toCharArray();
+                    for (int i = 0, size = chars.length; i < size; ++i) {
+                        char ch = chars[i];
+                        switch (ch) {
+                            case '<':
+                                writer.write("&lt;");
+                                break;
+                            case '>':
+                                writer.write("&gt;");
+                                break;
+                            case '&':
+                                writer.write("&amp;");
+                                break;
+                            default:
+                                writer.write(ch);
+                        }
+                    }
                     state = STATE_TEXT_WRITED;
                 }
             }
@@ -205,6 +260,12 @@ public class StaxerXmlStreamWriter {
         } catch (IOException e) {
             throw new StaxerXmlStreamException(e);
         }
+    }
+
+    public void attribute(
+            String attributeName, Object value
+    ) throws StaxerXmlStreamException {
+        attribute(new XmlName(attributeName), value);
     }
 
     public void attribute(
@@ -233,6 +294,12 @@ public class StaxerXmlStreamWriter {
     }
 
     public void element(
+            String elementName, Object value
+    ) throws StaxerXmlStreamException {
+        element(new XmlName(elementName), value, false);
+    }
+
+    public void element(
             XmlName elementName, Object value
     ) throws StaxerXmlStreamException {
         element(elementName, value, false);
@@ -241,16 +308,36 @@ public class StaxerXmlStreamWriter {
     public void element(
             XmlName elementName, Object value, boolean nillable
     ) throws StaxerXmlStreamException {
-        String s = StringUtils.notEmptyElseNull(StringUtils.toString(value));
-        if (s != null) {
-            startElement(elementName);
-            text(s);
-            endElement();
+        if (value != null) {
+            if (value instanceof StaxerWriteXml) {
+                startElement(elementName);
+                ((StaxerWriteXml) value).writeXmlAttributes(this);
+                ((StaxerWriteXml) value).writeXmlContent(this);
+                endElement();
+            } else {
+                String s = StringUtils.notEmptyElseNull(StringUtils.toString(value));
+                if (s != null) {
+                    startElement(elementName);
+                    text(s);
+                    endElement();
+                }
+            }
         } else if (nillable) {
             startElement(elementName);
             attribute(XML_NAME_XSI_NIL, "true");
             endElement();
         }
+
+    }
+
+    public void elementAndAttribute(
+            String elementName, Object elementValue,
+            String attributeName, Object attributeValue
+    ) throws StaxerXmlStreamException {
+        elementAndAttribute(
+                new XmlName(elementName), elementValue,
+                new XmlName(attributeName), attributeValue
+        );
     }
 
     public void elementAndAttribute(
@@ -263,11 +350,6 @@ public class StaxerXmlStreamWriter {
         if (s != null) {
             text(s);
         }
-        endElement();
-    }
-
-    public void emptyElement(XmlName elementName) throws StaxerXmlStreamException {
-        startElement(elementName);
         endElement();
     }
 

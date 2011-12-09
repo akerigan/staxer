@@ -21,7 +21,7 @@ public class SoapFaultDetail implements StaxerReadXml, StaxerWriteXml {
     @XmlElement(name = "entry")
     private List<SoapFaultDetailEntry> entries = new LinkedList<SoapFaultDetailEntry>();
 
-    public List getEntries() {
+    public List<SoapFaultDetailEntry> getEntries() {
         return entries;
     }
 

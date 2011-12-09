@@ -29,7 +29,6 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
     private static final XmlName XML_NAME_SOAP_ACTION = new XmlName("soapAction");
     private static final XmlName XML_NAME_USE = new XmlName("use");
     private static final XmlName XML_NAME_LOCATION = new XmlName("location");
-    private static final XmlName XML_NAME_NAMESPACE = new XmlName("namespace");
 
     private String wsdlTargetNamespace;
 
@@ -43,6 +42,7 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
     private XmlName bindingName;
     private String soapStyle;
     private String soapTransport;
+    private String name;
 
     private URI baseUri;
     private String httpUser;
@@ -73,6 +73,10 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
 
     public XmlName getBindingName() {
         return bindingName;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void readXmlAttributes(
@@ -137,6 +141,9 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
                 } catch (Exception e) {
                     throw new StaxerXmlStreamException(e);
                 }
+            } else if (xmlReader.elementStarted(XML_NAME_WSDL_SERVICE)) {
+                XmlNameMapProperties attributes = xmlReader.getAttributes();
+                name = StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_NAME));
             }
         }
     }
@@ -220,7 +227,9 @@ public class WebService implements StaxerReadXml, StaxerWriteXml {
 
     private void readWsdlBindingOperation(StaxerXmlStreamReader xmlReader) throws StaxerXmlStreamException {
         XmlNameMapProperties attributes = xmlReader.getAttributes();
-        WebServiceOperation operation = operationsMap.get(new XmlName(wsdlTargetNamespace, StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_NAME))));
+        WebServiceOperation operation = operationsMap.get(
+                new XmlName(wsdlTargetNamespace, StringUtils.notEmptyTrimmedElseNull(attributes.get(XML_NAME_NAME)))
+        );
         if (operation != null) {
             while (xmlReader.readNext() && !xmlReader.elementEnded(XML_NAME_WSDL_OPERATION)) {
                 if (xmlReader.elementStarted(XML_NAME_SOAP_OPERATION)) {

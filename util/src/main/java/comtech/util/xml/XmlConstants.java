@@ -33,6 +33,7 @@ public class XmlConstants {
     public static final XmlName XML_NAME_WSDL_OUTPUT = new XmlName(NAMESPACE_URI_WSDL, "output");
     public static final XmlName XML_NAME_WSDL_BINDING = new XmlName(NAMESPACE_URI_WSDL, "binding");
     public static final XmlName XML_NAME_WSDL_IMPORT = new XmlName(NAMESPACE_URI_WSDL, "import");
+    public static final XmlName XML_NAME_WSDL_SERVICE = new XmlName(NAMESPACE_URI_WSDL, "service");
 
     public static final XmlName XML_NAME_XSD_SCHEMA = new XmlName(NAMESPACE_URI_XSD, "schema");
     public static final XmlName XML_NAME_XSD_COMPLEX_TYPE = new XmlName(NAMESPACE_URI_XSD, "complexType");
@@ -51,6 +52,7 @@ public class XmlConstants {
     public static final XmlName XML_NAME_XSD_INCLUDE = new XmlName(NAMESPACE_URI_XSD, "include");
 
     public static final XmlName XML_NAME_XSI_NIL = new XmlName(NAMESPACE_URI_XSI, "nil");
+    public static final XmlName XML_NAME_XSI_TYPE = new XmlName(NAMESPACE_URI_XSI, "type");
 
     public static final XmlName XML_NAME_SOAP_BINDING = new XmlName(NAMESPACE_URI_SOAP, "binding");
     public static final XmlName XML_NAME_SOAP_OPERATION = new XmlName(NAMESPACE_URI_SOAP, "operation");
@@ -71,6 +73,7 @@ public class XmlConstants {
     public static final XmlName XML_NAME_SOAP_ENVELOPE_FAULT_CODE = new XmlName(NAMESPACE_URI_SOAP_ENVELOPE, SOAP_FAULT_CODE);
     public static final XmlName XML_NAME_SOAP_ENVELOPE_FAULT_STRING = new XmlName(NAMESPACE_URI_SOAP_ENVELOPE, SOAP_FAULT_STRING);
     public static final XmlName XML_NAME_SOAP_ENVELOPE_FAULT_ACTOR = new XmlName(NAMESPACE_URI_SOAP_ENVELOPE, SOAP_FAULT_ACTOR);
+    public static final XmlName XML_NAME_SOAP_ENVELOPE_ENCODING_STYLE = new XmlName(NAMESPACE_URI_SOAP_ENVELOPE, "encodingStyle");
 
     public static final XmlName XML_NAME_WSS_SECURITY = new XmlName(NAMESPACE_URI_WSS, "Security");
     public static final XmlName XML_NAME_WSS_USERNAME_TOKEN = new XmlName(NAMESPACE_URI_WSS, "UsernameToken");

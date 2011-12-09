@@ -54,10 +54,10 @@ public class XmlUtils {
             XmlName elementName, boolean nillable
     ) throws StaxerXmlStreamException {
         try {
-            if (!xmlReader.elementStarted(elementName)) {
+            if (elementName != null && !xmlReader.elementStarted(elementName)) {
                 xmlReader.readStartElement(elementName);
             }
-            if (xmlReader.elementStarted(elementName)) {
+            if (elementName == null || xmlReader.elementStarted(elementName)) {
                 XmlNameMapProperties attributes = xmlReader.getAttributes();
                 if (nillable && attributes.getBoolean(XML_NAME_XSI_NIL)) {
                     return null;

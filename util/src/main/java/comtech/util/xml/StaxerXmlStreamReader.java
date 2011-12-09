@@ -206,8 +206,11 @@ public class StaxerXmlStreamReader {
         }
     }
 
-    public boolean isCurrentElement(XmlName elementName) {
-        return lastStartedElement != null && lastStartedElement.equals(elementName);
+    public String charactersRead() {
+        if (event == XMLStreamConstants.CHARACTERS) {
+            return StringUtils.notEmptyTrimmedElseNull(reader.getText());
+        }
+        return null;
     }
 
 }

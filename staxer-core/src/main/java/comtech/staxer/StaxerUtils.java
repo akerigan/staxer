@@ -70,11 +70,12 @@ public class StaxerUtils {
         javaXsdType = new XmlSchemaXsdType();
         javaXsdType.setJavaName("Date");
         javaXsdType.getImports().add("java.util.Date");
-        javaXsdType.getImports().add("comtech.util.DateTimeUtils");
+        javaXsdType.getImports().add("comtech.util.date.DateTimeUtils");
         javaXsdType.setJaxbXmlSchema("dateTime");
         javaXsdType.setJavaConverter("DateTimeUtils.parseXmlDate");
         javaXsdType.setXmlConverter("DateTimeUtils.formatXmlDate");
         XSD_JAVA_TYPE_MAP.put(new XmlName(NAMESPACE_URI_XSD, "dateTime"), javaXsdType);
+        XSD_JAVA_TYPE_MAP.put(new XmlName(NAMESPACE_URI_XSD, "date"), javaXsdType);
     }
 
     public static void createJavaWebService(
@@ -97,16 +98,16 @@ public class StaxerUtils {
 
         for (WebServiceOperation operation : webServiceOperationsMap.values()) {
             XmlName operationXmlName = operation.getName();
-            log.info("Processing ws-operation:" + operationXmlName);
-            XmlName messageXmlName = operation.getInputMessage();
-            if (messageXmlName == null) {
+            log.info("Pre processing ws-operation:" + operationXmlName);
+            XmlName inputMessageName = operation.getInputMessage();
+            if (inputMessageName == null) {
                 continue;
             }
-            WebServiceMessage message = messagesMap.get(messageXmlName);
-            if (message == null) {
+            WebServiceMessage inputMessage = messagesMap.get(inputMessageName);
+            if (inputMessage == null) {
                 continue;
             }
-            for (WebServiceMessagePart part : message.getParts()) {
+            for (WebServiceMessagePart part : inputMessage.getParts()) {
                 XmlName xmlTypeName = globalElementTypeMap.get(part.getElement());
                 if (xmlTypeName == null) {
                     continue;
@@ -132,10 +133,13 @@ public class StaxerUtils {
         createXsdBeansPrivate(xmlSchema, beansDir, beanPackageName, writeJaxbAnnotations);
 
         if (createClientService || createServerService) {
-            String webServiceName = capitalize2(webService.getBindingName().getLocalPart(), false);
-            if (!webServiceName.toUpperCase().endsWith("WS")) {
+            String webServiceName = capitalize2(webService.getName(), false);
+            if (webServiceName.toUpperCase().endsWith("SERVICEWSSERVICE")) {
+                webServiceName = StringUtils.substring(webServiceName, 0, -7);
+            } else if (!webServiceName.toUpperCase().endsWith("WS")) {
                 webServiceName += "Ws";
             }
+            log.info("Web service name: " + webServiceName);
             StringBuilder clientXmlNames = new StringBuilder();
             StringBuilder serverXmlNames = new StringBuilder();
             StringBuilder clientServiceMethods = new StringBuilder();
@@ -209,10 +213,10 @@ public class StaxerUtils {
                     clientServiceMethods.append("(\n");
                     clientServiceMethods.append("            WsRequestHeader wsRequestHeader, ");
                     clientServiceMethods.append(inputTypeJavaName);
-                    clientServiceMethods.append(" parameters\n");
+                    clientServiceMethods.append(" request\n");
                     clientServiceMethods.append("    ) throws WsClientException {\n");
                     clientServiceMethods.append("        return httpWsClient.processSoapQuery(\n");
-                    clientServiceMethods.append("                wsRequestHeader, parameters, ");
+                    clientServiceMethods.append("                wsRequestHeader, request, ");
                     clientServiceMethods.append(inputTypeConstantName);
                     clientServiceMethods.append(", ");
                     clientServiceMethods.append(outputTypeJavaName);
@@ -475,6 +479,7 @@ public class StaxerUtils {
             imports.add("comtech.util.xml.StaxerXmlStreamWriter");
             imports.add("comtech.util.props.XmlNameMapProperties");
             imports.add("comtech.util.xml.StaxerXmlStreamException");
+            imports.add("comtech.util.xml.XmlName");
 
             Map<XmlName, String> constantsMap = new HashMap<XmlName, String>();
             Set<String> writeXmlNamespaces = new TreeSet<String>();
@@ -594,6 +599,7 @@ public class StaxerUtils {
                     }
 
                     String fieldJavaName = field.getJavaName();
+                    log.info("fieldJavaName = " + fieldJavaName);
 
                     if (!arrayField) {
                         fields.append("    private ");
@@ -651,8 +657,7 @@ public class StaxerUtils {
 
                     String constantName = constantsMap.get(fieldXmlName);
                     if (StringUtils.isEmpty(constantName) && !valueField) {
-                        imports.add("comtech.util.xml.XmlName");
-                        constantName = "XML_NAME_" + StringUtils.toEnumName(fieldJavaName);
+                        constantName = "XML_NAME_" + StringUtils.toEnumName(fieldXmlNameLocalPart);
                         constantsMap.put(fieldXmlName, constantName);
                         constants.append("    public static final XmlName ");
                         constants.append(constantName);
@@ -755,7 +760,9 @@ public class StaxerUtils {
                         }
                         readXmlContentElement.append("            return true;\n        }\n");
                     } else if (valueField) {
-                        readXmlContent.append("        value = ");
+                        readXmlContent.append("        ");
+                        readXmlContent.append(fieldJavaName);
+                        readXmlContent.append(" = ");
                         if (fieldJavaConverterNotEmpty) {
                             readXmlContent.append(fieldJavaConverter);
                             readXmlContent.append("(");
@@ -1090,7 +1097,16 @@ public class StaxerUtils {
                         "            StaxerXmlStreamReader xmlReader\n" +
                         "    ) throws StaxerXmlStreamException {\n"
                 );
-                writer.append(readXmlContent.toString());
+                if (readXmlContent.length() > 0) {
+                    writer.append(readXmlContent.toString());
+                } else {
+                    writer.append(
+                            "        XmlName rootElementName = xmlReader.getLastStartedElement();\n" +
+                            "        while (xmlReader.readNext() && !xmlReader.elementEnded(rootElementName)) {\n" +
+                            "            readXmlContentElement(xmlReader);\n" +
+                            "        }\n"
+                    );
+                }
                 writer.append(
                         "    }\n\n"
                 );
@@ -1176,6 +1192,7 @@ public class StaxerUtils {
     public static WebService readWebService(
             URI uri, String httpUser, String httpPassword, String xmlCharset
     ) throws Exception {
+        log.info("Reading web service from: " + uri + ", xml charset: " + xmlCharset);
         String xml = ResourceUtils.getUrlContentAsString(uri, httpUser, httpPassword, xmlCharset);
         if (xml != null) {
             WebService webService = new WebService(uri, httpUser, httpPassword, xmlCharset);
@@ -1200,6 +1217,7 @@ public class StaxerUtils {
             String xsdTargetNamespace, URI uri, String httpUser,
             String httpPassword, String xmlCharset, Map<String, String> namespacesMap
     ) throws Exception {
+        log.info("Reading xml schema from: " + uri + ", xml charset: " + xmlCharset);
         String xml = ResourceUtils.getUrlContentAsString(uri, httpUser, httpPassword, xmlCharset);
         if (xml != null) {
             XmlSchema xmlSchema = new XmlSchema(xsdTargetNamespace, uri, httpUser, httpPassword, xmlCharset);

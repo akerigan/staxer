@@ -1,8 +1,8 @@
 package comtech.util;
 
+import comtech.util.xml.StaxerXmlStreamException;
 import org.apache.commons.codec.binary.Base64;
 
-import javax.xml.stream.XMLStreamException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLDecoder;
@@ -418,21 +418,21 @@ public class StringUtils {
         return ss.matches("^\\-?[\\d]+(\\.[\\d]+)?$");
     }
 
-    public static String md5Base64(String text) throws XMLStreamException {
+    public static String md5Base64(String text) throws StaxerXmlStreamException {
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             return Base64.encodeBase64String(md5.digest(text.getBytes())).trim();
         } catch (NoSuchAlgorithmException e) {
-            throw new XMLStreamException("Can't initialize md5 algorithm", e);
+            throw new StaxerXmlStreamException("Can't initialize md5 algorithm", e);
         }
     }
 
-    public static String md5Hex(String text) throws XMLStreamException {
+    public static String md5Hex(String text) throws StaxerXmlStreamException {
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             return hexencode(md5.digest(text.getBytes()));
         } catch (NoSuchAlgorithmException e) {
-            throw new XMLStreamException("Can't initialize md5 algorithm", e);
+            throw new StaxerXmlStreamException("Can't initialize md5 algorithm", e);
         }
     }
 
@@ -936,4 +936,13 @@ public class StringUtils {
             return null;
         }
     }
+
+    public static byte[] decodeBase64(String base64String) {
+        if (base64String != null) {
+            return Base64.decodeBase64(base64String);
+        } else {
+            return null;
+        }
+    }
+
 }

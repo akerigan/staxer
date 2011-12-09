@@ -136,4 +136,11 @@ public class NumberUtils {
         }
     }
 
+    public static int toSimpleInteger(Integer dayshift) {
+        if (dayshift != null) {
+            return dayshift;
+        } else {
+            return 0;
+        }
+    }
 }
