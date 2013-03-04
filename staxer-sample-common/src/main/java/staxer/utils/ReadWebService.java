@@ -1,7 +1,7 @@
 package staxer.utils;
 
-import comtech.util.staxer.StaxerUtils;
-import comtech.util.staxer.domain.WebService;
+import org.staxer.util.staxer.StaxerUtils;
+import org.staxer.util.staxer.domain.WebService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +26,7 @@ public class ReadWebService {
         if (webService != null) {
             File sourceDir = new File(baseDirectory, "staxer-sample-common/src/main/java");
             StaxerUtils.createJavaWebService(
-                    webService, sourceDir, "staxer.sample", true, true, true
+                    webService, sourceDir, "org.staxer.sample", true, true, true
             );
         }
     }

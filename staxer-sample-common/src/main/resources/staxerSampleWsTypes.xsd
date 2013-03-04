@@ -1,5 +1,5 @@
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://staxer.sample/"
-            xmlns:tns="http://staxer.sample/" elementFormDefault="qualified" attributeFormDefault="qualified">
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://sample.staxer.org/"
+            xmlns:tns="http://sample.staxer.org/" elementFormDefault="qualified" attributeFormDefault="qualified">
 
     <xsd:include schemaLocation="staxerWsSampleCommon.xsd"/>
 

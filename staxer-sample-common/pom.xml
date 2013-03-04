@@ -57,7 +57,7 @@
                                 <phase>generate-sources</phase>
                                 <configuration>
                                     <wsdlUrl>src/main/resources/staxerSample.wsdl</wsdlUrl>
-                                    <packageName>staxer.sample</packageName>
+                                    <packageName>org.staxer.sample</packageName>
                                     <sourceDir>/src/main/java</sourceDir>
                                     <createClientService>true</createClientService>
                                     <createServerService>true</createServerService>

@@ -77,7 +77,7 @@
                                 <phase>generate-sources</phase>
                                 <configuration>
                                     <xsdUrl>src/main/resources/log4jConfiguration.xsd</xsdUrl>
-                                    <packageName>comtech.igniter.log.beans</packageName>
+                                    <packageName>org.staxer.igniter.log.beans</packageName>
                                     <sourceDir>/src/main/java</sourceDir>
                                 </configuration>
                             </execution>
@@ -103,7 +103,7 @@
                                 <phase>generate-sources</phase>
                                 <configuration>
                                     <xsdUrl>src/main/resources/jdbcTemplateConfiguration.xsd</xsdUrl>
-                                    <packageName>comtech.igniter.db.beans</packageName>
+                                    <packageName>org.staxer.igniter.db.beans</packageName>
                                     <sourceDir>/src/main/java</sourceDir>
                                 </configuration>
                             </execution>

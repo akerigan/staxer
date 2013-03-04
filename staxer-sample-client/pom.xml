@@ -11,7 +11,7 @@
     <groupId>staxer</groupId>
     <artifactId>staxer-sample-client</artifactId>
     <version>${staxer.version}</version>
-    <name>Staxer sample server</name>
+    <name>Staxer sample client</name>
     <packaging>jar</packaging>
 
     <properties>
@@ -23,7 +23,7 @@
 
         <dependency>
             <groupId>staxer</groupId>
-            <artifactId>staxer-core</artifactId>
+            <artifactId>staxer-util</artifactId>
             <version>${staxer.version}</version>
         </dependency>
 

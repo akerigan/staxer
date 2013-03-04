@@ -1,8 +1,8 @@
-import comtech.util.xml.StaxerXmlStreamException;
-import comtech.util.xml.StaxerXmlStreamReader;
-import comtech.util.xml.XmlName;
-import comtech.util.xml.XmlUtils;
-import comtech.util.xml.element.ListStaxerXmlElement;
+import org.staxer.util.xml.StaxerXmlStreamException;
+import org.staxer.util.xml.StaxerXmlStreamReader;
+import org.staxer.util.xml.XmlName;
+import org.staxer.util.xml.XmlUtils;
+import org.staxer.util.xml.element.ListStaxerXmlElement;
 import junit.framework.TestCase;
 
 import java.io.StringReader;

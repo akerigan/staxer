@@ -17,14 +17,14 @@
     </context-param>
 
     <listener>
-        <listener-class>staxer.sample.server.ignite.http.StaxerSampleServerListener</listener-class>
+        <listener-class>org.staxer.sample.server.ignite.http.StaxerSampleServerListener</listener-class>
     </listener>
 
     <!-- Staxer ws servlet -->
 
     <servlet>
         <servlet-name>staxerWsServlet</servlet-name>
-        <servlet-class>comtech.util.staxer.server.StaxerWsServlet</servlet-class>
+        <servlet-class>org.staxer.util.staxer.server.StaxerWsServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>

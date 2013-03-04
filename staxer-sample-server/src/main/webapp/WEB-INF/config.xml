@@ -9,7 +9,7 @@
             <appender>stdout</appender>
             <appender>R</appender>
         </logger>
-        <logger name="comtech.util" level="INFO">
+        <logger name="org.staxer.util" level="INFO">
             <appender>stdout</appender>
             <appender>R</appender>
         </logger>

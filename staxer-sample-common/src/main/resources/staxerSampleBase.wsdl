@@ -1,10 +1,10 @@
 <?xml version="1.0" ?>
 <wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-                  xmlns:tns="http://staxer.sample/" targetNamespace="http://staxer.sample/">
+                  xmlns:tns="http://sample.staxer.org/" targetNamespace="http://sample.staxer.org/">
     <wsdl:types>
-        <xsd:schema targetNamespace="http://staxer.sample/" elementFormDefault="qualified"
+        <xsd:schema targetNamespace="http://sample.staxer.org/" elementFormDefault="qualified"
                     attributeFormDefault="qualified">
-            <xsd:import namespace="http://staxer.sample/" schemaLocation="staxerSampleWsTypes.xsd"/>
+            <xsd:import namespace="http://sample.staxer.org/" schemaLocation="staxerSampleWsTypes.xsd"/>
         </xsd:schema>
     </wsdl:types>
 
