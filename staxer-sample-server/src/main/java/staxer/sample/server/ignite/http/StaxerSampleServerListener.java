@@ -7,7 +7,7 @@ import staxer.sample.server.ignite.StaxerSampleServerServices;
 
 import javax.servlet.ServletContextEvent;
 
-import static comtech.staxer.server.StaxerWsServlet.CONTEXT_CONTAINER_NAME;
+import static comtech.util.staxer.server.StaxerWsServlet.CONTEXT_CONTAINER_NAME;
 
 /**
  * @author Vlad Vinichenko (akerigan@gmail.com)

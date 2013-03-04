@@ -1,6 +1,6 @@
 package staxer.sample.client;
 
-import comtech.staxer.client.*;
+import comtech.util.staxer.client.*;
 import comtech.util.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +43,7 @@ public class EchoXsdTypesWsClient {
         }
         httpWsClient.setName("SERVER");
         httpWsClient.setConnectionTimeout(10);
-        httpWsClient.setProcessTimeout(30);
+        httpWsClient.setDefaultReadTimeout(30);
         return httpWsClient;
     }
 }

@@ -24,7 +24,7 @@
 
     <servlet>
         <servlet-name>staxerWsServlet</servlet-name>
-        <servlet-class>comtech.staxer.server.StaxerWsServlet</servlet-class>
+        <servlet-class>comtech.util.staxer.server.StaxerWsServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>

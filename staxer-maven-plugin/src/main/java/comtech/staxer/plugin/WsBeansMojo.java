@@ -1,7 +1,7 @@
-package comtech.staxer.plugin;
+package comtech.util.staxer.plugin;
 
-import comtech.staxer.StaxerUtils;
-import comtech.staxer.domain.WebService;
+import comtech.util.staxer.StaxerUtils;
+import comtech.util.staxer.domain.WebService;
 import comtech.util.ResourceUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;

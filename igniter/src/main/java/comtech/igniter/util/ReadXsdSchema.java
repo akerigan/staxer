@@ -1,7 +1,7 @@
 package comtech.igniter.util;
 
-import comtech.staxer.StaxerUtils;
-import comtech.staxer.domain.XmlSchema;
+import comtech.util.staxer.StaxerUtils;
+import comtech.util.staxer.domain.XmlSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

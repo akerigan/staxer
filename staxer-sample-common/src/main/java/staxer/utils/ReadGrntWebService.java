@@ -1,7 +1,7 @@
 package staxer.utils;
 
-import comtech.staxer.StaxerUtils;
-import comtech.staxer.domain.WebService;
+import comtech.util.staxer.StaxerUtils;
+import comtech.util.staxer.domain.WebService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

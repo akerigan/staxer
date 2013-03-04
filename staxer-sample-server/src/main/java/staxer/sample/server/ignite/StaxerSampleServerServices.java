@@ -1,7 +1,7 @@
 package staxer.sample.server.ignite;
 
-import comtech.staxer.server.WsMessageProcessor;
-import comtech.staxer.server.WsMessageProcessorsContainer;
+import comtech.util.staxer.server.WsMessageProcessor;
+import comtech.util.staxer.server.WsMessageProcessorsContainer;
 import staxer.sample.server.service.DbService;
 import staxer.sample.server.ws.ServerStaxerSampleServiceWsImpl;
 import staxer.sample.server.ws.StaxerSampleWsMessageProcessor;

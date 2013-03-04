@@ -1,7 +1,7 @@
 package comtech.staxer.plugin;
 
-import comtech.staxer.StaxerUtils;
-import comtech.staxer.domain.XmlSchema;
+import comtech.util.staxer.StaxerUtils;
+import comtech.util.staxer.domain.XmlSchema;
 import comtech.util.ResourceUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;

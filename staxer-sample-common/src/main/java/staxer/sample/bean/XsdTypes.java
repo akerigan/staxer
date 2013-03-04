@@ -1,6 +1,6 @@
 package staxer.sample.bean;
 
-import comtech.util.DateTimeUtils;
+import comtech.util.date.DateTimeUtils;
 import comtech.util.NumberUtils;
 import comtech.util.StringUtils;
 import comtech.util.props.XmlNameMapProperties;

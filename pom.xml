@@ -16,8 +16,7 @@
     </properties>
 
     <modules>
-        <module>util</module>
-        <module>staxer-core</module>
+        <module>staxer-util</module>
         <module>staxer-maven-plugin</module>
         <module>staxer-sample-common</module>
         <module>igniter</module>

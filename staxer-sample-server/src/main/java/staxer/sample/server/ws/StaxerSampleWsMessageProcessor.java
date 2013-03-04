@@ -1,7 +1,7 @@
 package staxer.sample.server.ws;
 
-import comtech.staxer.server.WsMessage;
-import comtech.staxer.server.WsMessageProcessor;
+import comtech.util.staxer.server.WsMessage;
+import comtech.util.staxer.server.WsMessageProcessor;
 import comtech.util.NumberUtils;
 import comtech.util.http.helper.HttpHelper;
 import comtech.util.xml.XmlName;
