@@ -1,44 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
+        <groupId>org.staxer</groupId>
         <artifactId>staxer</artifactId>
-        <groupId>staxer</groupId>
         <version>1.1</version>
     </parent>
-    <groupId>staxer</groupId>
     <artifactId>staxer-sample-client</artifactId>
-    <version>${staxer.version}</version>
-    <name>Staxer sample client</name>
     <packaging>jar</packaging>
-
+    <name>Staxer sample client</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
-
     <dependencies>
-
         <dependency>
-            <groupId>staxer</groupId>
+            <groupId>org.staxer</groupId>
             <artifactId>staxer-util</artifactId>
-            <version>${staxer.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>staxer</groupId>
+            <groupId>org.staxer</groupId>
             <artifactId>staxer-sample-common</artifactId>
-            <version>${staxer.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>staxer</groupId>
+            <groupId>org.staxer</groupId>
             <artifactId>igniter</artifactId>
-            <version>1.0</version>
         </dependency>
-
     </dependencies>
-
 </project>
