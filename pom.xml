@@ -17,7 +17,7 @@
         <module>staxer-util</module>
         <module>staxer-maven-plugin</module>
         <module>staxer-sample-common</module>
-        <module>igniter</module>
+        <module>staxer-igniter</module>
         <module>staxer-sample-server</module>
         <module>staxer-sample-client</module>
     </modules>
@@ -51,7 +51,7 @@
             </dependency>
             <dependency>
                 <groupId>org.staxer</groupId>
-                <artifactId>igniter</artifactId>
+                <artifactId>staxer-igniter</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- Unit testing -->

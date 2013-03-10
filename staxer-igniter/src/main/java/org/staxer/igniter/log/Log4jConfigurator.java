@@ -1,9 +1,9 @@
 package org.staxer.igniter.log;
 
-import org.staxer.igniter.log.beans.*;
-import org.staxer.util.StringUtils;
 import org.apache.log4j.*;
 import org.apache.log4j.spi.LoggerRepository;
+import org.staxer.igniter.log.beans.*;
+import org.staxer.util.StringUtils;
 
 import java.io.OutputStreamWriter;
 import java.util.HashMap;

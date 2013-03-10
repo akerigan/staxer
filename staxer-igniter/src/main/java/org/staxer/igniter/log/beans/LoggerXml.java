@@ -1,5 +1,7 @@
 package org.staxer.igniter.log.beans;
 
+import org.staxer.util.http.helper.HttpRequestHelper;
+import org.staxer.util.http.helper.ReadHttpParameters;
 import org.staxer.util.props.XmlNameMapProperties;
 import org.staxer.util.xml.*;
 
@@ -10,7 +12,7 @@ import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class LoggerXml implements StaxerReadXml, StaxerWriteXml {
+public class LoggerXml implements StaxerReadXml, StaxerWriteXml, ReadHttpParameters {
 
     public static final XmlName XML_NAME_APPENDER = new XmlName("appender");
     public static final XmlName XML_NAME_NAME = new XmlName("name");
@@ -43,6 +45,16 @@ public class LoggerXml implements StaxerReadXml, StaxerWriteXml {
 
     public void setLevel(LogLevelXml level) {
         this.level = level;
+    }
+
+    public void readHttpParameters(
+            HttpRequestHelper httpRequestHelper
+    ) {
+        for (String value : httpRequestHelper.getRequestParameters("appender")) {
+            appender.add(value);
+        }
+        name = httpRequestHelper.getRequestParameter("name");
+        level = LogLevelXml.getByCode(httpRequestHelper.getRequestParameter("level"));
     }
 
     public void readXmlAttributes(

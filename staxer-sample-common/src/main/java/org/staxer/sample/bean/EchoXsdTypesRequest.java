@@ -1,14 +1,14 @@
 package org.staxer.sample.bean;
 
-import org.staxer.util.date.DateTimeUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.staxer.util.NumberUtils;
 import org.staxer.util.StringUtils;
+import org.staxer.util.date.DateTimeUtils;
 import org.staxer.util.props.XmlNameMapProperties;
 import org.staxer.util.xml.StaxerXmlStreamException;
 import org.staxer.util.xml.StaxerXmlStreamReader;
 import org.staxer.util.xml.StaxerXmlStreamWriter;
 import org.staxer.util.xml.XmlName;
-import org.apache.commons.codec.binary.Base64;
 
 import javax.xml.bind.annotation.*;
 import java.math.BigDecimal;
@@ -182,7 +182,7 @@ public class EchoXsdTypesRequest extends XsdTypes {
     public void writeXmlAttributes(
             StaxerXmlStreamWriter xmlWriter
     ) throws StaxerXmlStreamException {
-        xmlWriter.declareNamespace("http://www.w3.org/2001/XMLSchema-instance");
+        xmlWriter.declareNamespace("http://www.w3.org/2001/XMLSchema-instance", "xsi");
         super.writeXmlAttributes(xmlWriter);
     }
 

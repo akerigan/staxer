@@ -1,13 +1,13 @@
 package org.staxer.igniter.http;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.spi.LoggerRepository;
 import org.staxer.igniter.log.Log4jConfigurator;
 import org.staxer.igniter.log.beans.Log4jConfigurationXml;
 import org.staxer.util.StringUtils;
 import org.staxer.util.xml.StaxerXmlStreamReader;
 import org.staxer.util.xml.XmlName;
 import org.staxer.util.xml.XmlUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.spi.LoggerRepository;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;

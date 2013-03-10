@@ -1,6 +1,8 @@
 package org.staxer.igniter.db.beans;
 
 import org.staxer.util.NumberUtils;
+import org.staxer.util.http.helper.HttpRequestHelper;
+import org.staxer.util.http.helper.ReadHttpParameters;
 import org.staxer.util.props.XmlNameMapProperties;
 import org.staxer.util.xml.*;
 
@@ -9,7 +11,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class BasicDataSourceXml implements StaxerReadXml, StaxerWriteXml {
+public class BasicDataSourceXml implements StaxerReadXml, StaxerWriteXml, ReadHttpParameters {
 
     public static final XmlName XML_NAME_NAME = new XmlName("name");
     public static final XmlName XML_NAME_DB_DRIVER_CLASS_NAME = new XmlName("dbDriverClassName");
@@ -96,6 +98,18 @@ public class BasicDataSourceXml implements StaxerReadXml, StaxerWriteXml {
         this.maxActive = maxActive;
     }
 
+    public void readHttpParameters(
+            HttpRequestHelper httpRequestHelper
+    ) {
+        name = httpRequestHelper.getRequestParameter("name");
+        dbDriverClassName = httpRequestHelper.getRequestParameter("dbDriverClassName");
+        dbUrl = httpRequestHelper.getRequestParameter("dbUrl");
+        username = httpRequestHelper.getRequestParameter("username");
+        password = httpRequestHelper.getRequestParameter("password");
+        minIdle = NumberUtils.parseInteger(httpRequestHelper.getRequestParameter("minIdle"));
+        maxActive = NumberUtils.parseInteger(httpRequestHelper.getRequestParameter("maxActive"));
+    }
+
     public void readXmlAttributes(
             XmlNameMapProperties attributes
     ) throws StaxerXmlStreamException {
@@ -111,6 +125,10 @@ public class BasicDataSourceXml implements StaxerReadXml, StaxerWriteXml {
     public void readXmlContent(
             StaxerXmlStreamReader xmlReader
     ) throws StaxerXmlStreamException {
+        XmlName rootElementName = xmlReader.getLastStartedElement();
+        while (xmlReader.readNext() && !xmlReader.elementEnded(rootElementName)) {
+            readXmlContentElement(xmlReader);
+        }
     }
 
     public boolean readXmlContentElement(

@@ -1,5 +1,7 @@
 package org.staxer.igniter.log.beans;
 
+import org.staxer.util.http.helper.HttpRequestHelper;
+import org.staxer.util.http.helper.ReadHttpParameters;
 import org.staxer.util.props.XmlNameMapProperties;
 import org.staxer.util.xml.StaxerXmlStreamException;
 import org.staxer.util.xml.StaxerXmlStreamReader;
@@ -11,7 +13,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ConsoleAppenderXml extends AppenderXml {
+public class ConsoleAppenderXml extends AppenderXml implements ReadHttpParameters {
 
     public static final XmlName XML_NAME_TARGET = new XmlName("target");
 
@@ -24,6 +26,13 @@ public class ConsoleAppenderXml extends AppenderXml {
 
     public void setTarget(String target) {
         this.target = target;
+    }
+
+    public void readHttpParameters(
+            HttpRequestHelper httpRequestHelper
+    ) {
+        super.readHttpParameters(httpRequestHelper);
+        target = httpRequestHelper.getRequestParameter("target");
     }
 
     @Override

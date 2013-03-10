@@ -1,10 +1,10 @@
 package org.staxer.igniter.db;
 
+import org.apache.commons.dbcp.BasicDataSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.staxer.igniter.db.beans.BasicDataSourceXml;
 import org.staxer.igniter.db.beans.BasicDataSourcesXml;
 import org.staxer.util.StringUtils;
-import org.apache.commons.dbcp.BasicDataSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 
 import java.util.HashMap;
 import java.util.Map;

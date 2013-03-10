@@ -1,8 +1,8 @@
 package org.staxer.sample.test;
 
-import org.staxer.util.xml.*;
 import junit.framework.TestCase;
 import org.staxer.sample.bean.*;
+import org.staxer.util.xml.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 public class SampleTests extends TestCase {
 
     public static final XmlName XML_NAME_XSD_TYPES = new XmlName("http://sample.staxer.org/", "xsdTypes");
-    public static final XmlName XML_NAME_ECHO_XSD_TYPES = new XmlName("http:///sample.staxer.org/", "echoXsdTypes");
+    public static final XmlName XML_NAME_ECHO_XSD_TYPES = new XmlName("http://sample.staxer.org/", "echoXsdTypes");
     public static final XmlName XML_NAME_CUSTOM_TYPES = new XmlName("http://sample.staxer.org/", "customTypes");
     public static final XmlName XML_NAME_ECHO_CUSTOM_TYPES = new XmlName("http://sample.staxer.org/", "echoCustomTypes");
 

@@ -1,5 +1,7 @@
 package org.staxer.igniter.log.beans;
 
+import org.staxer.util.http.helper.HttpRequestHelper;
+import org.staxer.util.http.helper.ReadHttpParameters;
 import org.staxer.util.props.XmlNameMapProperties;
 import org.staxer.util.xml.StaxerXmlStreamException;
 import org.staxer.util.xml.StaxerXmlStreamReader;
@@ -11,7 +13,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class DailyRollingFileAppenderXml extends AppenderXml {
+public class DailyRollingFileAppenderXml extends AppenderXml implements ReadHttpParameters {
 
     public static final XmlName XML_NAME_FILE = new XmlName("file");
     public static final XmlName XML_NAME_DATE_PATTERN = new XmlName("datePattern");
@@ -36,6 +38,14 @@ public class DailyRollingFileAppenderXml extends AppenderXml {
 
     public void setDatePattern(String datePattern) {
         this.datePattern = datePattern;
+    }
+
+    public void readHttpParameters(
+            HttpRequestHelper httpRequestHelper
+    ) {
+        super.readHttpParameters(httpRequestHelper);
+        file = httpRequestHelper.getRequestParameter("file");
+        datePattern = httpRequestHelper.getRequestParameter("datePattern");
     }
 
     @Override

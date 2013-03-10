@@ -8,9 +8,9 @@
         <artifactId>staxer</artifactId>
         <version>1.1</version>
     </parent>
-    <artifactId>igniter</artifactId>
+    <artifactId>staxer-igniter</artifactId>
     <packaging>jar</packaging>
-    <name>App initialization helper module</name>
+    <name>Staxer app initialization helper module</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

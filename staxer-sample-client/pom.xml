@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>org.staxer</groupId>
-            <artifactId>igniter</artifactId>
+            <artifactId>staxer-igniter</artifactId>
         </dependency>
     </dependencies>
 </project>

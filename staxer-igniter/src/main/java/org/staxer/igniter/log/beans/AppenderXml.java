@@ -1,5 +1,7 @@
 package org.staxer.igniter.log.beans;
 
+import org.staxer.util.http.helper.HttpRequestHelper;
+import org.staxer.util.http.helper.ReadHttpParameters;
 import org.staxer.util.props.XmlNameMapProperties;
 import org.staxer.util.xml.*;
 
@@ -8,7 +10,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class AppenderXml implements StaxerReadXml, StaxerWriteXml {
+public class AppenderXml implements StaxerReadXml, StaxerWriteXml, ReadHttpParameters {
 
     public static final XmlName XML_NAME_NAME = new XmlName("name");
     public static final XmlName XML_NAME_LAYOUT = new XmlName("layout");
@@ -35,6 +37,13 @@ public class AppenderXml implements StaxerReadXml, StaxerWriteXml {
         this.layout = layout;
     }
 
+    public void readHttpParameters(
+            HttpRequestHelper httpRequestHelper
+    ) {
+        name = httpRequestHelper.getRequestParameter("name");
+        layout = httpRequestHelper.getRequestParameter("layout");
+    }
+
     public void readXmlAttributes(
             XmlNameMapProperties attributes
     ) throws StaxerXmlStreamException {
@@ -45,6 +54,10 @@ public class AppenderXml implements StaxerReadXml, StaxerWriteXml {
     public void readXmlContent(
             StaxerXmlStreamReader xmlReader
     ) throws StaxerXmlStreamException {
+        XmlName rootElementName = xmlReader.getLastStartedElement();
+        while (xmlReader.readNext() && !xmlReader.elementEnded(rootElementName)) {
+            readXmlContentElement(xmlReader);
+        }
     }
 
     public boolean readXmlContentElement(

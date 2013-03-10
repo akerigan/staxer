@@ -1,12 +1,12 @@
 package org.staxer.sample.client;
 
-import org.staxer.util.staxer.client.*;
-import org.staxer.util.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.staxer.sample.ClientStaxerSampleServiceWs;
 import org.staxer.sample.bean.EchoXsdTypesRequest;
 import org.staxer.sample.bean.EchoXsdTypesResponse;
+import org.staxer.util.SecurityUtils;
+import org.staxer.util.staxer.client.*;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -24,7 +24,6 @@ public class EchoXsdTypesWsClient {
         serviceWs.setHttpWsClient(getWsClient(true));
 
         WssWsRequestHeader wsRequest = new WssWsRequestHeader();
-//        BasicHttpAuthWsRequestHeader wsRequest = new BasicHttpAuthWsRequestHeader();
         wsRequest.setEndpoint("http://localhost:8080/sample/sample");
         wsRequest.setLogin("user");
         wsRequest.setPassword(SecurityUtils.getMD5_EncodedBase64("user"));

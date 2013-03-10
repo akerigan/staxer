@@ -1,9 +1,9 @@
 package org.staxer.igniter.util;
 
-import org.staxer.util.staxer.StaxerUtils;
-import org.staxer.util.staxer.domain.XmlSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.staxer.util.staxer.StaxerUtils;
+import org.staxer.util.staxer.domain.XmlSchema;
 
 import java.io.File;
 
