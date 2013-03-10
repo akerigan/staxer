@@ -18,7 +18,6 @@ public class StaxerJsonStreamWriter {
     private static final int STATE_LIST_STARTED = STATE_OBJECT_ENDED * 2;
     private static final int STATE_LIST_ENDED = STATE_LIST_STARTED * 2;
     private static final int STATE_LIST_ITEM_WRITED = STATE_LIST_ENDED * 2;
-
     private Writer writer;
     private int indentSize;
     private int state;
@@ -113,7 +112,7 @@ public class StaxerJsonStreamWriter {
 
     public void objectEntry(String fieldName, String fieldValue) throws StaxerJsonStreamException {
         if (fieldName != null && fieldValue != null) {
-            objectEntryLocal(fieldName, StringUtils.escapeJson(fieldValue));
+            objectEntryLocal(fieldName, StringUtils.escapeJson(fieldValue, true));
         }
     }
 
@@ -167,9 +166,8 @@ public class StaxerJsonStreamWriter {
         }
     }
 
-/*
-    public void objectEntry(String fieldName, JsonObject value) throws StaxerJsonStreamException {
-        if (fieldName != null && value != null) {
+    public void objectEntryStartList(String fieldName) throws StaxerJsonStreamException {
+        if (fieldName != null) {
             try {
                 if ((state & (STATE_OBJECT_STARTED | STATE_OBJECT_ENTRY_WRITED)) > 0) {
                     if (state == STATE_OBJECT_ENTRY_WRITED) {
@@ -179,19 +177,46 @@ public class StaxerJsonStreamWriter {
                     writer.write('"');
                     writer.write(fieldName);
                     writer.write("\": ");
-                    JsonUtils.serialize(value, writer, indentSize > 0);
-                    state = STATE_OBJECT_ENTRY_WRITED;
+                    startList();
                 }
-            } catch (Exception e) {
+            } catch (IOException e) {
                 throw new StaxerJsonStreamException(e);
             }
         }
     }
 
-*/
+    public void objectEntryEndList() throws StaxerJsonStreamException {
+        if ((state & (STATE_LIST_ITEM_WRITED)) > 0) {
+            endList();
+            state = STATE_OBJECT_ENTRY_WRITED;
+        }
+    }
+
+    /*
+        public void objectEntry(String fieldName, JsonObject value) throws StaxerJsonStreamException {
+            if (fieldName != null && value != null) {
+                try {
+                    if ((state & (STATE_OBJECT_STARTED | STATE_OBJECT_ENTRY_WRITED)) > 0) {
+                        if (state == STATE_OBJECT_ENTRY_WRITED) {
+                            writer.write(", ");
+                        }
+                        writeIndents();
+                        writer.write('"');
+                        writer.write(fieldName);
+                        writer.write("\": ");
+                        JsonUtils.serialize(value, writer, indentSize > 0);
+                        state = STATE_OBJECT_ENTRY_WRITED;
+                    }
+                } catch (Exception e) {
+                    throw new StaxerJsonStreamException(e);
+                }
+            }
+        }
+
+    */
     public void listItem(String fieldValue) throws StaxerJsonStreamException {
         if (fieldValue != null) {
-            listItemLocal(StringUtils.escapeJson(fieldValue));
+            listItemLocal(StringUtils.escapeJson(fieldValue, true));
         }
     }
 

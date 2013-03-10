@@ -106,7 +106,7 @@ public class JsonStreamReader {
     public int next() throws IOException {
         value = null;
         if (valueType != TYPE_NUMBER || isWhiteSpace()) {
-            read(true);
+            readChar(true);
         }
         valueType = 0;
         if (ch == 0) {
@@ -164,7 +164,7 @@ public class JsonStreamReader {
         }
     }
 
-    private void read(boolean ignoreWhiteSpaces) throws IOException {
+    private void readChar(boolean ignoreWhiteSpaces) throws IOException {
         int i;
         do {
             i = reader.read();
@@ -190,10 +190,23 @@ public class JsonStreamReader {
         switch (ch) {
             case '"':
                 value = new StringBuilder();
-                read(false);
-                while (ch != '"' && ch != 0) {
-                    value.append(ch);
-                    read(false);
+                readChar(false);
+                char prevCh = 0;
+                while ((prevCh == '\\' || ch != '"') && ch != 0) {
+                    if (prevCh == '\\') {
+                        if (ch == '\\' || ch == '"') {
+                            value.append(ch);
+                        } else if (ch == 'n') {
+                            value.append('\n');
+                        } else {
+                            value.append(prevCh);
+                            value.append(ch);
+                        }
+                    } else if (ch != '\\'){
+                        value.append(ch);
+                    }
+                    prevCh = ch;
+                    readChar(false);
                 }
                 valueType = TYPE_STRING;
                 return true;
@@ -218,7 +231,7 @@ public class JsonStreamReader {
                         }
                     }
                     value.append(ch);
-                    read(false);
+                    readChar(false);
                 }
                 valueType = TYPE_NUMBER;
                 return true;
@@ -226,7 +239,7 @@ public class JsonStreamReader {
                 value = new StringBuilder();
                 value.append(ch);
                 for (int i = 0, len = VALID_CHARS_TRUE.length; i < len; ++i) {
-                    read(false);
+                    readChar(false);
                     if (ch != VALID_CHARS_TRUE[i]) {
                         throw new IllegalStateException("Invalid 'true' value at (" + line + "," + col + ")");
                     }
@@ -238,7 +251,7 @@ public class JsonStreamReader {
                 value = new StringBuilder();
                 value.append(ch);
                 for (int i = 0, len = VALID_CHARS_FALSE.length; i < len; ++i) {
-                    read(false);
+                    readChar(false);
                     if (ch != VALID_CHARS_FALSE[i]) {
                         throw new IllegalStateException("Invalid 'false' value at (" + line + "," + col + ")");
                     }
@@ -250,7 +263,7 @@ public class JsonStreamReader {
                 value = new StringBuilder();
                 value.append(ch);
                 for (int i = 0, len = VALID_CHARS_NULL.length; i < len; ++i) {
-                    read(false);
+                    readChar(false);
                     if (ch != VALID_CHARS_NULL[i]) {
                         throw new IllegalStateException("Invalid 'null' value at (" + line + "," + col + ")");
                     }

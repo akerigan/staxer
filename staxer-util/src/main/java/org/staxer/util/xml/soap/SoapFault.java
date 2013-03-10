@@ -101,17 +101,25 @@ public class SoapFault implements StaxerReadXml, StaxerWriteXml, StaxerReadJson,
 
     public void readJson(StaxerJsonStreamReader jsonReader) throws StaxerJsonStreamException {
         if (jsonReader.readObjectStart()) {
-            int rootLevel = jsonReader.getLevel();
+            int rootLevel = jsonReader.getLevel() + 1;
             while (jsonReader.readNext() && !jsonReader.objectEnded(rootLevel)) {
                 String fieldName = jsonReader.readFieldName(rootLevel);
                 if (XML_NAME_FAULTCODE.getLocalPart().equals(fieldName)) {
-                    code = jsonReader.readFieldValue(rootLevel);
+                    if (jsonReader.readFieldValue(rootLevel)) {
+                        code = jsonReader.getStringValue();
+                    }
                 } else if (XML_NAME_FAULTSTRING.getLocalPart().equals(fieldName)) {
-                    string = jsonReader.readFieldValue(rootLevel);
+                    if (jsonReader.readFieldValue(rootLevel)) {
+                        string = jsonReader.getStringValue();
+                    }
                 } else if (XML_NAME_FAULTACTOR.getLocalPart().equals(fieldName)) {
-                    actor = jsonReader.readFieldValue(rootLevel);
+                    if (jsonReader.readFieldValue(rootLevel)) {
+                        actor = jsonReader.getStringValue();
+                    }
                 } else if (XML_NAME_DETAIL.getLocalPart().equals(fieldName)) {
-                    detail = JsonUtils.readJson(jsonReader, SoapFaultDetail.class);
+                    if (jsonReader.readObjectFieldValue(rootLevel)) {
+                        detail = JsonUtils.readJson(jsonReader, SoapFaultDetail.class);
+                    }
                 }
             }
         }

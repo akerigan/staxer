@@ -1,7 +1,7 @@
 package org.staxer.util;
 
-import org.staxer.util.xml.StaxerXmlStreamException;
 import org.apache.commons.codec.binary.Base64;
+import org.staxer.util.xml.StaxerXmlStreamException;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -1058,34 +1058,34 @@ public class StringUtils {
     }
 
     public static String escapeJson(String value) {
+        return escapeJson(value, false);
+    }
+
+    public static String escapeJson(String value, boolean addQuotes) {
         if (!isEmpty(value)) {
             StringBuilder result = new StringBuilder();
+            result.append('"');
             char[] chars = value.toCharArray();
-            byte changesCount = 0;
             for (int i = 0, size = chars.length; i < size; ++i) {
                 char ch = chars[i];
                 switch (ch) {
                     case '"':
                         result.append("\\\"");
-                        changesCount += 1;
                         break;
                     case '\\':
                         result.append("\\\\");
-                        changesCount += 1;
                         break;
                     case '\n':
                         result.append("\\n");
-                        changesCount += 1;
                         break;
                     default:
                         result.append(ch);
                 }
             }
-            if (changesCount > 0) {
-                return result.toString();
-            } else {
-                return value;
-            }
+            result.append('"');
+            return result.toString();
+        } else if (addQuotes) {
+            return "\"\"";
         } else {
             return "";
         }

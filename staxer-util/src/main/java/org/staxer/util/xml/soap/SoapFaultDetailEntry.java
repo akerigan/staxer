@@ -68,9 +68,13 @@ public class SoapFaultDetailEntry implements StaxerReadXml, StaxerWriteXml, Stax
             while (jsonReader.readNext() && !jsonReader.objectEnded(rootLevel)) {
                 String fieldName = jsonReader.readFieldName(rootLevel);
                 if ("type".equals(fieldName)) {
-                    type = jsonReader.readFieldValue(rootLevel);
+                    if (jsonReader.readFieldValue(rootLevel)) {
+                        type = jsonReader.getStringValue();
+                    }
                 } else if ("value".equals(fieldName)) {
-                    value = jsonReader.readFieldValue(rootLevel);
+                    if (jsonReader.readFieldValue(rootLevel)) {
+                        value = jsonReader.getStringValue();
+                    }
                 }
             }
         }

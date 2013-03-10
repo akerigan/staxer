@@ -649,30 +649,34 @@ public class DateTimeUtils {
     }
 
     public static String formatXmlDate(Date date, TimeZone timeZone) {
-        if (timeZone == null) {
-            timeZone = TimeZone.getDefault();
-        }
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-        dateFormat.setTimeZone(timeZone);
-        StringBuilder result = new StringBuilder();
         if (date != null) {
-            result.append(dateFormat.format(date));
-            int minutesOffset = (timeZone.getRawOffset()) / 60000;
-            if (minutesOffset == 0) {
-                result.append('Z');
-            } else {
-                if (minutesOffset > 0) {
-                    result.append('+');
-                } else {
-                    result.append('-');
-                }
-                NumberFormat numberFormat = new DecimalFormat("00");
-                result.append(numberFormat.format(minutesOffset / 60));
-                result.append(':');
-                result.append(numberFormat.format(minutesOffset % 60));
+            if (timeZone == null) {
+                timeZone = TimeZone.getDefault();
             }
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+            dateFormat.setTimeZone(timeZone);
+            StringBuilder result = new StringBuilder();
+            if (date != null) {
+                result.append(dateFormat.format(date));
+                int minutesOffset = (timeZone.getRawOffset()) / 60000;
+                if (minutesOffset == 0) {
+                    result.append('Z');
+                } else {
+                    if (minutesOffset > 0) {
+                        result.append('+');
+                    } else {
+                        result.append('-');
+                    }
+                    NumberFormat numberFormat = new DecimalFormat("00");
+                    result.append(numberFormat.format(minutesOffset / 60));
+                    result.append(':');
+                    result.append(numberFormat.format(minutesOffset % 60));
+                }
+            }
+            return result.toString();
+        } else {
+            return null;
         }
-        return result.toString();
     }
 
     public static Date beginOfDay(Date date) {

@@ -1,3 +1,5 @@
+package org.staxer.util.xml.element;
+
 import org.staxer.util.xml.StaxerXmlStreamException;
 import org.staxer.util.xml.StaxerXmlStreamReader;
 import org.staxer.util.xml.XmlName;
