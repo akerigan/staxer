@@ -12,6 +12,8 @@ import java.io.*;
  */
 public class FileUtils {
 
+    public static final File HOME_DIR = new File(System.getProperty("user.home"));
+
     public static File createTempFile(String prefix, String suffix, byte[] buffer) throws IOException {
         return createTempFile(null, prefix, suffix, buffer);
     }
